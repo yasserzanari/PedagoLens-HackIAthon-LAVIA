@@ -1,0 +1,7 @@
+{
+  "commands": [
+    "git config --global --add safe.directory /opt/pedagolens && cd /opt/pedagolens && git pull origin main",
+    "php -l /opt/pedagolens/plugins/pedagolens-landing/includes/class-landing.php",
+    "sudo -u www-data /usr/local/bin/wp plugin activate pedagolens-landing --path=/var/www/html 2>&1 || wp plugin activate pedagolens-landing --path=/var/www/html --allow-root 2>&1"
+  ]
+}

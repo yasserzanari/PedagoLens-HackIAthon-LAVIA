@@ -189,8 +189,90 @@ class PedagoLens_Teacher_Dashboard {
     }
 
     // -------------------------------------------------------------------------
-    // Helpers
+    // Rendu front-end (shortcode délégué depuis pedagolens-landing)
     // -------------------------------------------------------------------------
+
+    /**
+     * Rendu HTML du dashboard enseignant pour le front-end (shortcode).
+     * Appelé par PedagoLens_Landing via [pedagolens_teacher_dashboard].
+     */
+    public static function render_front(): string {
+        if ( ! is_user_logged_in() ) {
+            $login_url = esc_url( wp_login_url( get_permalink() ) );
+            return "<div class=\"pl-notice pl-notice-warning\"><p>Vous devez &ecirc;tre connect&eacute; pour acc&eacute;der au tableau de bord enseignant. <a href=\"{$login_url}\">Se connecter</a></p></div>";
+        }
+
+        $user       = wp_get_current_user();
+        $is_teacher = in_array( 'pedagolens_teacher', (array) $user->roles, true )
+                   || in_array( 'administrator',      (array) $user->roles, true );
+
+        if ( ! $is_teacher ) {
+            return '<div class="pl-notice pl-notice-error"><p>Acc&egrave;s r&eacute;serv&eacute; aux enseignants.</p></div>';
+        }
+
+        $courses = get_posts( [
+            'post_type'      => 'pl_course',
+            'posts_per_page' => -1,
+            'post_status'    => 'publish',
+            'orderby'        => 'title',
+            'order'          => 'ASC',
+        ] );
+
+        $mode = get_option( 'pl_ai_mode', 'mock' );
+
+        ob_start();
+        ?>
+        <div class="pl-front-dashboard pl-teacher-dashboard">
+            <?php if ( $mode === 'mock' ) : ?>
+                <div class="pl-notice pl-notice-info">
+                    <p>Mode mock actif &mdash; les analyses utilisent des donn&eacute;es de d&eacute;monstration.</p>
+                </div>
+            <?php endif; ?>
+
+            <div class="pl-dashboard-header">
+                <h2>Mes cours</h2>
+                <a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=pl_course' ) ); ?>" class="pl-btn pl-btn-primary">
+                    + Nouveau cours
+                </a>
+            </div>
+
+            <?php if ( empty( $courses ) ) : ?>
+                <div class="pl-notice pl-notice-warning">
+                    <p>Aucun cours trouv&eacute;. <a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=pl_course' ) ); ?>">Cr&eacute;er un cours</a></p>
+                </div>
+            <?php else : ?>
+                <div class="pl-courses-grid">
+                    <?php foreach ( $courses as $course ) :
+                        $course_type = get_post_meta( $course->ID, '_pl_course_type', true ) ?: 'magistral';
+                        $projects    = self::get_projects( $course->ID );
+                        ?>
+                        <div class="pl-course-card pl-animate-in">
+                            <div class="pl-course-header">
+                                <h3><?php echo esc_html( $course->post_title ); ?></h3>
+                                <span class="pl-badge pl-type-<?php echo esc_attr( $course_type ); ?>">
+                                    <?php echo esc_html( $course_type ); ?>
+                                </span>
+                            </div>
+                            <div class="pl-course-meta">
+                                <span><?php echo count( $projects ); ?> projet(s)</span>
+                            </div>
+                            <div class="pl-course-actions">
+                                <button class="pl-btn pl-btn-primary pl-btn-sm pl-btn-analyze-front" data-course-id="<?php echo (int) $course->ID; ?>">
+                                    Analyser
+                                </button>
+                                <button class="pl-btn pl-btn-sm pl-btn-create-project" data-course-id="<?php echo (int) $course->ID; ?>" data-course-title="<?php echo esc_attr( $course->post_title ); ?>">
+                                    + Projet
+                                </button>
+                            </div>
+                            <div id="pl-analysis-result-<?php echo (int) $course->ID; ?>" class="pl-analysis-front-result"></div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
 
     /**
      * Retourne les profils actifs via Profile_Manager si disponible.

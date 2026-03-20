@@ -30,6 +30,27 @@ class PedagoLens_Landing {
         add_shortcode( 'pedagolens_account',           [ self::class, 'shortcode_account' ] );
 
         add_action( 'wp_enqueue_scripts', [ self::class, 'enqueue_front_assets' ] );
+
+        // AJAX front-end pour workbench (enseignants connectés)
+        if ( ! has_action( 'wp_ajax_pl_get_suggestions' ) ) {
+            add_action( 'wp_ajax_pl_get_suggestions',   [ 'PedagoLens_Workbench_Admin', 'ajax_get_suggestions' ] );
+        }
+        if ( ! has_action( 'wp_ajax_pl_apply_suggestion' ) ) {
+            add_action( 'wp_ajax_pl_apply_suggestion',  [ 'PedagoLens_Workbench_Admin', 'ajax_apply_suggestion' ] );
+        }
+        if ( ! has_action( 'wp_ajax_pl_reject_suggestion' ) ) {
+            add_action( 'wp_ajax_pl_reject_suggestion', [ 'PedagoLens_Workbench_Admin', 'ajax_reject_suggestion' ] );
+        }
+        if ( ! has_action( 'wp_ajax_pl_save_section' ) ) {
+            add_action( 'wp_ajax_pl_save_section',      [ 'PedagoLens_Workbench_Admin', 'ajax_save_section' ] );
+        }
+        // AJAX front-end pour teacher dashboard
+        if ( ! has_action( 'wp_ajax_pl_analyze_course' ) ) {
+            add_action( 'wp_ajax_pl_analyze_course',    [ 'PedagoLens_Dashboard_Admin', 'ajax_analyze' ] );
+        }
+        if ( ! has_action( 'wp_ajax_pl_create_project' ) ) {
+            add_action( 'wp_ajax_pl_create_project',    [ 'PedagoLens_Dashboard_Admin', 'ajax_create_project' ] );
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -43,6 +64,37 @@ class PedagoLens_Landing {
             [],
             PL_LANDING_VERSION
         );
+
+        // Enqueue JS seulement si les plugins requis sont actifs
+        $has_dashboard = class_exists( 'PedagoLens_Dashboard_Admin' );
+        $has_twin      = class_exists( 'PedagoLens_Twin_Admin' );
+        $has_workbench = class_exists( 'PedagoLens_Workbench_Admin' );
+
+        if ( $has_dashboard || $has_twin || $has_workbench ) {
+            wp_enqueue_script(
+                'pl-landing-front',
+                PL_LANDING_PLUGIN_URL . 'assets/js/landing-front.js',
+                [ 'jquery' ],
+                PL_LANDING_VERSION,
+                true
+            );
+
+            wp_localize_script( 'pl-landing-front', 'plFront', [
+                'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+                'nonces'  => [
+                    'dashboard' => $has_dashboard ? wp_create_nonce( 'pl_dashboard_ajax' ) : '',
+                    'twin'      => $has_twin      ? wp_create_nonce( 'pl_twin_ajax' )      : '',
+                    'workbench' => $has_workbench ? wp_create_nonce( 'pl_workbench_ajax' ) : '',
+                ],
+                'i18n' => [
+                    'analyzing'    => 'Analyse en cours…',
+                    'analyzeError' => 'Erreur lors de l\'analyse.',
+                    'sending'      => 'Envoi…',
+                    'saving'       => 'Enregistrement…',
+                    'sessionEnded' => 'Session terminée. À bientôt !',
+                ],
+            ] );
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -76,7 +128,7 @@ class PedagoLens_Landing {
             $icon   = esc_html( $f['icon']  ?? '' );
             $ftitle = esc_html( $f['title'] ?? '' );
             $desc   = esc_html( $f['desc']  ?? '' );
-            $features_html .= "<div class=\"pl-feature-card\"><span class=\"pl-feature-icon\">{$icon}</span><h3>{$ftitle}</h3><p>{$desc}</p></div>";
+            $features_html .= "<div class=\"pl-feature-card pl-animate-in\"><span class=\"pl-feature-icon\">{$icon}</span><h3>{$ftitle}</h3><p>{$desc}</p></div>";
         }
 
         return <<<HTML
@@ -103,88 +155,20 @@ class PedagoLens_Landing {
 
     // -------------------------------------------------------------------------
     // [pedagolens_teacher_dashboard] — Dashboard enseignant front-end
+    // Délègue au plugin pedagolens-teacher-dashboard
     // -------------------------------------------------------------------------
 
     public static function shortcode_teacher_dashboard( array $atts ): string {
-        if ( ! is_user_logged_in() ) {
-            return self::render_login_notice( 'Vous devez &ecirc;tre connect&eacute; pour acc&eacute;der au tableau de bord enseignant.' );
+        if ( ! class_exists( 'PedagoLens_Teacher_Dashboard' ) ) {
+            return '<div class="pl-notice pl-notice-error"><p>Le plugin Teacher Dashboard n\'est pas activ&eacute;.</p></div>';
         }
 
-        $user = wp_get_current_user();
-        $is_teacher = in_array( 'pedagolens_teacher', (array) $user->roles, true )
-                   || in_array( 'administrator',      (array) $user->roles, true );
-
-        if ( ! $is_teacher ) {
-            return '<div class="pl-notice pl-notice-error"><p>Acc&egrave;s r&eacute;serv&eacute; aux enseignants.</p></div>';
-        }
-
-        $courses = get_posts( [
-            'post_type'      => 'pl_course',
-            'posts_per_page' => -1,
-            'post_status'    => 'publish',
-            'orderby'        => 'title',
-            'order'          => 'ASC',
-        ] );
-
-        $mode = get_option( 'pl_ai_mode', 'mock' );
-
-        ob_start();
-        ?>
-        <div class="pl-front-dashboard pl-teacher-dashboard">
-            <?php if ( $mode === 'mock' ) : ?>
-                <div class="pl-notice pl-notice-info">
-                    <p>Mode mock actif &mdash; les analyses utilisent des donn&eacute;es de d&eacute;monstration.</p>
-                </div>
-            <?php endif; ?>
-
-            <div class="pl-dashboard-header">
-                <h2>Mes cours</h2>
-                <a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=pl_course' ) ); ?>" class="pl-btn pl-btn-primary">
-                    + Nouveau cours
-                </a>
-            </div>
-
-            <?php if ( empty( $courses ) ) : ?>
-                <div class="pl-notice pl-notice-warning">
-                    <p>Aucun cours trouv&eacute;. <a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=pl_course' ) ); ?>">Cr&eacute;er un cours</a></p>
-                </div>
-            <?php else : ?>
-                <div class="pl-courses-grid">
-                    <?php foreach ( $courses as $course ) :
-                        $course_type = get_post_meta( $course->ID, '_pl_course_type', true ) ?: 'magistral';
-                        $projects    = class_exists( 'PedagoLens_Teacher_Dashboard' )
-                            ? PedagoLens_Teacher_Dashboard::get_projects( $course->ID )
-                            : [];
-                        ?>
-                        <div class="pl-course-card">
-                            <div class="pl-course-header">
-                                <h3><?php echo esc_html( $course->post_title ); ?></h3>
-                                <span class="pl-badge pl-type-<?php echo esc_attr( $course_type ); ?>">
-                                    <?php echo esc_html( $course_type ); ?>
-                                </span>
-                            </div>
-                            <div class="pl-course-meta">
-                                <span><?php echo count( $projects ); ?> projet(s)</span>
-                            </div>
-                            <div class="pl-course-actions">
-                                <a href="<?php echo esc_url( admin_url( 'admin.php?page=pl-teacher-dashboard' ) ); ?>" class="pl-btn pl-btn-primary pl-btn-sm">
-                                    Analyser
-                                </a>
-                                <a href="<?php echo esc_url( get_permalink( get_page_by_path( 'cours-projets' ) ) . '?course_id=' . $course->ID ); ?>" class="pl-btn pl-btn-sm">
-                                    Projets
-                                </a>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
-        </div>
-        <?php
-        return ob_get_clean();
+        return PedagoLens_Teacher_Dashboard::render_front();
     }
 
     // -------------------------------------------------------------------------
     // [pedagolens_student_dashboard] — Dashboard étudiant (jumeau numérique)
+    // Délègue au plugin pedagolens-student-twin
     // -------------------------------------------------------------------------
 
     public static function shortcode_student_dashboard( array $atts ): string {
@@ -194,7 +178,12 @@ class PedagoLens_Landing {
             return '<div class="pl-notice pl-notice-error"><p>Le plugin Student Twin n\'est pas activ&eacute;.</p></div>';
         }
 
-        // Déléguer au shortcode du jumeau numérique
+        // S'assurer que le widget twin est enqueué avec le bon nonce front-end
+        wp_localize_script( 'pl-landing-front', 'plTwin', [
+            'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+            'nonce'   => wp_create_nonce( 'pl_twin_ajax' ),
+        ] );
+
         return PedagoLens_Twin_Admin::render_shortcode( $atts );
     }
 
@@ -357,12 +346,18 @@ class PedagoLens_Landing {
                 <div class="pl-sections-preview">
                     <h3>Sections (<?php echo count( $sections ); ?>)</h3>
                     <?php foreach ( $sections as $section ) : ?>
-                        <div class="pl-section-preview-card">
+                        <div class="pl-section-preview-card pl-animate-in">
                             <h4><?php echo esc_html( $section['title'] ?? 'Section' ); ?></h4>
                             <p class="pl-section-excerpt">
                                 <?php echo esc_html( mb_substr( $section['content'] ?? '', 0, 200 ) ); ?>
                                 <?php if ( mb_strlen( $section['content'] ?? '' ) > 200 ) echo '&hellip;'; ?>
                             </p>
+                            <button class="pl-btn pl-btn-sm pl-btn-suggestions-front"
+                                data-project-id="<?php echo (int) $project_id; ?>"
+                                data-section-id="<?php echo esc_attr( $section['id'] ?? '' ); ?>">
+                                Suggestions IA
+                            </button>
+                            <div class="pl-suggestions-zone"></div>
                         </div>
                     <?php endforeach; ?>
                 </div>

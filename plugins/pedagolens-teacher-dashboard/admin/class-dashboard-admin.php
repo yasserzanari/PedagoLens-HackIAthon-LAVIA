@@ -30,7 +30,19 @@ class PedagoLens_Dashboard_Admin {
     // -------------------------------------------------------------------------
 
     public static function add_menu(): void {
-        $parent = menu_page_url( 'pl-api-bridge-settings', false ) ? 'pl-api-bridge-settings' : 'pl-pedagolens';
+        global $menu;
+
+        $bridge_menu_exists = false;
+        if ( is_array( $menu ) ) {
+            foreach ( $menu as $item ) {
+                if ( isset( $item[2] ) && $item[2] === 'pl-api-bridge-settings' ) {
+                    $bridge_menu_exists = true;
+                    break;
+                }
+            }
+        }
+
+        $parent = $bridge_menu_exists ? 'pl-api-bridge-settings' : 'pl-pedagolens';
 
         add_submenu_page(
             $parent,

@@ -35,8 +35,20 @@ class PedagoLens_Admin_Profiles {
     // -------------------------------------------------------------------------
 
     public static function add_menus(): void {
-        // Menu parent PédagoLens (si pas déjà créé par api-bridge)
-        if ( ! menu_page_url( 'pl-api-bridge-settings', false ) ) {
+        global $menu;
+
+        // Vérifier si le menu parent pl-api-bridge-settings existe déjà (enregistré par api-bridge)
+        $bridge_menu_exists = false;
+        if ( is_array( $menu ) ) {
+            foreach ( $menu as $item ) {
+                if ( isset( $item[2] ) && $item[2] === 'pl-api-bridge-settings' ) {
+                    $bridge_menu_exists = true;
+                    break;
+                }
+            }
+        }
+
+        if ( ! $bridge_menu_exists ) {
             add_menu_page(
                 'PédagoLens',
                 'PédagoLens',
@@ -48,7 +60,7 @@ class PedagoLens_Admin_Profiles {
             );
         }
 
-        $parent = menu_page_url( 'pl-api-bridge-settings', false ) ? 'pl-api-bridge-settings' : 'pl-pedagolens';
+        $parent = $bridge_menu_exists ? 'pl-api-bridge-settings' : 'pl-pedagolens';
 
         add_submenu_page(
             $parent,

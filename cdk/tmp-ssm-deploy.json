@@ -1,0 +1,7 @@
+{
+  "commands": [
+    "cd /opt/pedagolens && git pull origin main 2>&1",
+    "echo '=== Vérification syntaxe ===' && php -l /opt/pedagolens/plugins/pedagolens-landing/includes/class-landing.php",
+    "echo '=== Activation plugin ===' && wp plugin activate pedagolens-landing --path=/var/www/html --allow-root 2>&1"
+  ]
+}

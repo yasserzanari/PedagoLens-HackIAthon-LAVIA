@@ -1,0 +1,7 @@
+{
+  "commands": [
+    "echo '=== WP DEBUG LOG ===' && tail -100 /var/www/html/wp-content/debug.log 2>/dev/null || echo 'NO_DEBUG_LOG'",
+    "echo '=== APACHE ERROR LOG ===' && tail -50 /var/log/apache2/error.log 2>/dev/null || echo 'NO_APACHE_LOG'",
+    "echo '=== PHP ERROR LOG ===' && tail -50 /var/log/php*.log 2>/dev/null || echo 'NO_PHP_LOG'"
+  ]
+}

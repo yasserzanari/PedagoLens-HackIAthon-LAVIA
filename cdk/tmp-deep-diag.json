@@ -1,0 +1,19 @@
+{
+  "commands": [
+    "echo '=== WP VERSION ==='",
+    "grep 'wp_version =' /var/www/html/wp-includes/version.php | head -1",
+    "echo '=== PHP SESSION ==='",
+    "php -r \"session_start(); echo 'Session OK'; session_destroy();\"",
+    "echo '=== APACHE MODULES ==='",
+    "apache2ctl -M 2>/dev/null | grep -E 'rewrite|headers|ssl'",
+    "echo '=== WP-CONFIG AUTH KEYS COUNT ==='",
+    "grep -c 'AUTH_KEY\\|SECURE_AUTH\\|LOGGED_IN\\|NONCE' /var/www/html/wp-config.php",
+    "echo '=== WP USERS TABLE ==='",
+    "mysql -u pedagolens -pPedagoLens2024! pedagolens -e \"SELECT user_login, user_pass, user_status FROM wp_users;\"",
+    "echo '=== WP USERMETA ==='",
+    "mysql -u pedagolens -pPedagoLens2024! pedagolens -e \"SELECT meta_key, meta_value FROM wp_usermeta WHERE user_id=1 AND meta_key IN ('wp_capabilities','wp_user_level','session_tokens');\"",
+    "echo '=== TEST LOGIN CURL ==='",
+    "curl -v -c /tmp/cookies.txt -b /tmp/cookies.txt -L 'http://pedagolens.34.199.149.247.nip.io/wp-login.php' --data 'log=pedagolens&pwd=PedagoLens2024!&wp-submit=Log+In&redirect_to=%2Fwp-admin%2F&testcookie=1' -H 'Cookie: wordpress_test_cookie=WP+Cookie+check' 2>&1 | grep -E 'Location|Set-Cookie|HTTP/'",
+    "echo '=== DONE ==='"
+  ]
+}

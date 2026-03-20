@@ -142,17 +142,15 @@ class PedagoLens_API_Bridge {
     /**
      * Retourne les credentials AWS.
      *
-     * ⚠️  MODE HACKATHON — Les credentials sont lus depuis les options WordPress.
-     *     Ce mode est TEMPORAIRE et uniquement acceptable pour une démo locale.
-     *     En production, remplacer par :
-     *       defined('AWS_ACCESS_KEY_ID') ? AWS_ACCESS_KEY_ID : getenv('AWS_ACCESS_KEY_ID')
-     *     ou utiliser AWS Secrets Manager / IAM Role.
+     * Priorité : constantes wp-config.php → variables d'environnement → options WP (fallback hackathon).
+     * En production, définir AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN
+     * dans wp-config.php ou en variables d'environnement — jamais dans les options WP.
      */
     public static function get_aws_credentials(): array {
         return [
-            'access_key_id'     => get_option( 'pl_aws_access_key_id',     '' ),
-            'secret_access_key' => get_option( 'pl_aws_secret_access_key', '' ),
-            'session_token'     => get_option( 'pl_aws_session_token',      '' ),
+            'access_key_id'     => defined( 'AWS_ACCESS_KEY_ID' )     ? AWS_ACCESS_KEY_ID     : ( getenv( 'AWS_ACCESS_KEY_ID' )     ?: get_option( 'pl_aws_access_key_id',     '' ) ),
+            'secret_access_key' => defined( 'AWS_SECRET_ACCESS_KEY' ) ? AWS_SECRET_ACCESS_KEY : ( getenv( 'AWS_SECRET_ACCESS_KEY' ) ?: get_option( 'pl_aws_secret_access_key', '' ) ),
+            'session_token'     => defined( 'AWS_SESSION_TOKEN' )     ? AWS_SESSION_TOKEN     : ( getenv( 'AWS_SESSION_TOKEN' )     ?: get_option( 'pl_aws_session_token',      '' ) ),
         ];
     }
 
