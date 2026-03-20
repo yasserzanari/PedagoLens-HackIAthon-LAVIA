@@ -95,12 +95,17 @@ class PedagoLens_Landing_Admin {
                 </table>
 
                 <h2><?php esc_html_e( 'Shortcodes disponibles', 'pedagolens-landing' ); ?></h2>
-                <p>
-                    <code>[pedagolens_hero]</code> &nbsp;
-                    <code>[pedagolens_features]</code> &nbsp;
-                    <code>[pedagolens_pricing]</code> &nbsp;
-                    <code>[pedagolens_testimonials]</code>
-                </p>
+                <table class="widefat striped">
+                    <thead><tr><th>Page</th><th>Shortcode</th><th>Slug</th></tr></thead>
+                    <tbody>
+                        <tr><td>Landing</td><td><code>[pedagolens_landing]</code></td><td>/</td></tr>
+                        <tr><td>Dashboard enseignant</td><td><code>[pedagolens_teacher_dashboard]</code></td><td>/dashboard-enseignant</td></tr>
+                        <tr><td>Dashboard étudiant</td><td><code>[pedagolens_student_dashboard]</code></td><td>/dashboard-etudiant</td></tr>
+                        <tr><td>Cours &amp; Projets</td><td><code>[pedagolens_courses]</code></td><td>/cours-projets</td></tr>
+                        <tr><td>Workbench</td><td><code>[pedagolens_workbench]</code></td><td>/workbench</td></tr>
+                        <tr><td>Compte</td><td><code>[pedagolens_account]</code></td><td>/compte</td></tr>
+                    </tbody>
+                </table>
 
                 <?php submit_button( __( 'Enregistrer', 'pedagolens-landing' ) ); ?>
             </form>
