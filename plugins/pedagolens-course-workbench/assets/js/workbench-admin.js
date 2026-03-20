@@ -148,3 +148,193 @@
     }
 
 } )( jQuery );
+
+
+// =============================================================================
+// FRONT-END: File Upload (drag & drop + browse)
+// =============================================================================
+( function ( $ ) {
+    'use strict';
+
+    // Only run on front-end workbench pages
+    if ( ! $( '.pl-front-workbench-page' ).length ) return;
+
+    var ajaxUrl   = ( typeof plWorkbench !== 'undefined' ) ? plWorkbench.ajaxUrl : ( typeof plFront !== 'undefined' ? plFront.ajaxUrl : '' );
+    var nonce     = ( typeof plWorkbench !== 'undefined' ) ? plWorkbench.nonce   : ( typeof plFront !== 'undefined' ? ( plFront.nonces?.workbench || '' ) : '' );
+    var projectId = ( typeof plWorkbench !== 'undefined' ) ? plWorkbench.projectId : 0;
+
+    if ( ! ajaxUrl ) return;
+
+    // -------------------------------------------------------------------------
+    // Toggle upload zone
+    // -------------------------------------------------------------------------
+    $( '#pl-upload-trigger' ).on( 'click', function () {
+        $( '#pl-upload-zone' ).slideToggle( 250 );
+    } );
+
+    // -------------------------------------------------------------------------
+    // Drag & drop
+    // -------------------------------------------------------------------------
+    var $dropzone = $( '#pl-dropzone' );
+
+    $dropzone.on( 'dragover dragenter', function ( e ) {
+        e.preventDefault();
+        e.stopPropagation();
+        $( this ).addClass( 'pl-drag-over' );
+    } );
+
+    $dropzone.on( 'dragleave drop', function ( e ) {
+        e.preventDefault();
+        e.stopPropagation();
+        $( this ).removeClass( 'pl-drag-over' );
+    } );
+
+    $dropzone.on( 'drop', function ( e ) {
+        var files = e.originalEvent.dataTransfer.files;
+        if ( files.length ) {
+            handleFiles( files );
+        }
+    } );
+
+    // Click to browse
+    $dropzone.on( 'click', function ( e ) {
+        if ( $( e.target ).is( 'label' ) || $( e.target ).closest( 'label' ).length ) return;
+        $( '#pl-file-input' ).trigger( 'click' );
+    } );
+
+    $( '#pl-file-input' ).on( 'change', function () {
+        if ( this.files.length ) {
+            handleFiles( this.files );
+            this.value = '';
+        }
+    } );
+
+    // -------------------------------------------------------------------------
+    // Handle file upload
+    // -------------------------------------------------------------------------
+    function handleFiles( files ) {
+        var allowed = [ 'pptx', 'docx', 'pdf' ];
+        var queue   = [];
+
+        for ( var i = 0; i < files.length; i++ ) {
+            var ext = files[ i ].name.split( '.' ).pop().toLowerCase();
+            if ( allowed.indexOf( ext ) !== -1 ) {
+                queue.push( files[ i ] );
+            }
+        }
+
+        if ( ! queue.length ) {
+            showUploadResult( 'Aucun fichier valide. Formats acceptés : .pptx, .docx, .pdf', true );
+            return;
+        }
+
+        // Upload sequentially
+        uploadNext( queue, 0 );
+    }
+
+    function uploadNext( queue, index ) {
+        if ( index >= queue.length ) {
+            $( '#pl-upload-progress' ).fadeOut( 200 );
+            return;
+        }
+
+        var file = queue[ index ];
+        var fd   = new FormData();
+        fd.append( 'action', 'pl_upload_file' );
+        fd.append( 'nonce', nonce );
+        fd.append( 'project_id', projectId );
+        fd.append( 'file', file );
+
+        $( '#pl-upload-progress' ).show();
+        $( '#pl-upload-result' ).hide();
+        $( '#pl-progress-text' ).text( 'Téléversement de ' + file.name + '…' );
+        $( '#pl-progress-bar' ).css( 'width', '0%' );
+
+        $.ajax( {
+            url: ajaxUrl,
+            type: 'POST',
+            data: fd,
+            processData: false,
+            contentType: false,
+            xhr: function () {
+                var xhr = new window.XMLHttpRequest();
+                xhr.upload.addEventListener( 'progress', function ( e ) {
+                    if ( e.lengthComputable ) {
+                        var pct = Math.round( ( e.loaded / e.total ) * 100 );
+                        $( '#pl-progress-bar' ).css( 'width', pct + '%' );
+                        $( '#pl-progress-text' ).text( file.name + ' — ' + pct + '%' );
+                    }
+                } );
+                return xhr;
+            },
+            success: function ( res ) {
+                if ( res.success ) {
+                    showUploadResult( '✓ ' + res.data.message, false );
+
+                    // Append new sections to the main area
+                    if ( res.data.sections_html ) {
+                        $( '.pl-wb-main' ).append( res.data.sections_html );
+                        $( '.pl-wb-empty' ).hide();
+                    }
+
+                    // Append file to sidebar list
+                    if ( res.data.file_html ) {
+                        var $list = $( '#pl-files-list' );
+                        $list.find( '.pl-wb-sidebar-empty' ).remove();
+                        $list.append( res.data.file_html );
+                    }
+                } else {
+                    showUploadResult( '✗ ' + ( res.data?.message || 'Erreur.' ), true );
+                }
+
+                // Next file
+                uploadNext( queue, index + 1 );
+            },
+            error: function () {
+                showUploadResult( '✗ Erreur réseau lors du téléversement.', true );
+                uploadNext( queue, index + 1 );
+            }
+        } );
+    }
+
+    function showUploadResult( msg, isError ) {
+        var $el = $( '#pl-upload-result' );
+        $el.text( msg )
+           .css( {
+               background: isError ? 'rgba(239,68,68,0.08)' : 'rgba(34,197,94,0.08)',
+               borderColor: isError ? 'rgba(239,68,68,0.2)' : 'rgba(34,197,94,0.2)',
+               color: isError ? '#fca5a5' : '#4ade80'
+           } )
+           .show();
+    }
+
+    // -------------------------------------------------------------------------
+    // Analyze all sections
+    // -------------------------------------------------------------------------
+    $( '#pl-analyze-all' ).on( 'click', function () {
+        var $btn = $( this );
+        var $sections = $( '.pl-btn-suggestions' );
+
+        if ( ! $sections.length ) {
+            alert( 'Aucune section à analyser.' );
+            return;
+        }
+
+        $btn.prop( 'disabled', true ).text( '⏳ Analyse en cours…' );
+
+        // Trigger suggestions for each section sequentially
+        var index = 0;
+        function analyzeNext() {
+            if ( index >= $sections.length ) {
+                $btn.prop( 'disabled', false ).text( '🔍 Analyser tout le projet' );
+                return;
+            }
+            var $s = $sections.eq( index );
+            $s.trigger( 'click' );
+            index++;
+            setTimeout( analyzeNext, 1500 );
+        }
+        analyzeNext();
+    } );
+
+} )( jQuery );

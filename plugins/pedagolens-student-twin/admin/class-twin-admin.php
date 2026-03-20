@@ -169,7 +169,7 @@ class PedagoLens_Twin_Admin {
                     <td><input type="text" id="twin_name" name="twin_name" value="<?php echo esc_attr( $twin_name ); ?>" class="regular-text"></td>
                 </tr>
                 <tr>
-                    <th><label for="intro_message"><?php esc_html_e( 'Message d\'introduction', 'pedagolens-student-twin' ); ?></label></th>
+                    <th><label for="intro_message"><?php esc_html_e( "Message d'introduction", 'pedagolens-student-twin' ); ?></label></th>
                     <td>
                         <textarea id="intro_message" name="intro_message" rows="4" class="large-text"><?php echo esc_textarea( $twin_intro ); ?></textarea>
                         <p class="description"><?php esc_html_e( 'Message affiché au début de chaque session.', 'pedagolens-student-twin' ); ?></p>
@@ -214,7 +214,7 @@ class PedagoLens_Twin_Admin {
         $twin_raw      = get_option( 'pl_student_twin_settings', [] );
         $twin_settings = is_string( $twin_raw ) ? ( json_decode( $twin_raw, true ) ?? [] ) : (array) $twin_raw;
         $twin_name     = esc_html( $twin_settings['twin_name'] ?? 'Léa' );
-        $intro_message = esc_html( $twin_settings['intro_message'] ?? 'Bonjour ! Je suis ton jumeau numérique. Comment puis-je t\'aider avec ton cours ?' );
+        $intro_message = esc_html( $twin_settings['intro_message'] ?? "Bonjour ! Je suis ton jumeau numérique. Comment puis-je t'aider avec ton cours ?" );
 
         $courses = get_posts( [ 'post_type' => 'pl_course', 'posts_per_page' => -1, 'post_status' => 'publish' ] );
         ?>
@@ -381,26 +381,67 @@ class PedagoLens_Twin_Admin {
     }
 
     // -------------------------------------------------------------------------
-    // Shortcode [pedagolens_twin]
+    // Shortcode [pedagolens_twin] — Page complète avec header/footer
     // -------------------------------------------------------------------------
 
     public static function render_shortcode( array $atts ): string {
         $atts = shortcode_atts( [ 'course_id' => 0 ], $atts );
 
+        wp_enqueue_style( 'pl-twin-front', PL_TWIN_PLUGIN_URL . 'assets/css/twin-admin.css', [], PL_TWIN_VERSION );
+
+        // --- Navigation links ---
+        $home_url      = esc_url( home_url( '/' ) );
+        $dashboard_pg  = get_page_by_path( 'dashboard-enseignant' );
+        $courses_pg    = get_page_by_path( 'cours-projets' );
+        $twin_pg       = get_page_by_path( 'dashboard-etudiant' );
+        $account_pg    = get_page_by_path( 'compte' );
+        $nav_links = [
+            'Accueil'   => $home_url,
+            'Dashboard' => $dashboard_pg ? get_permalink( $dashboard_pg ) : admin_url( 'admin.php?page=pl-teacher-dashboard' ),
+            'Cours'     => $courses_pg   ? get_permalink( $courses_pg )   : admin_url( 'admin.php?page=pl-course-workbench' ),
+            'Jumeau'    => $twin_pg      ? get_permalink( $twin_pg )      : '#',
+            'Compte'    => $account_pg   ? get_permalink( $account_pg )   : '#',
+        ];
+
         // --- Not logged in ---
         if ( ! is_user_logged_in() ) {
-            wp_enqueue_style( 'pl-twin-front', PL_TWIN_PLUGIN_URL . 'assets/css/twin-admin.css', [], PL_TWIN_VERSION );
             ob_start();
             ?>
-            <div class="pl-twin-dashboard pl-twin-logged-out">
-                <div class="pl-twin-logged-out-card">
-                    <span class="pl-twin-lock-icon" aria-hidden="true">🔒</span>
-                    <h2><?php esc_html_e( 'Accès restreint', 'pedagolens-student-twin' ); ?></h2>
-                    <p><?php esc_html_e( 'Connectez-vous pour accéder à votre jumeau numérique et commencer à apprendre.', 'pedagolens-student-twin' ); ?></p>
-                    <a href="<?php echo esc_url( wp_login_url( get_permalink() ) ); ?>" class="pl-twin-login-btn">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 6px;"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg><?php esc_html_e( 'Se connecter', 'pedagolens-student-twin' ); ?>
-                    </a>
+            <div class="pl-twin-page">
+                <nav class="pl-twin-nav" role="navigation" aria-label="Navigation principale">
+                    <div class="pl-twin-nav-inner">
+                        <a href="<?php echo $home_url; ?>" class="pl-twin-nav-logo">PédagoLens</a>
+                        <ul class="pl-twin-nav-links">
+                            <?php foreach ( $nav_links as $label => $url ) : ?>
+                                <li><a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $label ); ?></a></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                </nav>
+                <div class="pl-twin-page-body">
+                    <div class="pl-twin-logged-out">
+                        <div class="pl-twin-logged-out-card">
+                            <span class="pl-twin-lock-icon" aria-hidden="true">🔒</span>
+                            <h2><?php esc_html_e( 'Accès restreint', 'pedagolens-student-twin' ); ?></h2>
+                            <p><?php esc_html_e( "Connectez-vous pour accéder à votre jumeau numérique et commencer à apprendre.", 'pedagolens-student-twin' ); ?></p>
+                            <a href="<?php echo esc_url( wp_login_url( get_permalink() ) ); ?>" class="pl-twin-login-btn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                                <?php esc_html_e( 'Se connecter', 'pedagolens-student-twin' ); ?>
+                            </a>
+                        </div>
+                    </div>
                 </div>
+                <footer class="pl-twin-footer">
+                    <div class="pl-twin-footer-inner">
+                        <span class="pl-twin-footer-logo">PédagoLens</span>
+                        <ul class="pl-twin-footer-nav">
+                            <?php foreach ( $nav_links as $label => $url ) : ?>
+                                <li><a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $label ); ?></a></li>
+                            <?php endforeach; ?>
+                        </ul>
+                        <p class="pl-twin-footer-copy">&copy; <?php echo esc_html( gmdate( 'Y' ) ); ?> PédagoLens — Propulsé par AWS Bedrock</p>
+                    </div>
+                </footer>
             </div>
             <?php
             return ob_get_clean();
@@ -410,112 +451,193 @@ class PedagoLens_Twin_Admin {
         $twin_raw      = get_option( 'pl_student_twin_settings', [] );
         $twin_settings = is_string( $twin_raw ) ? ( json_decode( $twin_raw, true ) ?? [] ) : (array) $twin_raw;
         $twin_name     = esc_html( $twin_settings['twin_name'] ?? 'Léa' );
-        $intro         = esc_html( $twin_settings['intro_message'] ?? 'Bonjour ! Je suis ton jumeau numérique. Comment puis-je t\'aider avec ton cours ?' );
+        $intro         = esc_html( $twin_settings['intro_message'] ?? "Bonjour ! Je suis ton jumeau numérique. Comment puis-je t'aider avec ton cours ?" );
 
         $courses = get_posts( [ 'post_type' => 'pl_course', 'posts_per_page' => -1, 'post_status' => 'publish' ] );
 
         $current_user_id = get_current_user_id();
+        $current_user    = wp_get_current_user();
         $sessions = get_posts( [
-            'post_type' => 'pl_interaction', 'posts_per_page' => 15, 'post_status' => 'publish',
+            'post_type' => 'pl_interaction', 'posts_per_page' => 20, 'post_status' => 'publish',
             'orderby' => 'date', 'order' => 'DESC',
             'meta_query' => [ [ 'key' => '_pl_student_id', 'value' => $current_user_id ] ],
         ] );
 
+        // Build sessions data for JS (auto-resume)
+        $sessions_data = [];
+        foreach ( $sessions as $s ) {
+            $sid    = get_post_meta( $s->ID, '_pl_session_id', true );
+            $cid    = (int) get_post_meta( $s->ID, '_pl_course_id', true );
+            $ended  = get_post_meta( $s->ID, '_pl_ended_at', true );
+            $sessions_data[] = [
+                'session_id' => $sid,
+                'course_id'  => $cid,
+                'ended'      => ! empty( $ended ),
+            ];
+        }
+
         wp_enqueue_script( 'pl-twin-front', PL_TWIN_PLUGIN_URL . 'assets/js/twin-admin.js', [ 'jquery' ], PL_TWIN_VERSION, true );
         wp_localize_script( 'pl-twin-front', 'plTwin', [
-            'ajaxUrl'      => admin_url( 'admin-ajax.php' ),
-            'nonce'        => wp_create_nonce( self::NONCE_AJAX ),
-            'courseId'     => (int) $atts['course_id'],
-            'twinName'     => $twin_name,
-            'introMessage' => $intro,
-            'i18n'         => [
+            'ajaxUrl'       => admin_url( 'admin-ajax.php' ),
+            'nonce'         => wp_create_nonce( self::NONCE_AJAX ),
+            'courseId'      => (int) $atts['course_id'],
+            'twinName'      => $twin_name,
+            'introMessage'  => $intro,
+            'studentName'   => esc_html( $current_user->display_name ),
+            'sessionsData'  => $sessions_data,
+            'i18n'          => [
                 'send'           => __( 'Envoyer', 'pedagolens-student-twin' ),
-                'typing'         => __( 'est en train d\'écrire…', 'pedagolens-student-twin' ),
+                'typing'         => __( "est en train d'écrire…", 'pedagolens-student-twin' ),
                 'sessionEnded'   => __( 'Session terminée. À bientôt !', 'pedagolens-student-twin' ),
                 'networkError'   => __( 'Erreur réseau. Réessaie.', 'pedagolens-student-twin' ),
                 'guardrailLabel' => __( 'Garde-fou déclenché', 'pedagolens-student-twin' ),
                 'newSession'     => __( 'Nouvelle session', 'pedagolens-student-twin' ),
                 'endSession'     => __( 'Terminer la session', 'pedagolens-student-twin' ),
+                'welcome'        => __( 'Bienvenue', 'pedagolens-student-twin' ),
+                'chooseCourse'   => __( 'Choisis un cours pour commencer ta session', 'pedagolens-student-twin' ),
+                'resuming'       => __( 'Reprise de ta session précédente…', 'pedagolens-student-twin' ),
+                'starting'       => __( 'Démarrage de la session…', 'pedagolens-student-twin' ),
             ],
         ] );
-        wp_enqueue_style( 'pl-twin-front', PL_TWIN_PLUGIN_URL . 'assets/css/twin-admin.css', [], PL_TWIN_VERSION );
 
         ob_start();
         ?>
-        <div class="pl-twin-dashboard" data-twin-name="<?php echo esc_attr( $twin_name ); ?>" data-intro="<?php echo esc_attr( $intro ); ?>">
-            <header class="pl-twin-header">
-                <div class="pl-twin-header-left">
-                    <span class="pl-twin-robot-icon" aria-hidden="true">🤖</span>
-                    <div>
-                        <h1 class="pl-twin-title"><?php esc_html_e( 'Mon Jumeau Numérique', 'pedagolens-student-twin' ); ?></h1>
-                        <span class="pl-twin-subtitle"><?php echo $twin_name; ?> · <span class="pl-twin-status-dot" aria-hidden="true"></span> <?php esc_html_e( 'En ligne', 'pedagolens-student-twin' ); ?></span>
-                    </div>
-                </div>
-                <div class="pl-twin-header-right">
-                    <label for="pl-twin-course-select" class="screen-reader-text"><?php esc_html_e( 'Sélectionner un cours', 'pedagolens-student-twin' ); ?></label>
-                    <select id="pl-twin-course-select" class="pl-twin-course-select">
-                        <option value="0"><?php esc_html_e( '— Choisir un cours —', 'pedagolens-student-twin' ); ?></option>
-                        <?php foreach ( $courses as $c ) : ?>
-                            <option value="<?php echo esc_attr( $c->ID ); ?>" <?php selected( (int) $atts['course_id'], $c->ID ); ?>><?php echo esc_html( $c->post_title ); ?></option>
+        <div class="pl-twin-page" data-twin-name="<?php echo esc_attr( $twin_name ); ?>" data-intro="<?php echo esc_attr( $intro ); ?>">
+
+            <!-- ========== NAV ========== -->
+            <nav class="pl-twin-nav" role="navigation" aria-label="Navigation principale">
+                <div class="pl-twin-nav-inner">
+                    <a href="<?php echo $home_url; ?>" class="pl-twin-nav-logo">PédagoLens</a>
+                    <ul class="pl-twin-nav-links">
+                        <?php foreach ( $nav_links as $label => $url ) : ?>
+                            <li><a href="<?php echo esc_url( $url ); ?>" <?php if ( $label === 'Jumeau' ) echo 'class="pl-twin-nav-active"'; ?>><?php echo esc_html( $label ); ?></a></li>
                         <?php endforeach; ?>
-                        <?php if ( empty( $courses ) ) : ?>
-                            <option value="1"><?php esc_html_e( 'Cours démo', 'pedagolens-student-twin' ); ?></option>
-                        <?php endif; ?>
-                    </select>
+                    </ul>
+                    <div class="pl-twin-nav-user">
+                        <span class="pl-twin-nav-avatar"><?php echo esc_html( mb_substr( $current_user->display_name, 0, 1 ) ); ?></span>
+                        <span class="pl-twin-nav-username"><?php echo esc_html( $current_user->display_name ); ?></span>
+                    </div>
                 </div>
-            </header>
-            <div class="pl-twin-body">
-                <main class="pl-twin-chat-area">
-                    <div id="pl-twin-messages" class="pl-twin-messages" role="log" aria-live="polite"></div>
-                    <div id="pl-twin-follow-ups" class="pl-twin-follow-ups"></div>
-                    <div class="pl-twin-input-bar">
-                        <textarea id="pl-twin-input" class="pl-twin-input" rows="1" placeholder="<?php esc_attr_e( 'Pose ta question…', 'pedagolens-student-twin' ); ?>" disabled aria-label="<?php esc_attr_e( 'Message', 'pedagolens-student-twin' ); ?>"></textarea>
-                        <button type="button" id="pl-twin-send" class="pl-twin-send-btn" disabled aria-label="<?php esc_attr_e( 'Envoyer', 'pedagolens-student-twin' ); ?>">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                        </button>
-                    </div>
-                </main>
-                <aside class="pl-twin-sidebar">
-                    <div class="pl-twin-sidebar-actions">
-                        <button type="button" id="pl-twin-new-session" class="pl-twin-btn pl-twin-btn-primary">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                            <?php esc_html_e( 'Nouvelle session', 'pedagolens-student-twin' ); ?>
-                        </button>
-                        <button type="button" id="pl-twin-end-session" class="pl-twin-btn pl-twin-btn-danger" disabled>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-                            <?php esc_html_e( 'Terminer la session', 'pedagolens-student-twin' ); ?>
-                        </button>
-                    </div>
-                    <div class="pl-twin-sidebar-history">
-                        <h3 class="pl-twin-sidebar-title"><?php esc_html_e( 'Sessions précédentes', 'pedagolens-student-twin' ); ?></h3>
-                        <ul id="pl-twin-history-list" class="pl-twin-history-list">
-                            <?php if ( empty( $sessions ) ) : ?>
-                                <li class="pl-twin-history-empty"><?php esc_html_e( 'Aucune session.', 'pedagolens-student-twin' ); ?></li>
-                            <?php else : ?>
-                                <?php foreach ( $sessions as $s ) :
-                                    $sid     = get_post_meta( $s->ID, '_pl_session_id', true );
-                                    $cid     = (int) get_post_meta( $s->ID, '_pl_course_id', true );
-                                    $started = get_post_meta( $s->ID, '_pl_started_at', true );
-                                    $ended   = get_post_meta( $s->ID, '_pl_ended_at', true );
-                                    $course  = $cid ? get_post( $cid ) : null;
-                                    $raw_m   = get_post_meta( $s->ID, '_pl_messages', true );
-                                    $msgs    = is_string( $raw_m ) ? json_decode( $raw_m, true ) : [];
-                                    $count   = is_array( $msgs ) ? count( $msgs ) : 0;
-                                    ?>
-                                    <li class="pl-twin-history-item" data-session-id="<?php echo esc_attr( $sid ); ?>">
-                                        <span class="pl-twin-history-course"><?php echo esc_html( $course ? $course->post_title : '#' . $cid ); ?></span>
-                                        <span class="pl-twin-history-meta">
-                                            <?php echo esc_html( $started ? wp_date( 'd/m H:i', strtotime( $started ) ) : '—' ); ?>
-                                            · <?php echo esc_html( $count ); ?> msg
-                                            <?php if ( $ended ) : ?><span class="pl-twin-history-badge-ended">✓</span><?php endif; ?>
-                                        </span>
-                                    </li>
+            </nav>
+
+            <!-- ========== PAGE BODY ========== -->
+            <div class="pl-twin-page-body">
+
+                <!-- Course selector bar -->
+                <div class="pl-twin-course-bar">
+                    <div class="pl-twin-course-bar-inner">
+                        <div class="pl-twin-course-bar-left">
+                            <span class="pl-twin-robot-icon" aria-hidden="true">🤖</span>
+                            <div>
+                                <h1 class="pl-twin-page-title"><?php esc_html_e( 'Mon Jumeau Numérique', 'pedagolens-student-twin' ); ?></h1>
+                                <span class="pl-twin-subtitle"><?php echo $twin_name; ?> · <span class="pl-twin-status-dot" aria-hidden="true"></span> <?php esc_html_e( 'En ligne', 'pedagolens-student-twin' ); ?></span>
+                            </div>
+                        </div>
+                        <div class="pl-twin-course-bar-right">
+                            <label for="pl-twin-course-select" class="pl-twin-course-label"><?php esc_html_e( 'Cours :', 'pedagolens-student-twin' ); ?></label>
+                            <select id="pl-twin-course-select" class="pl-twin-course-select">
+                                <option value="0"><?php esc_html_e( '— Choisir un cours —', 'pedagolens-student-twin' ); ?></option>
+                                <?php foreach ( $courses as $c ) : ?>
+                                    <option value="<?php echo esc_attr( $c->ID ); ?>" <?php selected( (int) $atts['course_id'], $c->ID ); ?>><?php echo esc_html( $c->post_title ); ?></option>
                                 <?php endforeach; ?>
-                            <?php endif; ?>
-                        </ul>
+                                <?php if ( empty( $courses ) ) : ?>
+                                    <option value="1"><?php esc_html_e( 'Cours démo', 'pedagolens-student-twin' ); ?></option>
+                                <?php endif; ?>
+                            </select>
+                        </div>
                     </div>
-                </aside>
+                </div>
+
+                <!-- Main content: chat + sidebar -->
+                <div class="pl-twin-main">
+
+                    <!-- Welcome state (no course selected) -->
+                    <div id="pl-twin-welcome" class="pl-twin-welcome">
+                        <div class="pl-twin-welcome-card">
+                            <span class="pl-twin-welcome-icon" aria-hidden="true">👋</span>
+                            <h2><?php printf( esc_html__( 'Bonjour %s !', 'pedagolens-student-twin' ), esc_html( $current_user->display_name ) ); ?></h2>
+                            <p><?php esc_html_e( "Sélectionne un cours dans le menu ci-dessus pour démarrer une conversation avec ton jumeau numérique.", 'pedagolens-student-twin' ); ?></p>
+                            <p class="pl-twin-welcome-hint"><?php echo $twin_name; ?> <?php esc_html_e( "est prêt à t'accompagner dans ton apprentissage.", 'pedagolens-student-twin' ); ?></p>
+                        </div>
+                    </div>
+
+                    <!-- Chat area (hidden until course selected) -->
+                    <div id="pl-twin-chat-wrap" class="pl-twin-chat-wrap" style="display:none;">
+                        <div class="pl-twin-chat-container">
+                            <div class="pl-twin-chat-card">
+                                <div class="pl-twin-chat-header">
+                                    <div class="pl-twin-chat-header-left">
+                                        <span class="pl-twin-chat-avatar" aria-hidden="true">🤖</span>
+                                        <div>
+                                            <strong class="pl-twin-chat-name"><?php echo $twin_name; ?></strong>
+                                            <span class="pl-twin-chat-status"><span class="pl-twin-status-dot" aria-hidden="true"></span> <?php esc_html_e( 'En ligne', 'pedagolens-student-twin' ); ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="pl-twin-chat-header-right">
+                                        <span id="pl-twin-course-badge" class="pl-twin-course-badge"></span>
+                                        <button type="button" id="pl-twin-end-session" class="pl-twin-btn-end" title="<?php esc_attr_e( 'Terminer la session', 'pedagolens-student-twin' ); ?>">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="pl-twin-messages" class="pl-twin-messages" role="log" aria-live="polite"></div>
+                                <div id="pl-twin-follow-ups" class="pl-twin-follow-ups"></div>
+                                <div class="pl-twin-input-bar">
+                                    <textarea id="pl-twin-input" class="pl-twin-input" rows="1" placeholder="<?php esc_attr_e( 'Pose ta question…', 'pedagolens-student-twin' ); ?>" disabled aria-label="<?php esc_attr_e( 'Message', 'pedagolens-student-twin' ); ?>"></textarea>
+                                    <button type="button" id="pl-twin-send" class="pl-twin-send-btn" disabled aria-label="<?php esc_attr_e( 'Envoyer', 'pedagolens-student-twin' ); ?>">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- History sidebar -->
+                        <aside class="pl-twin-sidebar">
+                            <h3 class="pl-twin-sidebar-title"><?php esc_html_e( 'Sessions précédentes', 'pedagolens-student-twin' ); ?></h3>
+                            <ul id="pl-twin-history-list" class="pl-twin-history-list">
+                                <?php if ( empty( $sessions ) ) : ?>
+                                    <li class="pl-twin-history-empty"><?php esc_html_e( 'Aucune session pour le moment.', 'pedagolens-student-twin' ); ?></li>
+                                <?php else : ?>
+                                    <?php foreach ( $sessions as $s ) :
+                                        $sid     = get_post_meta( $s->ID, '_pl_session_id', true );
+                                        $cid     = (int) get_post_meta( $s->ID, '_pl_course_id', true );
+                                        $started = get_post_meta( $s->ID, '_pl_started_at', true );
+                                        $ended   = get_post_meta( $s->ID, '_pl_ended_at', true );
+                                        $course  = $cid ? get_post( $cid ) : null;
+                                        $raw_m   = get_post_meta( $s->ID, '_pl_messages', true );
+                                        $msgs    = is_string( $raw_m ) ? json_decode( $raw_m, true ) : [];
+                                        $count   = is_array( $msgs ) ? count( $msgs ) : 0;
+                                        ?>
+                                        <li class="pl-twin-history-item" data-session-id="<?php echo esc_attr( $sid ); ?>">
+                                            <span class="pl-twin-history-course"><?php echo esc_html( $course ? $course->post_title : '#' . $cid ); ?></span>
+                                            <span class="pl-twin-history-meta">
+                                                <?php echo esc_html( $started ? wp_date( 'd/m H:i', strtotime( $started ) ) : '—' ); ?>
+                                                · <?php echo esc_html( $count ); ?> msg
+                                                <?php if ( $ended ) : ?><span class="pl-twin-history-badge-ended">✓</span><?php endif; ?>
+                                            </span>
+                                        </li>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </ul>
+                        </aside>
+                    </div>
+
+                </div>
             </div>
+
+            <!-- ========== FOOTER ========== -->
+            <footer class="pl-twin-footer">
+                <div class="pl-twin-footer-inner">
+                    <span class="pl-twin-footer-logo">PédagoLens</span>
+                    <ul class="pl-twin-footer-nav">
+                        <?php foreach ( $nav_links as $label => $url ) : ?>
+                            <li><a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $label ); ?></a></li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <p class="pl-twin-footer-copy">&copy; <?php echo esc_html( gmdate( 'Y' ) ); ?> PédagoLens — Propulsé par AWS Bedrock</p>
+                </div>
+            </footer>
+
         </div>
         <?php
         return ob_get_clean();
