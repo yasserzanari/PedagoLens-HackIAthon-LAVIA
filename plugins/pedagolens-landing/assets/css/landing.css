@@ -1,0 +1,323 @@
+/**
+ * PédagoLens Landing — CSS front-end
+ * Design moderne pour la démo HackIAthon
+ */
+
+:root {
+    --pl-primary: #2271b1;
+    --pl-primary-dark: #1a4f8a;
+    --pl-text: #1d2327;
+    --pl-muted: #50575e;
+    --pl-border: #dcdcde;
+    --pl-bg-light: #f6f7f7;
+}
+
+/* ============================================================
+   Utilitaires partagés
+   ============================================================ */
+
+.pl-section-header-text {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.pl-section-header-text h2 {
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: var(--pl-text);
+    margin: 0;
+}
+
+/* ============================================================
+   Hero
+   ============================================================ */
+
+.pl-hero {
+    padding: 96px 24px 80px;
+    background: linear-gradient( 150deg, var(--pl-primary) 0%, var(--pl-primary-dark) 60%, #0f2d52 100% );
+    color: #fff;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Subtle grid overlay */
+.pl-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient( rgba(255,255,255,.04) 1px, transparent 1px ),
+        linear-gradient( 90deg, rgba(255,255,255,.04) 1px, transparent 1px );
+    background-size: 40px 40px;
+    pointer-events: none;
+}
+
+.pl-hero-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.pl-hero-badge {
+    display: inline-block;
+    padding: 4px 14px;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    margin-bottom: 20px;
+}
+
+.pl-hero-title {
+    font-size: 3.2rem;
+    font-weight: 900;
+    margin: 0 0 18px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+.pl-hero-subtitle {
+    font-size: 1.25rem;
+    opacity: 0.88;
+    margin: 0 0 28px;
+    line-height: 1.6;
+}
+
+/* Profile badges strip */
+.pl-hero-profiles {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 32px;
+}
+
+.pl-hero-profiles-label {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    margin-right: 4px;
+}
+
+.pl-hero-profile-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    background: rgba(255,255,255,.18);
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.pl-hero-cta-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.pl-btn-cta {
+    display: inline-block;
+    padding: 15px 36px;
+    background: #fff;
+    color: var(--pl-primary);
+    font-weight: 700;
+    font-size: 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 16px rgba(0,0,0,.2);
+}
+
+.pl-btn-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    color: var(--pl-primary);
+    text-decoration: none;
+}
+
+.pl-hero-note {
+    font-size: 0.8rem;
+    opacity: 0.65;
+}
+
+/* ============================================================
+   Features
+   ============================================================ */
+
+.pl-features {
+    padding: 72px 24px;
+    background: var(--pl-bg-light);
+}
+
+.pl-features-grid {
+    display: grid;
+    grid-template-columns: repeat( auto-fit, minmax( 220px, 1fr ) );
+    gap: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.pl-feature-card {
+    background: #fff;
+    border: 1px solid var(--pl-border);
+    border-radius: 10px;
+    padding: 28px 24px;
+    text-align: center;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.pl-feature-card:hover {
+    box-shadow: 0 6px 24px rgba(0,0,0,.08);
+    transform: translateY(-3px);
+}
+
+.pl-feature-icon {
+    font-size: 2.2rem;
+    display: block;
+    margin-bottom: 14px;
+}
+
+.pl-feature-card h3 {
+    margin: 0 0 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--pl-primary);
+}
+
+.pl-feature-card p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--pl-muted);
+    line-height: 1.6;
+}
+
+/* ============================================================
+   Pricing
+   ============================================================ */
+
+.pl-pricing {
+    padding: 72px 24px;
+    background: #fff;
+}
+
+.pl-pricing-grid {
+    display: grid;
+    grid-template-columns: repeat( auto-fit, minmax( 240px, 1fr ) );
+    gap: 24px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.pl-plan-card {
+    border: 1px solid var(--pl-border);
+    border-radius: 10px;
+    padding: 32px 24px;
+    text-align: center;
+    position: relative;
+    transition: box-shadow 0.2s;
+}
+
+.pl-plan-card.pl-plan-featured {
+    border-color: var(--pl-primary);
+    border-width: 2px;
+    box-shadow: 0 8px 32px rgba(34, 113, 177, .15);
+}
+
+.pl-plan-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--pl-primary);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.pl-plan-card h3 {
+    margin: 0 0 10px;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.pl-plan-price {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--pl-primary);
+    margin-bottom: 12px;
+    line-height: 1;
+}
+
+.pl-plan-card p {
+    font-size: 0.875rem;
+    color: var(--pl-muted);
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* ============================================================
+   Testimonials
+   ============================================================ */
+
+.pl-testimonials {
+    padding: 72px 24px;
+    background: #f0f6fc;
+}
+
+.pl-testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat( auto-fit, minmax( 300px, 1fr ) );
+    gap: 24px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.pl-testimonial {
+    background: #fff;
+    border-left: 4px solid var(--pl-primary);
+    border-radius: 6px;
+    padding: 24px 28px;
+    margin: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+
+.pl-testimonial p {
+    font-size: 1rem;
+    font-style: italic;
+    color: var(--pl-text);
+    margin: 0 0 16px;
+    line-height: 1.7;
+}
+
+.pl-testimonial footer strong {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--pl-primary);
+}
+
+.pl-testimonial footer span {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--pl-muted);
+    margin-top: 2px;
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+
+@media (max-width: 768px) {
+    .pl-hero-title { font-size: 2.2rem; }
+    .pl-hero { padding: 64px 20px 56px; }
+    .pl-features, .pl-pricing, .pl-testimonials { padding: 48px 16px; }
+    .pl-section-header-text h2 { font-size: 1.5rem; }
+}

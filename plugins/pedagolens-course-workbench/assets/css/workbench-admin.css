@@ -1,0 +1,402 @@
+/**
+ * PédagoLens Course Workbench — Admin CSS
+ */
+
+/* ============================================================
+   Layout principal
+   ============================================================ */
+
+.pl-workbench-wrap {
+    max-width: 1400px;
+}
+
+.pl-workbench-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #dcdcde;
+}
+
+.pl-workbench-header h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.pl-workbench-header h1 a {
+    text-decoration: none;
+    color: #2271b1;
+    font-size: 1.2rem;
+}
+
+.pl-workbench-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 24px;
+    align-items: start;
+}
+
+/* ============================================================
+   Colonne principale
+   ============================================================ */
+
+.pl-workbench-main {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.pl-empty-sections {
+    padding: 40px;
+    text-align: center;
+    background: #f6f7f7;
+    border: 2px dashed #c3c4c7;
+    border-radius: 4px;
+    color: #787c82;
+}
+
+/* ============================================================
+   Bloc section
+   ============================================================ */
+
+.pl-section-block {
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    overflow: hidden;
+    animation: pl-fade-in 0.25s ease;
+}
+
+@keyframes pl-fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.pl-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #f6f7f7;
+    border-bottom: 1px solid #dcdcde;
+}
+
+.pl-section-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.pl-section-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.pl-section-editor {
+    padding: 16px;
+}
+
+.pl-section-editor .pl-section-content {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: monospace;
+    font-size: 0.875rem;
+    resize: vertical;
+}
+
+.pl-section-save-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.pl-save-status {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* ============================================================
+   Zone suggestions
+   ============================================================ */
+
+.pl-suggestions-zone {
+    padding: 0 16px 16px;
+}
+
+.pl-suggestions-list h4 {
+    margin: 0 0 12px;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #787c82;
+}
+
+/* ============================================================
+   Carte suggestion
+   ============================================================ */
+
+.pl-suggestion-card {
+    background: #f9f9f9;
+    border: 1px solid #dcdcde;
+    border-left: 4px solid #2271b1;
+    border-radius: 4px;
+    padding: 14px;
+    margin-bottom: 12px;
+}
+
+.pl-sug-meta {
+    margin-bottom: 8px;
+}
+
+.pl-sug-profile {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #2271b1;
+    color: #fff;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.pl-sug-diff {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.pl-sug-original,
+.pl-sug-proposed {
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+.pl-sug-original {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+}
+
+.pl-sug-proposed {
+    background: #d1e7dd;
+    border: 1px solid #198754;
+}
+
+.pl-sug-original strong,
+.pl-sug-proposed strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.pl-sug-original p,
+.pl-sug-proposed p {
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.pl-sug-rationale {
+    margin: 8px 0;
+    font-size: 0.875rem;
+    color: #50575e;
+}
+
+/* ============================================================
+   Deltas d'impact
+   ============================================================ */
+
+.pl-sug-deltas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.pl-delta {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.pl-delta-pos {
+    background: #d1e7dd;
+    color: #0a3622;
+}
+
+.pl-delta-neg {
+    background: #f8d7da;
+    color: #58151c;
+}
+
+.pl-sug-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* ============================================================
+   Panneau latéral
+   ============================================================ */
+
+.pl-workbench-sidebar {
+    position: sticky;
+    top: 32px;
+}
+
+.pl-sidebar-card {
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    padding: 16px;
+}
+
+.pl-sidebar-card h3 {
+    margin: 0 0 14px;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #787c82;
+}
+
+.pl-sidebar-empty {
+    color: #787c82;
+    font-size: 0.875rem;
+    font-style: italic;
+}
+
+/* ============================================================
+   Barres de scores
+   ============================================================ */
+
+.pl-score-row {
+    display: grid;
+    grid-template-columns: 1fr 80px 32px;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.pl-score-label {
+    font-size: 0.75rem;
+    color: #50575e;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pl-score-bar-wrap {
+    height: 8px;
+    background: #f0f0f1;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.pl-score-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.4s ease;
+}
+
+.pl-score-value {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: right;
+    color: #1d2327;
+}
+
+/* ============================================================
+   Badge type de projet
+   ============================================================ */
+
+.pl-project-type-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    background: #e0e0e0;
+    color: #1d2327;
+}
+
+.pl-type-magistral      { background: #dbeafe; color: #1e40af; }
+.pl-type-exercice       { background: #dcfce7; color: #166534; }
+.pl-type-evaluation     { background: #fef9c3; color: #854d0e; }
+.pl-type-travail_equipe { background: #f3e8ff; color: #6b21a8; }
+.pl-type-laboratoire    { background: #fef9c3; color: #854d0e; }
+.pl-type-seminaire      { background: #fce7f3; color: #9d174d; }
+.pl-type-projet         { background: #ede9fe; color: #5b21b6; }
+
+/* ============================================================
+   Modale historique
+   ============================================================ */
+
+.pl-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pl-modal-box {
+    background: #fff;
+    border-radius: 6px;
+    padding: 24px;
+    width: 680px;
+    max-width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.pl-modal-box h2 {
+    margin: 0 0 16px;
+}
+
+/* ============================================================
+   États : loading / error
+   ============================================================ */
+
+.pl-loading {
+    color: #787c82;
+    font-style: italic;
+    padding: 12px 0;
+}
+
+.pl-error {
+    color: #d63638;
+    font-weight: 500;
+    padding: 8px 12px;
+    background: #fcf0f1;
+    border-left: 4px solid #d63638;
+    border-radius: 2px;
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+
+@media (max-width: 1100px) {
+    .pl-workbench-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .pl-workbench-sidebar {
+        position: static;
+    }
+
+    .pl-sug-diff {
+        grid-template-columns: 1fr;
+    }
+}

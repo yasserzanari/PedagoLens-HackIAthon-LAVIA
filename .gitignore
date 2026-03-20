@@ -1,0 +1,17 @@
+# WordPress local — ne pas versionner
+wordpress/
+
+# CDK build artifacts
+cdk/dist/
+cdk/node_modules/
+cdk/cdk.out/
+
+# Kiro settings locaux (credentials, etc.)
+.kiro/settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# PHP
+*.log

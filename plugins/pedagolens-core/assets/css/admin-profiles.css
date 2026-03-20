@@ -1,0 +1,34 @@
+/* PédagoLens Core — Admin Profiles */
+
+.pl-status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.pl-status-active {
+    background: #d7f0d7;
+    color: #1a6b1a;
+}
+
+.pl-status-inactive {
+    background: #f0f0f0;
+    color: #666;
+}
+
+.pl-drag-handle {
+    color: #aaa;
+    font-size: 18px;
+    user-select: none;
+}
+
+#pl-profiles-sortable tr:hover .pl-drag-handle {
+    color: #555;
+}
+
+#pl-preview-modal {
+    max-height: 400px;
+    overflow-y: auto;
+}

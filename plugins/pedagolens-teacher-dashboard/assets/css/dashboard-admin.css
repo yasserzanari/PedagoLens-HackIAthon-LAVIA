@@ -1,0 +1,129 @@
+/* PédagoLens Teacher Dashboard */
+
+.pl-dashboard h1 { margin-bottom: 16px; }
+
+.pl-courses-grid {
+    display: grid;
+    grid-template-columns: repeat( auto-fill, minmax( 480px, 1fr ) );
+    gap: 20px;
+    margin-top: 16px;
+}
+
+.pl-course-card {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px;
+}
+
+.pl-course-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.pl-course-header h2 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.pl-course-type-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    background: #e0e0e0;
+    color: #444;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+
+.pl-type-magistral   { background: #dbeafe; color: #1e40af; }
+.pl-type-exercice    { background: #dcfce7; color: #166534; }
+.pl-type-evaluation  { background: #fef9c3; color: #854d0e; }
+.pl-type-travail_equipe { background: #f3e8ff; color: #6b21a8; }
+
+.pl-course-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+/* Scores */
+.pl-scores-block { margin-top: 16px; }
+.pl-scores-block h3 { font-size: 14px; margin-bottom: 8px; }
+
+.pl-scores-bars { display: flex; flex-direction: column; gap: 6px; }
+
+.pl-score-row {
+    display: grid;
+    grid-template-columns: 180px 1fr 60px;
+    align-items: center;
+    gap: 8px;
+}
+
+.pl-score-label {
+    font-size: 12px;
+    color: #444;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pl-score-bar-wrap {
+    background: #f0f0f0;
+    border-radius: 3px;
+    height: 14px;
+    overflow: hidden;
+}
+
+.pl-score-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width .4s ease;
+}
+
+.pl-score-value {
+    font-size: 12px;
+    font-weight: 600;
+    text-align: right;
+    color: #333;
+}
+
+.pl-summary {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #555;
+    font-style: italic;
+    border-left: 3px solid #c3c4c7;
+    padding-left: 10px;
+}
+
+/* Recommandations */
+.pl-recs-block { margin-top: 16px; }
+.pl-recs-block h3 { font-size: 14px; margin-bottom: 8px; }
+
+.pl-recs-list { margin: 0; padding-left: 20px; }
+
+.pl-rec-item {
+    font-size: 13px;
+    margin-bottom: 6px;
+    line-height: 1.5;
+}
+
+.pl-rec-profile {
+    display: inline-block;
+    font-size: 11px;
+    background: #e8f4fd;
+    color: #0073aa;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-left: 6px;
+}
+
+/* Projets */
+.pl-projects-list { margin-top: 20px; }
+.pl-projects-list h3 { font-size: 14px; margin-bottom: 8px; }
+
+.pl-loading { color: #666; font-style: italic; }
