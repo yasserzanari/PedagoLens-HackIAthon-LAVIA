@@ -44,6 +44,16 @@ class PedagoLens_Landing {
         if ( ! has_action( 'wp_ajax_pl_save_section' ) ) {
             add_action( 'wp_ajax_pl_save_section',      [ 'PedagoLens_Workbench_Admin', 'ajax_save_section' ] );
         }
+        // AJAX front-end pour sauvegarde profil compte
+        if ( ! has_action( 'wp_ajax_pl_save_account_profile' ) ) {
+            add_action( 'wp_ajax_pl_save_account_profile', [ self::class, 'ajax_save_account_profile' ] );
+        }
+
+        // AJAX front-end pour sauvegarde difficultés étudiant
+        if ( ! has_action( 'wp_ajax_pl_save_student_difficulties' ) ) {
+            add_action( 'wp_ajax_pl_save_student_difficulties', [ self::class, 'ajax_save_student_difficulties' ] );
+        }
+
         // AJAX front-end pour teacher dashboard
         if ( ! has_action( 'wp_ajax_pl_analyze_course' ) ) {
             add_action( 'wp_ajax_pl_analyze_course',    [ 'PedagoLens_Dashboard_Admin', 'ajax_analyze' ] );
@@ -65,36 +75,34 @@ class PedagoLens_Landing {
             PL_LANDING_VERSION
         );
 
-        // Enqueue JS seulement si les plugins requis sont actifs
+        // Toujours charger le JS front (animations landing + AJAX dashboards)
+        wp_enqueue_script(
+            'pl-landing-front',
+            PL_LANDING_PLUGIN_URL . 'assets/js/landing-front.js',
+            [],
+            PL_LANDING_VERSION,
+            true
+        );
+
         $has_dashboard = class_exists( 'PedagoLens_Dashboard_Admin' );
         $has_twin      = class_exists( 'PedagoLens_Twin_Admin' );
         $has_workbench = class_exists( 'PedagoLens_Workbench_Admin' );
 
-        if ( $has_dashboard || $has_twin || $has_workbench ) {
-            wp_enqueue_script(
-                'pl-landing-front',
-                PL_LANDING_PLUGIN_URL . 'assets/js/landing-front.js',
-                [ 'jquery' ],
-                PL_LANDING_VERSION,
-                true
-            );
-
-            wp_localize_script( 'pl-landing-front', 'plFront', [
-                'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-                'nonces'  => [
-                    'dashboard' => $has_dashboard ? wp_create_nonce( 'pl_dashboard_ajax' ) : '',
-                    'twin'      => $has_twin      ? wp_create_nonce( 'pl_twin_ajax' )      : '',
-                    'workbench' => $has_workbench ? wp_create_nonce( 'pl_workbench_ajax' ) : '',
-                ],
-                'i18n' => [
-                    'analyzing'    => 'Analyse en cours…',
-                    'analyzeError' => 'Erreur lors de l\'analyse.',
-                    'sending'      => 'Envoi…',
-                    'saving'       => 'Enregistrement…',
-                    'sessionEnded' => 'Session terminée. À bientôt !',
-                ],
-            ] );
-        }
+        wp_localize_script( 'pl-landing-front', 'plFront', [
+            'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+            'nonces'  => [
+                'dashboard' => $has_dashboard ? wp_create_nonce( 'pl_dashboard_ajax' ) : '',
+                'twin'      => $has_twin      ? wp_create_nonce( 'pl_twin_ajax' )      : '',
+                'workbench' => $has_workbench ? wp_create_nonce( 'pl_workbench_ajax' ) : '',
+            ],
+            'i18n' => [
+                'analyzing'    => 'Analyse en cours…',
+                'analyzeError' => 'Erreur lors de l\'analyse.',
+                'sending'      => 'Envoi…',
+                'saving'       => 'Enregistrement…',
+                'sessionEnded' => 'Session terminée. À bientôt !',
+            ],
+        ] );
     }
 
     // -------------------------------------------------------------------------
@@ -372,21 +380,42 @@ class PedagoLens_Landing {
     // -------------------------------------------------------------------------
 
     public static function shortcode_account( array $atts ): string {
+
+        // -----------------------------------------------------------------
+        // Visiteur non connecté → formulaire de connexion stylé
+        // -----------------------------------------------------------------
         if ( ! is_user_logged_in() ) {
             $login_url = wp_login_url( get_permalink() );
-            return <<<HTML
-            <div class="pl-account-login">
-                <h2>Connexion</h2>
-                <p>Connectez-vous pour acc&eacute;der &agrave; votre compte PédagoLens.</p>
-                <a href="{$login_url}" class="pl-btn pl-btn-primary">Se connecter</a>
+            ob_start();
+            ?>
+            <div class="pl-account-page">
+                <div class="pl-account-login-card pl-glass-card pl-animate-in">
+                    <div class="pl-login-icon">&#128274;</div>
+                    <h2>Connexion &agrave; PédagoLens</h2>
+                    <p class="pl-text-muted">Connectez-vous pour acc&eacute;der &agrave; votre espace.</p>
+                    <?php wp_login_form( [
+                        'redirect'       => get_permalink(),
+                        'label_username' => 'Identifiant ou courriel',
+                        'label_password' => 'Mot de passe',
+                        'label_remember' => 'Se souvenir de moi',
+                        'label_log_in'   => 'Se connecter',
+                    ] ); ?>
+                    <?php if ( get_option( 'users_can_register' ) ) : ?>
+                        <p class="pl-login-register">Pas encore de compte ?
+                            <a href="<?php echo esc_url( wp_registration_url() ); ?>">Cr&eacute;er un compte</a>
+                        </p>
+                    <?php endif; ?>
+                </div>
             </div>
-            HTML;
+            <?php
+            return ob_get_clean();
         }
 
-        $user    = wp_get_current_user();
-        $name    = esc_html( $user->display_name );
-        $email   = esc_html( $user->user_email );
-        $roles   = (array) $user->roles;
+        // -----------------------------------------------------------------
+        // Utilisateur connecté
+        // -----------------------------------------------------------------
+        $user       = wp_get_current_user();
+        $roles      = (array) $user->roles;
         $is_admin   = in_array( 'administrator',      $roles, true );
         $is_teacher = in_array( 'pedagolens_teacher', $roles, true );
         $is_student = in_array( 'pedagolens_student', $roles, true );
@@ -394,44 +423,395 @@ class PedagoLens_Landing {
         $role_label = match ( true ) {
             $is_admin   => 'Administrateur',
             $is_teacher => 'Enseignant',
-            $is_student => 'Étudiant',
+            $is_student => '&Eacute;tudiant',
             default     => 'Utilisateur',
         };
 
-        $logout_url = wp_logout_url( home_url() );
+        $role_icon = match ( true ) {
+            $is_admin   => '&#128081;',
+            $is_teacher => '&#128218;',
+            $is_student => '&#127891;',
+            default     => '&#128100;',
+        };
 
-        // Liens rapides selon le rôle
-        $quick_links = '';
-        if ( $is_admin || $is_teacher ) {
-            $teacher_page  = get_page_by_path( 'dashboard-enseignant' );
-            $courses_page  = get_page_by_path( 'cours-projets' );
-            $teacher_url   = $teacher_page ? get_permalink( $teacher_page ) : admin_url( 'admin.php?page=pl-teacher-dashboard' );
-            $courses_url   = $courses_page ? get_permalink( $courses_page ) : admin_url( 'admin.php?page=pl-course-workbench' );
-            $quick_links  .= "<a href=\"{$teacher_url}\" class=\"pl-btn pl-btn-sm\">&#128202; Dashboard enseignant</a> ";
-            $quick_links  .= "<a href=\"{$courses_url}\" class=\"pl-btn pl-btn-sm\">&#128218; Cours &amp; Projets</a> ";
-        }
-        if ( $is_student || $is_admin ) {
-            $student_page = get_page_by_path( 'dashboard-etudiant' );
-            $student_url  = $student_page ? get_permalink( $student_page ) : '#';
-            $quick_links .= "<a href=\"{$student_url}\" class=\"pl-btn pl-btn-sm\">&#129302; Jumeau num&eacute;rique</a> ";
-        }
+        $avatar_url = esc_url( get_avatar_url( $user->ID, [ 'size' => 120 ] ) );
+        $logout_url = esc_url( wp_logout_url( home_url() ) );
+        $profile_nonce = wp_create_nonce( 'pl_account_profile' );
+        $diff_nonce    = wp_create_nonce( 'pl_student_difficulties' );
 
-        return <<<HTML
+        ob_start();
+        ?>
         <div class="pl-account-page">
-            <div class="pl-account-card">
-                <div class="pl-account-avatar">&#128100;</div>
-                <h2>{$name}</h2>
-                <span class="pl-badge">{$role_label}</span>
-                <p class="pl-account-email">{$email}</p>
-                <div class="pl-account-links">
-                    {$quick_links}
+
+            <!-- ============ PROFIL CARD ============ -->
+            <div class="pl-account-profile-card pl-glass-card pl-animate-in">
+                <div class="pl-account-avatar-wrap">
+                    <img src="<?php echo $avatar_url; ?>" alt="Avatar" class="pl-account-avatar-img" />
                 </div>
-                <div class="pl-account-footer">
-                    <a href="{$logout_url}" class="pl-btn pl-btn-outline">D&eacute;connexion</a>
-                </div>
+                <h2 class="pl-account-name"><?php echo esc_html( $user->display_name ); ?></h2>
+                <span class="pl-account-role-badge"><?php echo $role_icon . ' ' . $role_label; ?></span>
+                <p class="pl-account-email-display"><?php echo esc_html( $user->user_email ); ?></p>
+                <a href="<?php echo $logout_url; ?>" class="pl-btn pl-btn-outline pl-btn-sm">D&eacute;connexion</a>
             </div>
-        </div>
-        HTML;
+
+            <!-- ============ MODIFIER MON PROFIL ============ -->
+            <div class="pl-account-section pl-glass-card pl-animate-in">
+                <h3>&#9998; Modifier mon profil</h3>
+                <div id="pl-profile-msg" class="pl-account-msg" style="display:none;"></div>
+                <form id="pl-profile-form" class="pl-account-form" autocomplete="off">
+                    <input type="hidden" name="_wpnonce" value="<?php echo $profile_nonce; ?>" />
+                    <div class="pl-form-group">
+                        <label for="pl-display-name">Nom d'affichage</label>
+                        <input type="text" id="pl-display-name" name="display_name"
+                               value="<?php echo esc_attr( $user->display_name ); ?>" required />
+                    </div>
+                    <div class="pl-form-group">
+                        <label for="pl-email">Courriel</label>
+                        <input type="email" id="pl-email" name="email"
+                               value="<?php echo esc_attr( $user->user_email ); ?>" required />
+                    </div>
+                    <div class="pl-form-group">
+                        <label for="pl-password">Nouveau mot de passe <small>(laisser vide pour ne pas changer)</small></label>
+                        <input type="password" id="pl-password" name="password" autocomplete="new-password" />
+                    </div>
+                    <button type="submit" class="pl-btn pl-btn-primary">Enregistrer</button>
+                </form>
+            </div>
+
+            <?php
+            // =================================================================
+            // ENSEIGNANT / ADMIN — Préférences + Stats + Liens rapides
+            // =================================================================
+            if ( $is_admin || $is_teacher ) :
+                // Stats rapides
+                $nb_courses  = wp_count_posts( 'pl_course' )->publish ?? 0;
+                $nb_projects = wp_count_posts( 'pl_project' )->publish ?? 0;
+                $nb_analyses = (int) get_user_meta( $user->ID, '_pl_analysis_count', true );
+
+                // Liens
+                $teacher_page  = get_page_by_path( 'dashboard-enseignant' );
+                $courses_page  = get_page_by_path( 'cours-projets' );
+                $workbench_page = get_page_by_path( 'workbench' );
+                $teacher_url   = $teacher_page  ? get_permalink( $teacher_page )  : admin_url( 'admin.php?page=pl-teacher-dashboard' );
+                $courses_url   = $courses_page  ? get_permalink( $courses_page )  : admin_url( 'admin.php?page=pl-course-workbench' );
+                $workbench_url = $workbench_page ? get_permalink( $workbench_page ) : admin_url( 'admin.php?page=pl-course-workbench' );
+            ?>
+
+                <!-- Stats rapides -->
+                <div class="pl-account-section pl-glass-card pl-animate-in">
+                    <h3>&#128202; Statistiques rapides</h3>
+                    <div class="pl-account-stats-grid">
+                        <div class="pl-stat-card">
+                            <span class="pl-stat-number"><?php echo (int) $nb_courses; ?></span>
+                            <span class="pl-stat-label">Cours</span>
+                        </div>
+                        <div class="pl-stat-card">
+                            <span class="pl-stat-number"><?php echo (int) $nb_analyses; ?></span>
+                            <span class="pl-stat-label">Analyses</span>
+                        </div>
+                        <div class="pl-stat-card">
+                            <span class="pl-stat-number"><?php echo (int) $nb_projects; ?></span>
+                            <span class="pl-stat-label">Projets</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Préférences -->
+                <div class="pl-account-section pl-glass-card pl-animate-in">
+                    <h3>&#9881; Mes pr&eacute;f&eacute;rences</h3>
+                    <?php
+                    $prefs = (array) get_user_meta( $user->ID, 'pl_teacher_prefs', true );
+                    $dark  = ! empty( $prefs['dark_mode'] );
+                    $notif = ! empty( $prefs['notifications'] );
+                    ?>
+                    <div class="pl-prefs-grid">
+                        <label class="pl-toggle-row">
+                            <span>&#127769; Th&egrave;me sombre</span>
+                            <input type="checkbox" class="pl-toggle-input" data-pref="dark_mode" <?php checked( $dark ); ?> />
+                            <span class="pl-toggle-slider"></span>
+                        </label>
+                        <label class="pl-toggle-row">
+                            <span>&#128276; Notifications</span>
+                            <input type="checkbox" class="pl-toggle-input" data-pref="notifications" <?php checked( $notif ); ?> />
+                            <span class="pl-toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Liens rapides -->
+                <div class="pl-account-section pl-glass-card pl-animate-in">
+                    <h3>&#128279; Liens rapides</h3>
+                    <div class="pl-quick-links">
+                        <a href="<?php echo esc_url( $teacher_url ); ?>" class="pl-quick-link-card">
+                            <span class="pl-ql-icon">&#128202;</span>
+                            <span>Dashboard</span>
+                        </a>
+                        <a href="<?php echo esc_url( $courses_url ); ?>" class="pl-quick-link-card">
+                            <span class="pl-ql-icon">&#128218;</span>
+                            <span>Cours</span>
+                        </a>
+                        <a href="<?php echo esc_url( $workbench_url ); ?>" class="pl-quick-link-card">
+                            <span class="pl-ql-icon">&#9999;</span>
+                            <span>Workbench</span>
+                        </a>
+                    </div>
+                </div>
+
+            <?php
+            // =================================================================
+            // ÉTUDIANT — Difficultés / troubles + Liens rapides
+            // =================================================================
+            elseif ( $is_student ) :
+                $raw_diff     = get_user_meta( $user->ID, 'pl_student_difficulties', true );
+                $difficulties = is_array( $raw_diff ) ? $raw_diff : ( is_string( $raw_diff ) && $raw_diff ? json_decode( $raw_diff, true ) : [] );
+                if ( ! is_array( $difficulties ) ) $difficulties = [];
+
+                $difficulty_options = [
+                    'tdah'              => 'TDAH / Difficult&eacute;s de concentration',
+                    'surcharge'         => 'Surcharge cognitive',
+                    'allophone'         => 'Langue seconde / Allophone',
+                    'faible_autonomie'  => 'Faible autonomie',
+                    'anxiete'           => 'Anxi&eacute;t&eacute; face aux consignes',
+                    'trouble_apprentissage' => "Trouble d'apprentissage",
+                    'autre'             => 'Autre',
+                ];
+
+                $other_text = '';
+                foreach ( $difficulties as $d ) {
+                    if ( is_array( $d ) && ( $d['key'] ?? '' ) === 'autre' ) {
+                        $other_text = $d['text'] ?? '';
+                    }
+                }
+                $checked_keys = array_map( fn( $d ) => is_array( $d ) ? ( $d['key'] ?? '' ) : $d, $difficulties );
+
+                $student_page = get_page_by_path( 'dashboard-etudiant' );
+                $courses_page = get_page_by_path( 'cours-projets' );
+                $student_url  = $student_page ? get_permalink( $student_page ) : '#';
+                $courses_url  = $courses_page ? get_permalink( $courses_page ) : '#';
+            ?>
+
+                <!-- Mes difficultés / troubles -->
+                <div class="pl-account-section pl-glass-card pl-animate-in">
+                    <h3>&#128203; Mes difficult&eacute;s / troubles</h3>
+                    <p class="pl-text-muted">Ces informations aident vos enseignants &agrave; adapter leur p&eacute;dagogie.</p>
+                    <div id="pl-diff-msg" class="pl-account-msg" style="display:none;"></div>
+                    <form id="pl-difficulties-form" class="pl-difficulties-list">
+                        <input type="hidden" name="_wpnonce" value="<?php echo $diff_nonce; ?>" />
+                        <?php foreach ( $difficulty_options as $key => $label ) : ?>
+                            <label class="pl-difficulty-checkbox">
+                                <input type="checkbox" name="difficulties[]" value="<?php echo esc_attr( $key ); ?>"
+                                    <?php checked( in_array( $key, $checked_keys, true ) ); ?> />
+                                <span class="pl-checkbox-custom"></span>
+                                <span><?php echo $label; ?></span>
+                            </label>
+                            <?php if ( $key === 'autre' ) : ?>
+                                <div class="pl-autre-field" style="<?php echo in_array( 'autre', $checked_keys, true ) ? '' : 'display:none;'; ?>">
+                                    <input type="text" name="autre_text" placeholder="Pr&eacute;cisez…"
+                                           value="<?php echo esc_attr( $other_text ); ?>" />
+                                </div>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                        <button type="submit" class="pl-btn pl-btn-primary">Sauvegarder</button>
+                    </form>
+                </div>
+
+                <!-- Liens rapides étudiant -->
+                <div class="pl-account-section pl-glass-card pl-animate-in">
+                    <h3>&#128279; Liens rapides</h3>
+                    <div class="pl-quick-links">
+                        <a href="<?php echo esc_url( $student_url ); ?>" class="pl-quick-link-card">
+                            <span class="pl-ql-icon">&#129302;</span>
+                            <span>Jumeau num&eacute;rique</span>
+                        </a>
+                        <a href="<?php echo esc_url( $courses_url ); ?>" class="pl-quick-link-card">
+                            <span class="pl-ql-icon">&#128218;</span>
+                            <span>Cours</span>
+                        </a>
+                    </div>
+                </div>
+
+            <?php endif; ?>
+
+        </div><!-- .pl-account-page -->
+
+        <script>
+        (function($){
+            // --- Profil form (tous les rôles) ---
+            $('#pl-profile-form').on('submit', function(e){
+                e.preventDefault();
+                var $form = $(this), $msg = $('#pl-profile-msg'), $btn = $form.find('button[type=submit]');
+                $btn.prop('disabled',true).text('Enregistrement…');
+                $msg.hide();
+                $.post(plFront.ajaxUrl, {
+                    action: 'pl_save_account_profile',
+                    _wpnonce: $form.find('[name=_wpnonce]').val(),
+                    display_name: $('#pl-display-name').val(),
+                    email: $('#pl-email').val(),
+                    password: $('#pl-password').val()
+                }, function(res){
+                    $msg.removeClass('pl-msg-ok pl-msg-err')
+                        .addClass(res.success ? 'pl-msg-ok' : 'pl-msg-err')
+                        .text(res.data?.message || (res.success ? 'Profil mis à jour.' : 'Erreur.'))
+                        .show();
+                    $btn.prop('disabled',false).text('Enregistrer');
+                }).fail(function(){
+                    $msg.addClass('pl-msg-err').text('Erreur réseau.').show();
+                    $btn.prop('disabled',false).text('Enregistrer');
+                });
+            });
+
+            // --- Difficultés étudiant ---
+            $('[name="difficulties[]"][value="autre"]').on('change', function(){
+                $('.pl-autre-field').toggle(this.checked);
+            });
+            $('#pl-difficulties-form').on('submit', function(e){
+                e.preventDefault();
+                var $form = $(this), $msg = $('#pl-diff-msg'), $btn = $form.find('button[type=submit]');
+                var checked = [];
+                $form.find('[name="difficulties[]"]:checked').each(function(){
+                    var key = $(this).val();
+                    if(key === 'autre'){
+                        checked.push({key:'autre', text: $form.find('[name=autre_text]').val()});
+                    } else {
+                        checked.push(key);
+                    }
+                });
+                $btn.prop('disabled',true).text('Enregistrement…');
+                $msg.hide();
+                $.post(plFront.ajaxUrl, {
+                    action: 'pl_save_student_difficulties',
+                    _wpnonce: $form.find('[name=_wpnonce]').val(),
+                    difficulties: JSON.stringify(checked)
+                }, function(res){
+                    $msg.removeClass('pl-msg-ok pl-msg-err')
+                        .addClass(res.success ? 'pl-msg-ok' : 'pl-msg-err')
+                        .text(res.data?.message || (res.success ? 'Sauvegardé !' : 'Erreur.'))
+                        .show();
+                    $btn.prop('disabled',false).text('Sauvegarder');
+                }).fail(function(){
+                    $msg.addClass('pl-msg-err').text('Erreur réseau.').show();
+                    $btn.prop('disabled',false).text('Sauvegarder');
+                });
+            });
+
+            // --- Préférences toggle (enseignant) ---
+            $('.pl-toggle-input').on('change', function(){
+                var pref = $(this).data('pref'), val = this.checked ? 1 : 0;
+                $.post(plFront.ajaxUrl, {
+                    action: 'pl_save_account_profile',
+                    _wpnonce: '<?php echo $profile_nonce; ?>',
+                    pref_key: pref,
+                    pref_val: val
+                });
+            });
+        })(jQuery);
+        </script>
+        <?php
+        return ob_get_clean();
+    }
+
+    // -------------------------------------------------------------------------
+    // AJAX — Sauvegarde difficultés étudiant
+    // -------------------------------------------------------------------------
+
+    public static function ajax_save_student_difficulties(): void {
+        check_ajax_referer( 'pl_student_difficulties' );
+
+        if ( ! is_user_logged_in() ) {
+            wp_send_json_error( [ 'message' => 'Non authentifié.' ] );
+        }
+
+        $user  = wp_get_current_user();
+        $roles = (array) $user->roles;
+
+        if ( ! in_array( 'pedagolens_student', $roles, true ) && ! in_array( 'administrator', $roles, true ) ) {
+            wp_send_json_error( [ 'message' => 'Accès refusé.' ] );
+        }
+
+        $raw = isset( $_POST['difficulties'] ) ? sanitize_text_field( wp_unslash( $_POST['difficulties'] ) ) : '[]';
+        $decoded = json_decode( $raw, true );
+
+        if ( ! is_array( $decoded ) ) {
+            wp_send_json_error( [ 'message' => 'Données invalides.' ] );
+        }
+
+        // Sanitize each entry
+        $clean = [];
+        foreach ( $decoded as $item ) {
+            if ( is_string( $item ) ) {
+                $clean[] = sanitize_key( $item );
+            } elseif ( is_array( $item ) && isset( $item['key'] ) ) {
+                $clean[] = [
+                    'key'  => sanitize_key( $item['key'] ),
+                    'text' => sanitize_text_field( $item['text'] ?? '' ),
+                ];
+            }
+        }
+
+        update_user_meta( $user->ID, 'pl_student_difficulties', $clean );
+
+        wp_send_json_success( [ 'message' => 'Difficultés enregistrées.' ] );
+    }
+
+    // -------------------------------------------------------------------------
+    // AJAX — Sauvegarde profil / préférences compte
+    // -------------------------------------------------------------------------
+
+    public static function ajax_save_account_profile(): void {
+        check_ajax_referer( 'pl_account_profile' );
+
+        if ( ! is_user_logged_in() ) {
+            wp_send_json_error( [ 'message' => 'Non authentifié.' ] );
+        }
+
+        $user = wp_get_current_user();
+
+        // Préférence toggle (enseignant)
+        if ( ! empty( $_POST['pref_key'] ) ) {
+            $prefs = (array) get_user_meta( $user->ID, 'pl_teacher_prefs', true );
+            $key   = sanitize_key( $_POST['pref_key'] );
+            $prefs[ $key ] = (int) $_POST['pref_val'] ? true : false;
+            update_user_meta( $user->ID, 'pl_teacher_prefs', $prefs );
+            wp_send_json_success( [ 'message' => 'Préférence enregistrée.' ] );
+        }
+
+        // Profil complet
+        $display_name = sanitize_text_field( wp_unslash( $_POST['display_name'] ?? '' ) );
+        $email        = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
+        $password     = $_POST['password'] ?? '';
+
+        if ( ! $display_name || ! $email ) {
+            wp_send_json_error( [ 'message' => 'Nom et courriel requis.' ] );
+        }
+
+        // Vérifier unicité email
+        if ( $email !== $user->user_email ) {
+            $existing = get_user_by( 'email', $email );
+            if ( $existing && $existing->ID !== $user->ID ) {
+                wp_send_json_error( [ 'message' => 'Ce courriel est déjà utilisé.' ] );
+            }
+        }
+
+        $update_data = [
+            'ID'           => $user->ID,
+            'display_name' => $display_name,
+            'user_email'   => $email,
+        ];
+
+        if ( ! empty( $password ) ) {
+            if ( strlen( $password ) < 6 ) {
+                wp_send_json_error( [ 'message' => 'Le mot de passe doit contenir au moins 6 caractères.' ] );
+            }
+            $update_data['user_pass'] = $password;
+        }
+
+        $result = wp_update_user( $update_data );
+
+        if ( is_wp_error( $result ) ) {
+            wp_send_json_error( [ 'message' => $result->get_error_message() ] );
+        }
+
+        wp_send_json_success( [ 'message' => 'Profil mis à jour.' ] );
     }
 
     // -------------------------------------------------------------------------

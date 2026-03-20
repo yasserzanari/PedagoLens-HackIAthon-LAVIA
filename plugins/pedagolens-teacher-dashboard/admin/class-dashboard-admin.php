@@ -224,16 +224,18 @@ class PedagoLens_Dashboard_Admin {
         }
         ?>
         <div class="pl-scores-block">
-            <h3><?php esc_html_e( 'Scores par profil', 'pedagolens-teacher-dashboard' ); ?></h3>
+            <h4>&#127919; Scores par profil</h4>
             <div class="pl-scores-bars">
                 <?php foreach ( $scores as $slug => $score ) :
-                    $score = max( 0, min( 100, (int) $score ) );
-                    $color = self::score_color( $score );
+                    $score      = max( 0, min( 100, (int) $score ) );
+                    $color_cls  = self::score_color_class( $score );
                     ?>
                     <div class="pl-score-row">
                         <span class="pl-score-label"><?php echo esc_html( $slug ); ?></span>
                         <div class="pl-score-bar-wrap">
-                            <div class="pl-score-bar" style="width:<?php echo $score; ?>%;background:<?php echo esc_attr( $color ); ?>;"></div>
+                            <div class="pl-score-bar <?php echo esc_attr( $color_cls ); ?>"
+                                 data-score="<?php echo $score; ?>"
+                                 style="width:0%;"></div>
                         </div>
                         <span class="pl-score-value"><?php echo $score; ?>/100</span>
                     </div>
@@ -247,18 +249,26 @@ class PedagoLens_Dashboard_Admin {
 
         <?php if ( ! empty( $recs ) ) : ?>
             <div class="pl-recs-block">
-                <h3><?php esc_html_e( 'Recommandations', 'pedagolens-teacher-dashboard' ); ?></h3>
-                <ol class="pl-recs-list">
-                    <?php foreach ( $recs as $rec ) : ?>
-                        <li class="pl-rec-item">
-                            <strong><?php echo esc_html( $rec['section'] ?? '' ); ?></strong>
-                            — <?php echo esc_html( $rec['text'] ?? '' ); ?>
-                            <?php if ( ! empty( $rec['profile_target'] ) ) : ?>
-                                <span class="pl-rec-profile"><?php echo esc_html( $rec['profile_target'] ); ?></span>
-                            <?php endif; ?>
-                        </li>
+                <h4>&#128161; Recommandations</h4>
+                <div class="pl-recs-list">
+                    <?php foreach ( $recs as $rec ) :
+                        $priority     = (int) ( $rec['priority'] ?? 99 );
+                        $priority_cls = $priority <= 2 ? 'high' : ( $priority <= 4 ? 'medium' : 'low' );
+                        ?>
+                        <div class="pl-rec-item">
+                            <span class="pl-rec-priority pl-rec-priority--<?php echo esc_attr( $priority_cls ); ?>">
+                                <?php echo $priority; ?>
+                            </span>
+                            <div class="pl-rec-content">
+                                <span class="pl-rec-section"><?php echo esc_html( $rec['section'] ?? '' ); ?></span>
+                                — <?php echo esc_html( $rec['text'] ?? '' ); ?>
+                                <?php if ( ! empty( $rec['profile_target'] ) ) : ?>
+                                    <span class="pl-rec-profile"><?php echo esc_html( $rec['profile_target'] ); ?></span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
                     <?php endforeach; ?>
-                </ol>
+                </div>
             </div>
         <?php endif; ?>
         <?php
@@ -373,5 +383,12 @@ class PedagoLens_Dashboard_Admin {
         if ( $score >= 60 ) return '#2271b1';
         if ( $score >= 40 ) return '#dba617';
         return '#d63638';
+    }
+
+    private static function score_color_class( int $score ): string {
+        if ( $score >= 80 ) return 'pl-score-green';
+        if ( $score >= 60 ) return 'pl-score-blue';
+        if ( $score >= 40 ) return 'pl-score-yellow';
+        return 'pl-score-red';
     }
 }

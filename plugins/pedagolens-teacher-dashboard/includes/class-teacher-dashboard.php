@@ -210,6 +210,21 @@ class PedagoLens_Teacher_Dashboard {
             return '<div class="pl-notice pl-notice-error"><p>Acc&egrave;s r&eacute;serv&eacute; aux enseignants.</p></div>';
         }
 
+        // Enqueue dashboard-specific assets on front-end
+        wp_enqueue_style(
+            'pl-dashboard-front',
+            PL_DASHBOARD_PLUGIN_URL . 'assets/css/dashboard-admin.css',
+            [],
+            PL_DASHBOARD_VERSION
+        );
+        wp_enqueue_script(
+            'pl-dashboard-front',
+            PL_DASHBOARD_PLUGIN_URL . 'assets/js/dashboard-admin.js',
+            [],
+            PL_DASHBOARD_VERSION,
+            true
+        );
+
         $courses = get_posts( [
             'post_type'      => 'pl_course',
             'posts_per_page' => -1,
@@ -220,31 +235,104 @@ class PedagoLens_Teacher_Dashboard {
 
         $mode = get_option( 'pl_ai_mode', 'mock' );
 
+        // --- Compute stats ---
+        $total_courses  = count( $courses );
+        $total_analyses = 0;
+        $total_projects = 0;
+        $all_scores     = [];
+
+        $courses_data = [];
+        foreach ( $courses as $course ) {
+            $course_type = get_post_meta( $course->ID, '_pl_course_type', true ) ?: 'magistral';
+            $projects    = self::get_projects( $course->ID );
+            $total_projects += count( $projects );
+
+            // Latest analysis
+            $analysis = self::get_latest_analysis_front( $course->ID );
+            if ( $analysis ) {
+                $total_analyses++;
+                foreach ( ( $analysis['profile_scores'] ?? [] ) as $s ) {
+                    $all_scores[] = (int) $s;
+                }
+            }
+
+            // Count all analyses for this course
+            $analysis_count = self::count_analyses( $course->ID );
+            $total_analyses = max( $total_analyses, $total_analyses ); // keep running total
+            if ( $analysis_count > 1 ) {
+                $total_analyses += ( $analysis_count - 1 );
+            }
+
+            $courses_data[] = [
+                'post'        => $course,
+                'type'        => $course_type,
+                'projects'    => $projects,
+                'analysis'    => $analysis,
+            ];
+        }
+
+        // Reset total_analyses to actual count
+        $total_analyses = self::count_all_analyses();
+        $avg_score = ! empty( $all_scores ) ? (int) round( array_sum( $all_scores ) / count( $all_scores ) ) : 0;
+
         ob_start();
         ?>
         <div class="pl-front-dashboard pl-teacher-dashboard">
-            <?php if ( $mode === 'mock' ) : ?>
-                <div class="pl-notice pl-notice-info">
-                    <p>Mode mock actif &mdash; les analyses utilisent des donn&eacute;es de d&eacute;monstration.</p>
-                </div>
-            <?php endif; ?>
 
+            <!-- ============ Header ============ -->
             <div class="pl-dashboard-header">
-                <h2>Mes cours</h2>
-                <a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=pl_course' ) ); ?>" class="pl-btn pl-btn-primary">
-                    + Nouveau cours
-                </a>
+                <h2 class="pl-dashboard-title">
+                    <span class="pl-icon">&#128202;</span>
+                    Tableau de bord enseignant
+                </h2>
+                <div class="pl-header-actions">
+                    <span class="pl-mode-badge pl-mode-badge--<?php echo esc_attr( $mode ); ?>">
+                        &#9679; <?php echo $mode === 'mock' ? 'Mode Mock' : 'AWS Bedrock'; ?>
+                    </span>
+                    <a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=pl_course' ) ); ?>" class="pl-btn-glow">
+                        + Nouveau cours
+                    </a>
+                </div>
             </div>
 
-            <?php if ( empty( $courses ) ) : ?>
+            <!-- ============ Stats Overview ============ -->
+            <div class="pl-stats-grid">
+                <div class="pl-stat-card pl-animate-in">
+                    <span class="pl-stat-icon">&#128218;</span>
+                    <div class="pl-stat-number" data-target="<?php echo (int) $total_courses; ?>">0</div>
+                    <div class="pl-stat-label">Cours</div>
+                </div>
+                <div class="pl-stat-card pl-animate-in">
+                    <span class="pl-stat-icon">&#128269;</span>
+                    <div class="pl-stat-number" data-target="<?php echo (int) $total_analyses; ?>">0</div>
+                    <div class="pl-stat-label">Analyses</div>
+                </div>
+                <div class="pl-stat-card pl-animate-in">
+                    <span class="pl-stat-icon">&#128196;</span>
+                    <div class="pl-stat-number" data-target="<?php echo (int) $total_projects; ?>">0</div>
+                    <div class="pl-stat-label">Projets</div>
+                </div>
+                <div class="pl-stat-card pl-animate-in">
+                    <span class="pl-stat-icon">&#127942;</span>
+                    <div class="pl-stat-number" data-target="<?php echo (int) $avg_score; ?>">0</div>
+                    <div class="pl-stat-label">Score moyen</div>
+                </div>
+            </div>
+
+            <!-- ============ Courses Grid ============ -->
+            <?php if ( empty( $courses_data ) ) : ?>
                 <div class="pl-notice pl-notice-warning">
-                    <p>Aucun cours trouv&eacute;. <a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=pl_course' ) ); ?>">Cr&eacute;er un cours</a></p>
+                    <p>Aucun cours trouv&eacute;. <a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=pl_course' ) ); ?>">Cr&eacute;er votre premier cours</a></p>
                 </div>
             <?php else : ?>
                 <div class="pl-courses-grid">
-                    <?php foreach ( $courses as $course ) :
-                        $course_type = get_post_meta( $course->ID, '_pl_course_type', true ) ?: 'magistral';
-                        $projects    = self::get_projects( $course->ID );
+                    <?php foreach ( $courses_data as $cd ) :
+                        $course      = $cd['post'];
+                        $course_type = $cd['type'];
+                        $projects    = $cd['projects'];
+                        $analysis    = $cd['analysis'];
+
+                        $workbench_page = get_page_by_path( 'workbench' );
                         ?>
                         <div class="pl-course-card pl-animate-in">
                             <div class="pl-course-header">
@@ -254,17 +342,47 @@ class PedagoLens_Teacher_Dashboard {
                                 </span>
                             </div>
                             <div class="pl-course-meta">
-                                <span><?php echo count( $projects ); ?> projet(s)</span>
+                                <span>&#128197; <?php echo esc_html( get_the_date( 'j M Y', $course ) ); ?></span>
+                                <span>&#128196; <?php echo count( $projects ); ?> projet(s)</span>
                             </div>
                             <div class="pl-course-actions">
-                                <button class="pl-btn pl-btn-primary pl-btn-sm pl-btn-analyze-front" data-course-id="<?php echo (int) $course->ID; ?>">
-                                    Analyser
+                                <button class="pl-btn-glow pl-btn-sm pl-btn-analyze-front"
+                                    data-course-id="<?php echo (int) $course->ID; ?>">
+                                    &#128269; Analyser
                                 </button>
-                                <button class="pl-btn pl-btn-sm pl-btn-create-project" data-course-id="<?php echo (int) $course->ID; ?>" data-course-title="<?php echo esc_attr( $course->post_title ); ?>">
+                                <button class="pl-btn-ghost pl-btn-sm pl-btn-create-project"
+                                    data-course-id="<?php echo (int) $course->ID; ?>"
+                                    data-course-title="<?php echo esc_attr( $course->post_title ); ?>">
                                     + Projet
                                 </button>
                             </div>
-                            <div id="pl-analysis-result-<?php echo (int) $course->ID; ?>" class="pl-analysis-front-result"></div>
+
+                            <!-- Analysis result zone -->
+                            <div id="pl-analysis-result-<?php echo (int) $course->ID; ?>" class="pl-analysis-front-result">
+                                <?php if ( $analysis ) : ?>
+                                    <?php PedagoLens_Dashboard_Admin::render_analysis_result( $analysis ); ?>
+                                <?php endif; ?>
+                            </div>
+
+                            <!-- Projects list -->
+                            <?php if ( ! empty( $projects ) ) : ?>
+                                <div class="pl-projects-section">
+                                    <h4>&#128196; Projets</h4>
+                                    <div class="pl-project-list">
+                                        <?php foreach ( $projects as $project ) :
+                                            $wb_url = $workbench_page
+                                                ? get_permalink( $workbench_page ) . '?project_id=' . $project['id']
+                                                : admin_url( 'admin.php?page=pl-course-workbench&project_id=' . $project['id'] );
+                                            ?>
+                                            <div class="pl-project-row">
+                                                <span class="pl-project-title"><?php echo esc_html( $project['title'] ); ?></span>
+                                                <span class="pl-badge pl-type-<?php echo esc_attr( $project['type'] ); ?>"><?php echo esc_html( $project['type'] ); ?></span>
+                                                <a href="<?php echo esc_url( $wb_url ); ?>" class="pl-project-link">Ouvrir &#8594;</a>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -272,6 +390,64 @@ class PedagoLens_Teacher_Dashboard {
         </div>
         <?php
         return ob_get_clean();
+    }
+
+    /**
+     * Retourne la dernière analyse d'un cours (pour le front).
+     */
+    private static function get_latest_analysis_front( int $course_id ): ?array {
+        $posts = get_posts( [
+            'post_type'      => 'pl_analysis',
+            'posts_per_page' => 1,
+            'orderby'        => 'date',
+            'order'          => 'DESC',
+            'meta_query'     => [ [
+                'key'   => '_pl_course_id',
+                'value' => $course_id,
+                'type'  => 'NUMERIC',
+            ] ],
+        ] );
+
+        if ( empty( $posts ) ) {
+            return null;
+        }
+
+        $id = $posts[0]->ID;
+        return [
+            'analysis_id'     => $id,
+            'profile_scores'  => self::get_profile_scores( $id ),
+            'recommendations' => self::get_recommendations( $id ),
+            'summary'         => get_post_meta( $id, '_pl_summary', true ),
+        ];
+    }
+
+    /**
+     * Compte les analyses d'un cours.
+     */
+    private static function count_analyses( int $course_id ): int {
+        $q = new WP_Query( [
+            'post_type'      => 'pl_analysis',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+            'meta_query'     => [ [
+                'key'   => '_pl_course_id',
+                'value' => $course_id,
+                'type'  => 'NUMERIC',
+            ] ],
+        ] );
+        return $q->found_posts;
+    }
+
+    /**
+     * Compte toutes les analyses.
+     */
+    private static function count_all_analyses(): int {
+        $q = new WP_Query( [
+            'post_type'      => 'pl_analysis',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+        ] );
+        return $q->found_posts;
     }
 
     /**
