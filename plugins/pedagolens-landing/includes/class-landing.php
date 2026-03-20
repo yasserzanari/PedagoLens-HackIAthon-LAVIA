@@ -111,54 +111,290 @@ class PedagoLens_Landing {
 
     public static function shortcode_landing( array $atts ): string {
         $s        = self::get_settings();
-        $color    = esc_attr( $s['primary_color'] ?? '#2271b1' );
-        $title    = esc_html( $s['hero_title']    ?? 'PédagoLens' );
-        $subtitle = esc_html( $s['hero_subtitle'] ?? "L'IA p&eacute;dagogique pour les enseignants du C&Eacute;GEP." );
-        $cta_text = esc_html( $s['cta_text']      ?? 'Demander une d&eacute;mo' );
-        $cta_url  = esc_url(  $s['cta_url']       ?? '#' );
+        $cta_url  = esc_url( $s['cta_url'] ?? '#demo' );
 
-        // Badges profils
+        // ── Badges profils ──
         $profiles_html = '';
+        $default_profiles = [
+            'TDAH',
+            'Surcharge cognitive',
+            'Langue seconde',
+            'Faible autonomie',
+            'Anxi&eacute;t&eacute; aux consignes',
+            "Trouble d'apprentissage",
+            'D&eacute;crochage potentiel',
+        ];
+
         if ( class_exists( 'PedagoLens_Profile_Manager' ) ) {
-            foreach ( PedagoLens_Profile_Manager::get_all( active_only: true ) as $p ) {
-                $name          = esc_html( $p['name'] ?? $p['slug'] );
-                $profiles_html .= "<span class=\"pl-hero-profile-badge\">{$name}</span>";
+            $db_profiles = PedagoLens_Profile_Manager::get_all( active_only: true );
+            if ( ! empty( $db_profiles ) ) {
+                $i = 0;
+                foreach ( $db_profiles as $p ) {
+                    $name           = esc_html( $p['name'] ?? $p['slug'] );
+                    $delay          = $i++;
+                    $profiles_html .= '<span class="pl-hero-profile-badge pl-animate-in pl-delay-' . esc_attr( $delay ) . '">' . $name . '</span>';
+                }
             }
         }
-        $profiles_section = $profiles_html
-            ? "<div class=\"pl-hero-profiles\"><span class=\"pl-hero-profiles-label\">7 profils d'apprenants :</span>{$profiles_html}</div>"
-            : '';
 
-        // Features
-        $features      = $s['features'] ?? self::default_features();
-        $features_html = '';
-        foreach ( $features as $f ) {
-            $icon   = esc_html( $f['icon']  ?? '' );
-            $ftitle = esc_html( $f['title'] ?? '' );
-            $desc   = esc_html( $f['desc']  ?? '' );
-            $features_html .= "<div class=\"pl-feature-card pl-animate-in\"><span class=\"pl-feature-icon\">{$icon}</span><h3>{$ftitle}</h3><p>{$desc}</p></div>";
+        if ( '' === $profiles_html ) {
+            $i = 0;
+            foreach ( $default_profiles as $pname ) {
+                $delay          = $i++;
+                $profiles_html .= '<span class="pl-hero-profile-badge pl-animate-in pl-delay-' . esc_attr( $delay ) . '">' . $pname . '</span>';
+            }
         }
 
-        return <<<HTML
-        <div class="pl-landing-page" style="--pl-primary:{$color};">
-            <section class="pl-hero">
-                <div class="pl-hero-inner">
-                    <div class="pl-hero-badge">&#10022; Propuls&eacute; par AWS Bedrock</div>
-                    <h1 class="pl-hero-title">{$title}</h1>
-                    <p class="pl-hero-subtitle">{$subtitle}</p>
-                    {$profiles_section}
-                    <div class="pl-hero-cta-group">
-                        <a href="{$cta_url}" class="pl-btn-cta">{$cta_text}</a>
-                        <span class="pl-hero-note">Mode d&eacute;mo disponible &mdash; aucun compte requis</span>
+        // ── Navigation links ──
+        $nav_links = self::get_nav_links();
+        $nav_html  = '';
+        foreach ( $nav_links as $label => $url ) {
+            $nav_html .= '<li><a href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a></li>';
+        }
+
+        // ── Features ──
+        $features = [
+            [ 'icon' => '&#128269;', 'title' => 'Analyse p&eacute;dagogique IA',    'desc' => 'Analysez vos cours selon 7 profils d&rsquo;apprenants en quelques secondes gr&acirc;ce &agrave; AWS Bedrock.' ],
+            [ 'icon' => '&#9999;',   'title' => 'Atelier de cours (Workbench)',       'desc' => 'Recevez des suggestions concr&egrave;tes et appliquez-les en un clic pour am&eacute;liorer l&rsquo;accessibilit&eacute;.' ],
+            [ 'icon' => '&#129302;', 'title' => 'Jumeau num&eacute;rique &eacute;tudiant', 'desc' => 'Simulez l&rsquo;exp&eacute;rience d&rsquo;un &eacute;tudiant avec des garde-fous p&eacute;dagogiques int&eacute;gr&eacute;s.' ],
+            [ 'icon' => '&#128202;', 'title' => 'Tableau de bord enseignant',        'desc' => 'Visualisez les scores par profil, suivez l&rsquo;&eacute;volution et priorisez vos am&eacute;liorations.' ],
+        ];
+
+        $features_html = '';
+        $fi = 0;
+        foreach ( $features as $f ) {
+            $delay          = $fi++;
+            $features_html .= '<div class="pl-feature-card pl-animate-in pl-delay-' . esc_attr( $delay ) . '">'
+                . '<span class="pl-feature-icon">' . $f['icon'] . '</span>'
+                . '<h3>' . $f['title'] . '</h3>'
+                . '<p>' . $f['desc'] . '</p>'
+                . '</div>';
+        }
+
+        // ── Steps ──
+        $steps = [
+            [ 'title' => 'Analyse du cours par profils',          'desc' => 'L&rsquo;IA examine votre contenu &agrave; travers le prisme de chaque profil d&rsquo;apprenant.' ],
+            [ 'title' => 'Score /100 par profil',                 'desc' => 'Chaque profil re&ccedil;oit un score d&rsquo;accessibilit&eacute; clair et actionnable.' ],
+            [ 'title' => 'Propositions d&rsquo;am&eacute;lioration', 'desc' => 'Des suggestions concr&egrave;tes, contextualis&eacute;es et applicables en un clic.' ],
+            [ 'title' => 'Mesure de l&rsquo;impact',              'desc' => 'Visualisez l&rsquo;effet de chaque modification sur les scores avant de l&rsquo;appliquer.' ],
+            [ 'title' => 'Optimisation continue',                 'desc' => 'It&eacute;rez jusqu&rsquo;&agrave; atteindre l&rsquo;accessibilit&eacute; optimale pour tous les profils.' ],
+        ];
+
+        $steps_html = '';
+        $si = 0;
+        foreach ( $steps as $step ) {
+            $si++;
+            $steps_html .= '<div class="pl-step pl-animate-in">'
+                . '<div class="pl-step-number">' . esc_html( $si ) . '</div>'
+                . '<div class="pl-step-content">'
+                . '<h3>' . $step['title'] . '</h3>'
+                . '<p>' . $step['desc'] . '</p>'
+                . '</div></div>';
+        }
+
+        // ── Score demo bars ──
+        $demo_scores = [
+            'TDAH'                     => 42,
+            'Surcharge cognitive'      => 58,
+            'Langue seconde'           => 35,
+            'Faible autonomie'         => 67,
+            'Anxi&eacute;t&eacute;'   => 51,
+            'Trouble d&rsquo;apprentissage' => 44,
+            'D&eacute;crochage'        => 73,
+        ];
+
+        $scores_html = '';
+        foreach ( $demo_scores as $label => $score ) {
+            $scores_html .= '<div class="pl-score-row">'
+                . '<span class="pl-score-label">' . $label . '</span>'
+                . '<div class="pl-score-bar-wrap">'
+                . '<div class="pl-score-bar" style="--score-width:' . esc_attr( $score ) . '%;"></div>'
+                . '</div>'
+                . '<span class="pl-score-value">' . esc_html( $score ) . '/100</span>'
+                . '</div>';
+        }
+
+        // ── Footer nav ──
+        $footer_nav_html = '';
+        foreach ( $nav_links as $label => $url ) {
+            $footer_nav_html .= '<li><a href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a></li>';
+        }
+
+        // ── BUILD HTML ──
+        ob_start();
+        ?>
+<div class="pl-landing-page">
+
+    <!-- ========== NAV ========== -->
+    <nav class="pl-landing-nav" role="navigation" aria-label="Navigation principale">
+        <div class="pl-landing-nav-inner">
+            <a href="#pl-hero" class="pl-nav-logo">P&eacute;dagoLens</a>
+            <ul class="pl-nav-links">
+                <?php echo $nav_html; ?>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- ========== HERO ========== -->
+    <section class="pl-hero" id="pl-hero">
+        <div class="pl-hero-inner">
+            <div class="pl-hero-badge">&#10024; Propuls&eacute; par AWS Bedrock</div>
+            <h1 class="pl-hero-title">P&eacute;dagoLens</h1>
+            <p class="pl-hero-subtitle">L&rsquo;IA p&eacute;dagogique qui transforme vos cours pour chaque profil d&rsquo;&eacute;tudiant</p>
+            <div class="pl-hero-profiles">
+                <span class="pl-hero-profiles-label">7 profils d&rsquo;apprenants analys&eacute;s :</span>
+                <div class="pl-hero-profiles-badges">
+                    <?php echo $profiles_html; ?>
+                </div>
+            </div>
+            <div class="pl-hero-cta-group">
+                <div class="pl-hero-cta-buttons">
+                    <a href="<?php echo $cta_url; ?>" class="pl-btn-cta">&#127891; D&eacute;couvrir la d&eacute;mo</a>
+                    <a href="#pl-how" class="pl-btn-cta-outline">En savoir plus &#8595;</a>
+                </div>
+                <span class="pl-hero-note">Mode d&eacute;mo disponible &mdash; aucun compte requis</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== PROBLEM ========== -->
+    <section class="pl-problem" id="pl-problem">
+        <div class="pl-section-inner">
+            <div class="pl-section-header pl-animate-in">
+                <span class="pl-section-tag">&#9888;&#65039; Le probl&egrave;me</span>
+                <h2 class="pl-section-title">Un cours, des dizaines de r&eacute;alit&eacute;s</h2>
+                <p class="pl-section-subtitle">Les cours sont con&ccedil;us pour un &eacute;tudiant moyen. Pourtant, les classes sont compos&eacute;es de profils tr&egrave;s vari&eacute;s.</p>
+            </div>
+            <div class="pl-problem-content">
+                <div class="pl-problem-text pl-animate-in">
+                    <p><strong>TDAH, surcharge cognitive, langue seconde, faible autonomie, anxi&eacute;t&eacute; face aux consignes, troubles d&rsquo;apprentissage&hellip;</strong></p>
+                    <p>Chaque profil a des besoins sp&eacute;cifiques que les enseignants n&rsquo;ont ni le temps ni les outils pour adresser individuellement. R&eacute;sultat : des &eacute;tudiants qui d&eacute;crochent, non pas par manque de capacit&eacute;, mais par manque d&rsquo;adaptation du contenu.</p>
+                    <p>P&eacute;dagoLens analyse automatiquement vos cours et propose des am&eacute;liorations cibl&eacute;es pour chaque profil.</p>
+                </div>
+                <div class="pl-problem-stats pl-animate-in">
+                    <div class="pl-stat-card">
+                        <span class="pl-stat-number" data-count-to="7">0</span>
+                        <span class="pl-stat-label">Profils analys&eacute;s</span>
+                    </div>
+                    <div class="pl-stat-card">
+                        <span class="pl-stat-number" data-count-to="100" data-count-suffix="/100">0</span>
+                        <span class="pl-stat-label">Score par profil</span>
+                    </div>
+                    <div class="pl-stat-card">
+                        <span class="pl-stat-number" data-count-to="30" data-count-suffix="s">0</span>
+                        <span class="pl-stat-label">Temps d&rsquo;analyse</span>
+                    </div>
+                    <div class="pl-stat-card">
+                        <span class="pl-stat-number" data-count-to="1">0</span>
+                        <span class="pl-stat-label">Clic pour am&eacute;liorer</span>
                     </div>
                 </div>
-            </section>
-            <section class="pl-features">
-                <div class="pl-section-header-text"><h2>Tout ce dont vous avez besoin</h2></div>
-                <div class="pl-features-grid">{$features_html}</div>
-            </section>
+            </div>
         </div>
-        HTML;
+    </section>
+
+    <!-- ========== HOW IT WORKS ========== -->
+    <section class="pl-how" id="pl-how">
+        <div class="pl-section-inner">
+            <div class="pl-section-header pl-animate-in">
+                <span class="pl-section-tag">&#9881;&#65039; Comment &ccedil;a marche</span>
+                <h2 class="pl-section-title">5 &eacute;tapes vers l&rsquo;accessibilit&eacute;</h2>
+                <p class="pl-section-subtitle">De l&rsquo;analyse &agrave; l&rsquo;optimisation, un processus fluide et guid&eacute; par l&rsquo;IA.</p>
+            </div>
+            <div class="pl-steps">
+                <?php echo $steps_html; ?>
+            </div>
+            <div class="pl-score-bars pl-animate-in" style="margin-top:48px;">
+                <h3 style="text-align:center;color:#fff;margin-bottom:24px;">Exemple de scores par profil</h3>
+                <?php echo $scores_html; ?>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== FEATURES ========== -->
+    <section class="pl-features" id="pl-features">
+        <div class="pl-section-inner">
+            <div class="pl-section-header pl-animate-in">
+                <span class="pl-section-tag">&#128640; Fonctionnalit&eacute;s</span>
+                <h2 class="pl-section-title">Tout ce dont vous avez besoin</h2>
+                <p class="pl-section-subtitle">Une suite compl&egrave;te d&rsquo;outils pour transformer votre p&eacute;dagogie.</p>
+            </div>
+            <div class="pl-features-grid">
+                <?php echo $features_html; ?>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== PHASE 2 ========== -->
+    <section class="pl-phase2" id="pl-phase2">
+        <div class="pl-section-inner">
+            <div class="pl-section-header pl-animate-in">
+                <span class="pl-phase2-tag">&#128302; Phase 2</span>
+                <h2 class="pl-section-title">Accompagnement &eacute;tudiant</h2>
+                <p class="pl-section-subtitle">L&rsquo;&eacute;tape suivante : un compagnon IA qui guide chaque &eacute;tudiant sans faire le travail &agrave; sa place.</p>
+            </div>
+            <div class="pl-phase2-grid">
+                <div class="pl-phase2-card pl-animate-in">
+                    <span class="pl-phase2-icon">&#129302;</span>
+                    <h3>Jumeau num&eacute;rique &eacute;tudiant</h3>
+                    <p>Un assistant IA personnalis&eacute; qui conna&icirc;t le profil de l&rsquo;&eacute;tudiant et l&rsquo;accompagne dans sa compr&eacute;hension du cours &mdash; avec des garde-fous p&eacute;dagogiques pour guider sans donner les r&eacute;ponses.</p>
+                </div>
+                <div class="pl-phase2-card pl-animate-in pl-delay-1">
+                    <span class="pl-phase2-icon">&#128202;</span>
+                    <h3>Tableau de bord des incompr&eacute;hensions</h3>
+                    <p>Les enseignants acc&egrave;dent &agrave; un tableau de bord agr&eacute;g&eacute; des questions fr&eacute;quentes et des zones d&rsquo;incompr&eacute;hension, permettant d&rsquo;ajuster le cours en temps r&eacute;el.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="pl-landing-footer" id="pl-footer">
+        <div class="pl-footer-inner">
+            <span class="pl-footer-logo">P&eacute;dagoLens</span>
+            <ul class="pl-footer-nav">
+                <?php echo $footer_nav_html; ?>
+            </ul>
+            <p class="pl-footer-copy">&copy; 2026 P&eacute;dagoLens &mdash; Propuls&eacute; par AWS Bedrock</p>
+        </div>
+    </footer>
+
+</div><!-- .pl-landing-page -->
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Navigation links used in header and footer.
+     */
+    private static function get_nav_links(): array {
+        $home_url      = esc_url( home_url( '/' ) );
+        $dashboard_url = esc_url( self::page_url( 'dashboard-enseignant', 'pl-teacher-dashboard' ) );
+        $courses_url   = esc_url( self::page_url( 'cours-projets', 'pl-course-workbench' ) );
+        $twin_url      = esc_url( self::page_url( 'dashboard-etudiant', '' ) );
+        $account_url   = esc_url( self::page_url( 'compte', '' ) );
+
+        return [
+            'Accueil'   => $home_url,
+            'Dashboard' => $dashboard_url,
+            'Cours'     => $courses_url,
+            'Jumeau'    => $twin_url,
+            'Compte'    => $account_url,
+        ];
+    }
+
+    /**
+     * Resolve a front page URL by slug, fallback to admin page.
+     */
+    private static function page_url( string $slug, string $admin_page ): string {
+        $page = get_page_by_path( $slug );
+        if ( $page ) {
+            return get_permalink( $page );
+        }
+        if ( $admin_page ) {
+            return admin_url( 'admin.php?page=' . $admin_page );
+        }
+        return home_url( '/' );
     }
 
     // -------------------------------------------------------------------------
