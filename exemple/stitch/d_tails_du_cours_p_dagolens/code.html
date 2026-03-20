@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PédagoLens AI - Détail du Cours</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-tint": "#4059aa",
+              "on-background": "#191c1e",
+              "outline": "#757682",
+              "surface-bright": "#f7f9fb",
+              "inverse-surface": "#2d3133",
+              "secondary-fixed-dim": "#d2bbff",
+              "secondary": "#712ae2",
+              "primary": "#00236f",
+              "secondary-fixed": "#eaddff",
+              "inverse-on-surface": "#eff1f3",
+              "surface-variant": "#e0e3e5",
+              "on-secondary-fixed": "#25005a",
+              "on-primary-fixed-variant": "#264191",
+              "primary-container": "#1e3a8a",
+              "surface-container-highest": "#e0e3e5",
+              "on-primary-container": "#90a8ff",
+              "on-primary-fixed": "#00164e",
+              "on-error-container": "#93000a",
+              "on-surface-variant": "#444651",
+              "on-surface": "#191c1e",
+              "on-error": "#ffffff",
+              "on-tertiary-fixed": "#001f26",
+              "surface-container-low": "#f2f4f6",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary-container": "#1dbcda",
+              "tertiary-fixed": "#acedff",
+              "outline-variant": "#c5c5d3",
+              "primary-fixed": "#dce1ff",
+              "background": "#f7f9fb",
+              "on-secondary-container": "#fffbff",
+              "surface-dim": "#d8dadc",
+              "surface-container-high": "#e6e8ea",
+              "surface": "#f7f9fb",
+              "primary-fixed-dim": "#b6c4ff",
+              "on-secondary": "#ffffff",
+              "inverse-primary": "#b6c4ff",
+              "on-primary": "#ffffff",
+              "on-secondary-fixed-variant": "#5a00c6",
+              "error": "#ba1a1a",
+              "secondary-container": "#8a4cfc",
+              "error-container": "#ffdad6",
+              "tertiary-fixed-dim": "#4cd7f6",
+              "tertiary": "#002f38",
+              "tertiary-container": "#004754",
+              "on-tertiary": "#ffffff",
+              "on-tertiary-fixed-variant": "#004e5c",
+              "surface-container": "#eceef0"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .text-display { font-family: 'Manrope'; letter-spacing: -0.02em; }
+        .bg-gradient-primary { background: linear-gradient(135deg, #00236f 0%, #1e3a8a 100%); }
+        .glass-effect { backdrop-filter: blur(12px); background-color: rgba(255, 255, 255, 0.8); }
+        .ia-glow { position: relative; }
+        .ia-glow::after { content: ''; position: absolute; top: 0; right: 0; width: 40px; height: 40px; background: radial-gradient(circle, rgba(113, 42, 226, 0.15) 0%, transparent 70%); border-radius: 0 1.5rem 0 0; }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface">
+<!-- Sidebar Navigation -->
+<aside class="fixed left-0 top-0 h-full flex flex-col p-6 bg-surface-container-lowest w-64 shadow-[0_10px_40px_rgba(25,28,30,0.06)] z-50">
+<div class="mb-10">
+<h1 class="text-lg font-bold text-primary">PédagoLens AI</h1>
+<p class="text-xs text-on-surface-variant font-medium">Portail Éducatif</p>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-surface-container-low hover:translate-x-1 transition-transform rounded-lg" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-medium text-sm">Tableau de bord</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-surface-container-low text-primary font-bold rounded-lg translate-x-1" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-medium text-sm">Analyses IA</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-surface-container-low hover:translate-x-1 transition-transform rounded-lg" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-medium text-sm">Élèves</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-surface-container-low hover:translate-x-1 transition-transform rounded-lg" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="font-medium text-sm">Rapports</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-surface-container-low hover:translate-x-1 transition-transform rounded-lg" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-medium text-sm">Paramètres</span>
+</a>
+</nav>
+<div class="mt-auto space-y-2 pt-6 border-t border-outline-variant/15">
+<button class="w-full flex items-center justify-center gap-2 bg-gradient-primary text-white py-3 rounded-xl font-bold text-sm shadow-sm hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined">add</span>
+                Nouvelle Analyse
+            </button>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-surface-container-low rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="text-sm">Aide</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-surface-container-low rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="text-sm">Déconnexion</span>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="ml-64 min-h-screen">
+<!-- Header Section -->
+<header class="bg-surface-container-low px-12 py-8 flex justify-between items-end">
+<div class="space-y-4">
+<nav class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-2">
+<span>Cours</span>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+<span>Analyses IA</span>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+<span class="text-primary font-semibold">Détails</span>
+</nav>
+<div>
+<div class="flex items-center gap-3 mb-2">
+<span class="px-3 py-1 bg-tertiary-fixed/20 text-on-tertiary-fixed-variant text-[10px] font-bold uppercase tracking-wider rounded-full">Session Automne 2024</span>
+<span class="flex items-center gap-1 text-[10px] font-bold text-secondary uppercase tracking-wider">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                            Analysé
+                        </span>
+</div>
+<h2 class="text-display text-4xl font-extrabold text-primary mb-1">Histoire de l'Art Moderne</h2>
+<p class="text-on-surface-variant font-medium">Enseignant : <span class="text-on-surface">Dr. Claire Valmont</span></p>
+</div>
+</div>
+<div class="flex gap-4">
+<button class="flex items-center gap-2 px-6 py-3 border border-primary text-primary font-bold rounded-xl hover:bg-primary/5 transition-colors">
+<span class="material-symbols-outlined text-xl">edit</span>
+                    Éditer le contenu
+                </button>
+<button class="flex items-center gap-2 px-6 py-3 bg-gradient-primary text-white font-bold rounded-xl shadow-lg hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-xl">refresh</span>
+                    Relancer l'analyse
+                </button>
+</div>
+</header>
+<!-- Content Area -->
+<div class="px-12 py-10">
+<!-- Summary Bento Grid -->
+<div class="grid grid-cols-4 gap-6 mb-12">
+<!-- Score Moyen -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0_10px_40px_rgba(25,28,30,0.06)] ia-glow border border-white">
+<p class="text-label-sm font-bold text-on-surface-variant uppercase tracking-widest mb-4">Score Moyen</p>
+<div class="flex items-baseline gap-2">
+<span class="text-display text-5xl font-black text-primary">78</span>
+<span class="text-on-surface-variant font-bold text-xl">/100</span>
+</div>
+<div class="mt-4 flex items-center gap-1 text-on-tertiary-container font-semibold text-xs">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span>+12% vs session préc.</span>
+</div>
+</div>
+<!-- Profils à risque -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0_10px_40px_rgba(25,28,30,0.06)] border border-white">
+<p class="text-label-sm font-bold text-on-surface-variant uppercase tracking-widest mb-4">Profils à risque</p>
+<div class="flex items-baseline gap-2">
+<span class="text-display text-5xl font-black text-error">04</span>
+<span class="text-on-surface-variant font-bold text-sm">étudiants</span>
+</div>
+<div class="mt-4 flex -space-x-2">
+<img alt="Student" class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="Photo de profil étudiant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3jKjQa5C9OOBeIw3fCFNs_6fqAQNN548BQOtdwEAmGOFbLYyIaW5w1ZbdIKuS1NeCqlc7GSCtCGtbJqw8AC2pdttAY7vF4dUHFbyRuDjUUVlvdQKJaWQjKO4_RR9COQ1j4Ni2PtnmOjaLzzKNcu_18s3zSVrKStc-hd9ABg1-eLCBObd13inyNXa1Et0OhL7UpH8SjKByE3gjpt2_Y7Bf2GHIpuhPgxI8G4TrTP7hToQ4l0ZSrZ5mtdV07Ar0D2HXCjUvwxFtGm-x"/>
+<img alt="Student" class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="Photo de profil étudiant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQW-yzBBcjzI914QtkoKjpwwD3opdASc4W2nA2kkNq2zf9LT1ab3x5HGx6V3MtZZUkmNP67J91go5FWw1svr96RoWq65h7jGFTKuDpu3IkoaL2dfzC4HE1Ze8Mn39WaRit75uI70yueTlO_mJ3ZM8SbQWncX59LBzxkkz-ykDjSJF-1rW9NqghOmB-_JchMnum2TUW8oy6bizy6rFZ2xicKG6tCL6ydcFYvx563ZFE4pYrfK6dhvQ9jM1NTTseDVuU0iv5RsBss1J3"/>
+<div class="w-8 h-8 rounded-full border-2 border-white bg-surface-container-high flex items-center justify-center text-[10px] font-bold">+2</div>
+</div>
+</div>
+<!-- Notions floues -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0_10px_40px_rgba(25,28,30,0.06)] ia-glow border border-white">
+<p class="text-label-sm font-bold text-on-surface-variant uppercase tracking-widest mb-4">Notions floues</p>
+<div class="flex items-baseline gap-2">
+<span class="text-display text-5xl font-black text-secondary">07</span>
+<span class="text-on-surface-variant font-bold text-sm">concepts</span>
+</div>
+<div class="mt-4 flex gap-2">
+<span class="px-2 py-1 bg-secondary-fixed/30 text-secondary text-[10px] font-bold rounded-md">Cubisme</span>
+<span class="px-2 py-1 bg-secondary-fixed/30 text-secondary text-[10px] font-bold rounded-md">Perspectivisme</span>
+</div>
+</div>
+<!-- Sections critiques -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0_10px_40px_rgba(25,28,30,0.06)] border border-white">
+<p class="text-label-sm font-bold text-on-surface-variant uppercase tracking-widest mb-4">Sections critiques</p>
+<div class="flex items-baseline gap-2">
+<span class="text-display text-5xl font-black text-tertiary">02</span>
+<span class="text-on-surface-variant font-bold text-sm">chapitres</span>
+</div>
+<div class="mt-4 text-xs font-semibold text-on-surface-variant">
+                        Focus requis sur le Chapitre 4
+                    </div>
+</div>
+</div>
+<!-- Tabs Navigation -->
+<div class="flex items-center gap-10 border-b border-outline-variant/20 mb-10 overflow-x-auto">
+<button class="pb-4 text-primary font-bold border-b-2 border-primary text-sm whitespace-nowrap">Vue générale</button>
+<button class="pb-4 text-on-surface-variant hover:text-primary transition-colors text-sm whitespace-nowrap">Analyses détaillées</button>
+<button class="pb-4 text-on-surface-variant hover:text-primary transition-colors text-sm whitespace-nowrap">Interactions étudiantes</button>
+<button class="pb-4 text-on-surface-variant hover:text-primary transition-colors text-sm whitespace-nowrap">Recommandations</button>
+<button class="pb-4 text-on-surface-variant hover:text-primary transition-colors text-sm whitespace-nowrap">Historique des versions</button>
+</div>
+<!-- Deep Analysis Grid -->
+<div class="grid grid-cols-12 gap-8">
+<!-- Section Heatmap -->
+<div class="col-span-8 bg-surface-container-lowest p-8 rounded-2xl shadow-[0_10px_40px_rgba(25,28,30,0.06)] border border-white">
+<div class="flex justify-between items-center mb-8">
+<h3 class="text-xl font-bold text-primary">Engagement par Section du Cours</h3>
+<div class="flex gap-2">
+<span class="flex items-center gap-1 text-[10px] font-bold uppercase text-on-surface-variant">
+<span class="w-3 h-3 rounded-sm bg-primary/20"></span> Faible
+                            </span>
+<span class="flex items-center gap-1 text-[10px] font-bold uppercase text-on-surface-variant">
+<span class="w-3 h-3 rounded-sm bg-primary"></span> Élevé
+                            </span>
+</div>
+</div>
+<div class="space-y-6">
+<!-- Heatmap Row -->
+<div class="flex items-center gap-4">
+<span class="w-32 text-xs font-bold text-on-surface-variant">Introduction</span>
+<div class="flex-1 h-8 flex gap-1">
+<div class="flex-1 bg-primary rounded-sm opacity-90"></div>
+<div class="flex-1 bg-primary rounded-sm opacity-100"></div>
+<div class="flex-1 bg-primary rounded-sm opacity-80"></div>
+<div class="flex-1 bg-primary rounded-sm opacity-90"></div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="w-32 text-xs font-bold text-on-surface-variant">L'Impressionnisme</span>
+<div class="flex-1 h-8 flex gap-1">
+<div class="flex-1 bg-primary rounded-sm opacity-40"></div>
+<div class="flex-1 bg-primary rounded-sm opacity-60"></div>
+<div class="flex-1 bg-primary rounded-sm opacity-30"></div>
+<div class="flex-1 bg-primary rounded-sm opacity-20"></div>
+</div>
+<span class="material-symbols-outlined text-error text-lg" title="Point de chute">warning</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="w-32 text-xs font-bold text-on-surface-variant">Post-Impressionnisme</span>
+<div class="flex-1 h-8 flex gap-1">
+<div class="flex-1 bg-primary rounded-sm opacity-70"></div>
+<div class="flex-1 bg-primary rounded-sm opacity-80"></div>
+<div class="flex-1 bg-primary rounded-sm opacity-90"></div>
+<div class="flex-1 bg-primary rounded-sm opacity-70"></div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="w-32 text-xs font-bold text-on-surface-variant">Cubisme &amp; Forme</span>
+<div class="flex-1 h-8 flex gap-1">
+<div class="flex-1 bg-primary rounded-sm opacity-20"></div>
+<div class="flex-1 bg-primary rounded-sm opacity-10"></div>
+<div class="flex-1 bg-primary rounded-sm opacity-20"></div>
+<div class="flex-1 bg-primary rounded-sm opacity-30"></div>
+</div>
+<span class="material-symbols-outlined text-error text-lg" title="Point de chute">warning</span>
+</div>
+</div>
+<div class="mt-8 pt-8 border-t border-outline-variant/10">
+<p class="text-sm font-medium text-on-surface-variant italic">
+                            "L'IA suggère une baisse de l'attention significative lors de la transition vers le chapitre sur le Cubisme. Une activité interactive pourrait être insérée à 15mn du début."
+                        </p>
+</div>
+</div>
+<!-- Top misunderstood topics -->
+<div class="col-span-4 flex flex-col gap-6">
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0_10px_40px_rgba(25,28,30,0.06)] border border-white flex-1 ia-glow">
+<h3 class="text-sm font-extrabold text-primary uppercase tracking-wider mb-6">Concepts les plus mal compris</h3>
+<div class="space-y-6">
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center text-xs font-bold">
+<span>Théorie de la Couleur (Chevreul)</span>
+<span class="text-error">64% d'échec</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-error h-full w-[64%]"></div>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center text-xs font-bold">
+<span>L'espace pictural cezannien</span>
+<span class="text-secondary">42% d'échec</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full w-[42%]"></div>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center text-xs font-bold">
+<span>Manifeste du Futurisme</span>
+<span class="text-secondary">38% d'échec</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full w-[38%]"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0_10px_40px_rgba(25,28,30,0.06)] border border-white flex-1">
+<h3 class="text-sm font-extrabold text-primary uppercase tracking-wider mb-6">Questions fréquentes (IA)</h3>
+<ul class="space-y-4">
+<li class="flex gap-3">
+<span class="material-symbols-outlined text-primary-container shrink-0">chat_bubble</span>
+<p class="text-xs font-medium leading-relaxed">"Quelle est la différence concrète entre impressionnisme et réalisme ?"</p>
+</li>
+<li class="flex gap-3">
+<span class="material-symbols-outlined text-primary-container shrink-0">chat_bubble</span>
+<p class="text-xs font-medium leading-relaxed">"Pourquoi Picasso a-t-il abandonné la perspective ?"</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- Footer Section -->
+<footer class="w-full py-12 px-8 mt-20 bg-primary rounded-t-[2rem] text-white">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="text-center md:text-left">
+<h2 class="text-xl font-black mb-2">PédagoLens AI</h2>
+<p class="text-xs opacity-80">© 2024 PédagoLens AI. L'excellence éditoriale au service de l'éducation.</p>
+</div>
+<div class="flex gap-8 text-xs font-medium">
+<a class="text-slate-300 hover:text-white transition-colors" href="#">Confidentialité</a>
+<a class="text-slate-300 hover:text-white transition-colors" href="#">Conditions d'utilisation</a>
+<a class="text-slate-300 hover:text-white transition-colors" href="#">Support Technique</a>
+<a class="text-slate-300 hover:text-white transition-colors underline" href="#">Blog Éducatif</a>
+</div>
+</div>
+</footer>
+</div>
+</main>
+</body></html>

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-tint": "#4059aa",
+                        "on-background": "#191c1e",
+                        "outline": "#757682",
+                        "surface-bright": "#f7f9fb",
+                        "inverse-surface": "#2d3133",
+                        "secondary-fixed-dim": "#d2bbff",
+                        "secondary": "#712ae2",
+                        "primary": "#00236f",
+                        "secondary-fixed": "#eaddff",
+                        "inverse-on-surface": "#eff1f3",
+                        "surface-variant": "#e0e3e5",
+                        "on-secondary-fixed": "#25005a",
+                        "on-primary-fixed-variant": "#264191",
+                        "primary-container": "#1e3a8a",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-primary-container": "#90a8ff",
+                        "on-primary-fixed": "#00164e",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#444651",
+                        "on-surface": "#191c1e",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed": "#001f26",
+                        "surface-container-low": "#f2f4f6",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#1dbcda",
+                        "tertiary-fixed": "#acedff",
+                        "outline-variant": "#c5c5d3",
+                        "primary-fixed": "#dce1ff",
+                        "background": "#f7f9fb",
+                        "on-secondary-container": "#fffbff",
+                        "surface-dim": "#d8dadc",
+                        "surface-container-high": "#e6e8ea",
+                        "surface": "#f7f9fb",
+                        "primary-fixed-dim": "#b6c4ff",
+                        "on-secondary": "#ffffff",
+                        "inverse-primary": "#b6c4ff",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#5a00c6",
+                        "error": "#ba1a1a",
+                        "secondary-container": "#8a4cfc",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#4cd7f6",
+                        "tertiary": "#002f38",
+                        "tertiary-container": "#004754",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#004e5c",
+                        "surface-container": "#eceef0"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface">
+<!-- Sidebar Navigation -->
+<aside class="fixed left-0 top-0 h-full flex flex-col p-6 bg-[#FFFFFF] dark:bg-slate-950 shadow-[0_10px_40px_rgba(25,28,30,0.06)] w-64 z-50">
+<div class="mb-10">
+<h1 class="text-lg font-bold text-[#00236F] font-headline">PédagoLens AI</h1>
+<p class="text-xs text-slate-500 font-medium">Portail Éducatif</p>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:translate-x-1 transition-transform font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Tableau de bord
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 bg-[#F2F4F6] text-[#00236F] font-bold rounded-lg transition-transform text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+                Analyses IA
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:translate-x-1 transition-transform font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+                Élèves
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:translate-x-1 transition-transform font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+                Rapports
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:translate-x-1 transition-transform font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                Paramètres
+            </a>
+</nav>
+<div class="mt-auto space-y-2 pt-6 border-t border-surface-variant/30">
+<button class="w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:translate-x-1 transition-transform text-sm">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+                Aide
+            </button>
+<button class="w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:translate-x-1 transition-transform text-sm">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+                Déconnexion
+            </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 min-h-screen flex flex-col relative">
+<!-- Top Navigation -->
+<header class="sticky top-0 z-40 bg-[#F7F9FB] flex justify-between items-center w-full px-8 py-4 max-w-7xl mx-auto">
+<div class="flex items-center gap-6">
+<span class="text-xl font-black text-[#00236F] font-headline tracking-tight">PédagoLens</span>
+<nav class="hidden lg:flex gap-6 items-center">
+<a class="text-slate-500 hover:text-[#00236F] font-['Manrope'] font-bold tracking-tight text-sm" href="#">Découvrir</a>
+<a class="text-[#00236F] border-b-2 border-[#00236F] pb-1 font-['Manrope'] font-bold tracking-tight text-sm" href="#">Ressources</a>
+<a class="text-slate-500 hover:text-[#00236F] font-['Manrope'] font-bold tracking-tight text-sm" href="#">Tarification</a>
+<a class="text-slate-500 hover:text-[#00236F] font-['Manrope'] font-bold tracking-tight text-sm" href="#">Contact</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="px-6 py-2 rounded-lg bg-gradient-to-r from-primary to-primary-container text-white font-bold text-sm shadow-md">
+                    Connexion
+                </button>
+</div>
+</header>
+<!-- Academic Hero -->
+<section class="px-12 pt-12 pb-8 max-w-7xl mx-auto w-full">
+<div class="flex flex-col gap-2 mb-10">
+<h2 class="text-4xl lg:text-5xl font-extrabold font-headline text-primary tracking-tight">Assistant du cours - Histoire de l'Art</h2>
+<p class="text-lg text-on-surface-variant font-body">Comprendre sans faire le travail à votre place</p>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-8">
+<!-- Chat & Action Interface (Left/Center) -->
+<div class="col-span-12 lg:col-span-8 flex flex-col gap-6">
+<!-- Responsible AI Warning -->
+<div class="bg-surface-container-low p-5 rounded-xl flex items-start gap-4 border-l-4 border-secondary">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">info</span>
+<div>
+<h4 class="font-bold text-secondary text-sm mb-1 uppercase tracking-wider">Note Éthique</h4>
+<p class="text-xs text-on-surface-variant">Cette IA aide à comprendre et organiser, elle ne produit pas la réponse finale. Son but est de stimuler votre réflexion critique.</p>
+</div>
+</div>
+<!-- Chat Experience Container -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_10px_40px_rgba(25,28,30,0.06)] flex flex-col h-[600px] overflow-hidden">
+<!-- Message History -->
+<div class="flex-1 overflow-y-auto p-8 space-y-6 hide-scrollbar">
+<!-- AI Message -->
+<div class="flex gap-4 max-w-[85%]">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+<div class="bg-surface-container-low p-5 rounded-2xl rounded-tl-none">
+<p class="text-sm leading-relaxed">Bonjour ! Je suis votre jumeau numérique pédagogique pour le module sur le <strong class="text-primary">Renaissance Italienne</strong>. Comment puis-je vous accompagner aujourd'hui dans l'analyse de l'œuvre de Botticelli ?</p>
+</div>
+</div>
+<!-- Student Message -->
+<div class="flex gap-4 max-w-[85%] ml-auto flex-row-reverse">
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">person</span>
+</div>
+<div class="bg-primary text-white p-5 rounded-2xl rounded-tr-none">
+<p class="text-sm leading-relaxed">Je ne comprends pas bien pourquoi la perspective est si importante dans ce tableau.</p>
+</div>
+</div>
+<!-- AI Message - Structured Response -->
+<div class="flex gap-4 max-w-[85%] relative">
+<div class="absolute -right-2 top-0">
+<div class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_8px_#712ae2]"></div>
+</div>
+<div class="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+<div class="bg-surface-container-low p-5 rounded-2xl rounded-tl-none space-y-3">
+<p class="text-sm leading-relaxed">C'est une excellente question. Pour t'aider à trouver la réponse par toi-même, examinons ces points :</p>
+<ul class="text-sm space-y-2 list-disc ml-4 text-on-surface-variant">
+<li>Comment ton regard est-il dirigé vers le centre de l'œuvre ?</li>
+<li>Quel sentiment de réalisme cela apporte-t-il par rapport aux œuvres médiévales ?</li>
+</ul>
+<p class="text-xs italic text-secondary-fixed-dim">Indice : Regarde les lignes de fuite sur le carrelage.</p>
+</div>
+</div>
+</div>
+<!-- Chat Interaction Footer -->
+<div class="p-6 border-t border-surface-variant/20 bg-surface-container-lowest">
+<!-- Quick Action Buttons -->
+<div class="flex flex-wrap gap-2 mb-4">
+<button class="px-4 py-2 bg-surface-container text-primary rounded-full text-xs font-semibold hover:bg-primary hover:text-white transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-base">rebase_edit</span> Reformuler la consigne
+                                </button>
+<button class="px-4 py-2 bg-surface-container text-primary rounded-full text-xs font-semibold hover:bg-primary hover:text-white transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-base">target</span> M'expliquer l'objectif
+                                </button>
+<button class="px-4 py-2 bg-surface-container text-primary rounded-full text-xs font-semibold hover:bg-primary hover:text-white transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-base">map</span> Me guider étape par étape
+                                </button>
+<button class="px-4 py-2 bg-surface-container text-primary rounded-full text-xs font-semibold hover:bg-primary hover:text-white transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-base">fact_check</span> Vérifier ma compréhension
+                                </button>
+</div>
+<!-- Input Field -->
+<div class="relative flex items-center">
+<input class="w-full bg-surface-container-low border-none rounded-xl py-4 pl-6 pr-14 focus:ring-2 focus:ring-primary text-sm" placeholder="Posez une question sur le cours..." type="text"/>
+<button class="absolute right-3 p-2 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Side Panel (Right) -->
+<div class="col-span-12 lg:col-span-4 flex flex-col gap-6">
+<!-- Course Context Card -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-[0_10px_40px_rgba(25,28,30,0.06)]">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-headline font-bold text-lg text-primary">Contenu Actuel</h3>
+<span class="px-2 py-1 bg-tertiary-fixed/20 text-on-tertiary-fixed-variant text-[10px] font-bold rounded uppercase">Semaine 4</span>
+</div>
+<div class="space-y-4">
+<div class="flex items-center gap-4 group cursor-pointer">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center group-hover:bg-primary-fixed transition-colors">
+<span class="material-symbols-outlined text-primary">article</span>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-bold text-on-surface">Support de cours.pdf</h4>
+<p class="text-xs text-on-surface-variant">L'influence de la perspective</p>
+</div>
+</div>
+<div class="flex items-center gap-4 group cursor-pointer">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center group-hover:bg-primary-fixed transition-colors">
+<span class="material-symbols-outlined text-primary">video_library</span>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-bold text-on-surface">Analyse Vidéo</h4>
+<p class="text-xs text-on-surface-variant">Conférence de M. Dupont</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Deadlines Card -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-[0_10px_40px_rgba(25,28,30,0.06)] border-t-4 border-error/20">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-error text-xl">event_busy</span>
+<h3 class="font-headline font-bold text-lg text-on-surface">Échéances</h3>
+</div>
+<div class="bg-error-container/10 p-4 rounded-lg">
+<div class="flex justify-between items-center mb-1">
+<span class="text-xs font-bold text-error">Analyse de tableau</span>
+<span class="text-[10px] text-on-surface-variant">J-2</span>
+</div>
+<p class="text-xs text-on-surface-variant mb-3">Rendu final du dossier sur la Renaissance.</p>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-error h-full w-[80%]"></div>
+</div>
+</div>
+</div>
+<!-- Recommended Resources -->
+<div class="bg-primary-container p-6 rounded-xl text-white">
+<h3 class="font-headline font-bold text-lg mb-4">Bibliothèque IA</h3>
+<div class="space-y-3">
+<div class="p-3 bg-white/10 rounded-lg hover:bg-white/20 transition-colors cursor-pointer flex justify-between items-center">
+<span class="text-sm">Glossaire des termes d'art</span>
+<span class="material-symbols-outlined text-sm">open_in_new</span>
+</div>
+<div class="p-3 bg-white/10 rounded-lg hover:bg-white/20 transition-colors cursor-pointer flex justify-between items-center">
+<span class="text-sm">Chronologie interactive</span>
+<span class="material-symbols-outlined text-sm">open_in_new</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Global Footer -->
+<footer class="w-full py-12 px-8 mt-20 bg-[#00236F] dark:bg-black rounded-t-[2rem] text-white">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+<div>
+<h2 class="text-xl font-black font-headline mb-2">PédagoLens AI</h2>
+<p class="text-xs text-slate-300 font-body">© 2024 PédagoLens AI. L'excellence éditoriale au service de l'éducation.</p>
+</div>
+<div class="flex gap-8">
+<a class="text-xs text-slate-300 hover:text-white transition-colors" href="#">Confidentialité</a>
+<a class="text-xs text-slate-300 hover:text-white transition-colors" href="#">Conditions d'utilisation</a>
+<a class="text-xs text-slate-300 hover:text-white transition-colors" href="#">Support Technique</a>
+<a class="text-xs text-slate-300 hover:text-white transition-colors" href="#">Blog Éducatif</a>
+</div>
+</div>
+</footer>
+</main>
+<!-- Floating Action for Quick Help (Suppressed on details but kept for student dashboard context) -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-br from-secondary to-secondary-container text-white rounded-full shadow-lg flex items-center justify-center hover:scale-105 transition-transform z-50">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">live_help</span>
+</button>
+</body></html>

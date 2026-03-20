@@ -22,6 +22,7 @@ class PedagoLens_Dashboard_Admin {
         add_action( 'admin_menu',                          [ self::class, 'add_menu' ] );
         add_action( 'wp_ajax_pl_analyze_course',           [ self::class, 'ajax_analyze' ] );
         add_action( 'wp_ajax_pl_create_project',           [ self::class, 'ajax_create_project' ] );
+        add_action( 'wp_ajax_pl_create_course',            [ self::class, 'ajax_create_course' ] );
         add_action( 'admin_enqueue_scripts',               [ self::class, 'enqueue_assets' ] );
     }
 
@@ -281,7 +282,7 @@ class PedagoLens_Dashboard_Admin {
     public static function ajax_analyze(): void {
         check_ajax_referer( self::NONCE_AJAX, 'nonce' );
 
-        if ( ! current_user_can( 'manage_options' ) ) {
+        if ( ! current_user_can( 'manage_options' ) && ! current_user_can( 'pedagolens_teacher' ) ) {
             wp_send_json_error( [ 'message' => 'Accès refusé.' ], 403 );
         }
 
@@ -314,7 +315,7 @@ class PedagoLens_Dashboard_Admin {
     public static function ajax_create_project(): void {
         check_ajax_referer( self::NONCE_AJAX, 'nonce' );
 
-        if ( ! current_user_can( 'manage_options' ) ) {
+        if ( ! current_user_can( 'manage_options' ) && ! current_user_can( 'pedagolens_teacher' ) ) {
             wp_send_json_error( [ 'message' => 'Accès refusé.' ], 403 );
         }
 
@@ -335,6 +336,48 @@ class PedagoLens_Dashboard_Admin {
         wp_send_json_success( [
             'project_id'  => $project_id,
             'workbench_url' => admin_url( 'admin.php?page=pl-course-workbench&project_id=' . $project_id ),
+        ] );
+    }
+
+    // -------------------------------------------------------------------------
+    // AJAX — Créer un cours
+    // -------------------------------------------------------------------------
+
+    public static function ajax_create_course(): void {
+        check_ajax_referer( self::NONCE_AJAX, 'nonce' );
+
+        if ( ! current_user_can( 'manage_options' ) && ! current_user_can( 'pedagolens_teacher' ) ) {
+            wp_send_json_error( [ 'message' => 'Accès refusé.' ], 403 );
+        }
+
+        $title       = sanitize_text_field( $_POST['title'] ?? '' );
+        $course_type = sanitize_text_field( $_POST['course_type'] ?? 'magistral' );
+
+        if ( ! $title ) {
+            wp_send_json_error( [ 'message' => 'Le titre est requis.' ] );
+        }
+
+        $allowed_types = [ 'magistral', 'exercice', 'evaluation', 'travail_equipe' ];
+        if ( ! in_array( $course_type, $allowed_types, true ) ) {
+            $course_type = 'magistral';
+        }
+
+        $post_id = wp_insert_post( [
+            'post_type'   => 'pl_course',
+            'post_title'  => $title,
+            'post_status' => 'publish',
+        ] );
+
+        if ( is_wp_error( $post_id ) ) {
+            wp_send_json_error( [ 'message' => 'Création du cours échouée.' ] );
+        }
+
+        update_post_meta( $post_id, '_pl_course_type', $course_type );
+
+        wp_send_json_success( [
+            'course_id' => $post_id,
+            'title'     => $title,
+            'type'      => $course_type,
         ] );
     }
 

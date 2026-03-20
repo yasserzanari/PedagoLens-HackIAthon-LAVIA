@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-tint": "#4059aa",
+              "on-background": "#191c1e",
+              "outline": "#757682",
+              "surface-bright": "#f7f9fb",
+              "inverse-surface": "#2d3133",
+              "secondary-fixed-dim": "#d2bbff",
+              "secondary": "#712ae2",
+              "primary": "#00236f",
+              "secondary-fixed": "#eaddff",
+              "inverse-on-surface": "#eff1f3",
+              "surface-variant": "#e0e3e5",
+              "on-secondary-fixed": "#25005a",
+              "on-primary-fixed-variant": "#264191",
+              "primary-container": "#1e3a8a",
+              "surface-container-highest": "#e0e3e5",
+              "on-primary-container": "#90a8ff",
+              "on-primary-fixed": "#00164e",
+              "on-error-container": "#93000a",
+              "on-surface-variant": "#444651",
+              "on-surface": "#191c1e",
+              "on-error": "#ffffff",
+              "on-tertiary-fixed": "#001f26",
+              "surface-container-low": "#f2f4f6",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary-container": "#1dbcda",
+              "tertiary-fixed": "#acedff",
+              "outline-variant": "#c5c5d3",
+              "primary-fixed": "#dce1ff",
+              "background": "#f7f9fb",
+              "on-secondary-container": "#fffbff",
+              "surface-dim": "#d8dadc",
+              "surface-container-high": "#e6e8ea",
+              "surface": "#f7f9fb",
+              "primary-fixed-dim": "#b6c4ff",
+              "on-secondary": "#ffffff",
+              "inverse-primary": "#b6c4ff",
+              "on-primary": "#ffffff",
+              "on-secondary-fixed-variant": "#5a00c6",
+              "error": "#ba1a1a",
+              "secondary-container": "#8a4cfc",
+              "error-container": "#ffdad6",
+              "tertiary-fixed-dim": "#4cd7f6",
+              "tertiary": "#002f38",
+              "tertiary-container": "#004754",
+              "on-tertiary": "#ffffff",
+              "on-tertiary-fixed-variant": "#004e5c",
+              "surface-container": "#eceef0"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-headline { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface flex min-h-screen">
+<!-- SideNavBar (Execution from JSON) -->
+<aside class="fixed left-0 top-0 h-full flex flex-col p-6 bg-[#FFFFFF] dark:bg-slate-950 w-64 shadow-[0_10px_40px_rgba(25,28,30,0.06)] z-50">
+<div class="mb-10">
+<h1 class="text-lg font-bold text-[#00236F] font-headline">PédagoLens AI</h1>
+<p class="text-xs text-on-surface-variant font-medium">Portail Éducatif</p>
+</div>
+<nav class="flex-1 space-y-1">
+<!-- Active Tab: Tableau de bord -->
+<a class="flex items-center gap-3 px-4 py-3 bg-[#F2F4F6] text-[#00236F] font-bold rounded-lg transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-['Inter'] text-sm">Tableau de bord</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+<span class="font-['Inter'] text-sm">Analyses IA</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-['Inter'] text-sm">Élèves</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="font-['Inter'] text-sm">Rapports</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-['Inter'] text-sm">Paramètres</span>
+</a>
+</nav>
+<div class="mt-auto space-y-4">
+<button class="w-full py-3 px-4 bg-gradient-to-r from-primary to-primary-container text-white rounded-xl font-bold text-sm shadow-md hover:opacity-90 transition-opacity">
+                Nouvelle Analyse
+            </button>
+<div class="pt-6 border-t border-outline-variant/20 space-y-1">
+<a class="flex items-center gap-3 px-4 py-2 text-slate-500 hover:bg-slate-50 transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="font-['Inter'] text-sm">Aide</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-500 hover:bg-slate-50 transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-['Inter'] text-sm">Déconnexion</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 flex-1 p-8 md:p-12 max-w-7xl">
+<!-- Top Header & Actions -->
+<header class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+<div>
+<p class="text-secondary font-bold text-sm tracking-widest uppercase mb-2">Enseignement &amp; IA</p>
+<h2 class="text-4xl md:text-5xl font-extrabold font-headline text-primary tracking-tight">Vue d’ensemble pédagogique</h2>
+</div>
+<div class="flex gap-4">
+<button class="flex items-center gap-2 px-6 py-3 bg-surface-container-lowest text-primary font-bold rounded-xl border border-outline-variant/30 hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined" data-icon="upload">upload</span>
+<span>Importer</span>
+</button>
+<button class="flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-primary to-primary-container text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span>Analyser un nouveau cours</span>
+</button>
+</div>
+</header>
+<!-- KPI Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+<!-- KPI 1 -->
+<div class="bg-surface-container-lowest p-7 rounded-[1.5rem] shadow-[0_10px_40px_rgba(25,28,30,0.06)] relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+<p class="text-on-surface-variant font-medium text-sm mb-4">Moyenne globale</p>
+<div class="flex items-baseline gap-2">
+<span class="text-5xl font-black font-headline text-primary tracking-tighter">14.8</span>
+<span class="text-on-tertiary-fixed-variant font-bold text-sm bg-tertiary-fixed/30 px-2 py-0.5 rounded-full">+1.2</span>
+</div>
+<p class="text-xs text-outline mt-4 italic">Progression stable ce trimestre</p>
+</div>
+<!-- KPI 2 -->
+<div class="bg-surface-container-lowest p-7 rounded-[1.5rem] shadow-[0_10px_40px_rgba(25,28,30,0.06)] relative overflow-hidden">
+<div class="absolute top-2 right-2 w-3 h-3 bg-secondary rounded-full blur-[4px] opacity-60"></div>
+<p class="text-on-surface-variant font-medium text-sm mb-4">Profils à risque</p>
+<div class="flex items-baseline gap-2">
+<span class="text-5xl font-black font-headline text-error tracking-tighter">12</span>
+<span class="text-error font-bold text-sm">élèves</span>
+</div>
+<p class="text-xs text-outline mt-4">Nécessite une attention immédiate</p>
+</div>
+<!-- KPI 3 -->
+<div class="bg-surface-container-lowest p-7 rounded-[1.5rem] shadow-[0_10px_40px_rgba(25,28,30,0.06)] relative overflow-hidden">
+<p class="text-on-surface-variant font-medium text-sm mb-4">Contenus à retravailler</p>
+<div class="flex items-baseline gap-2">
+<span class="text-5xl font-black font-headline text-tertiary tracking-tighter">04</span>
+<span class="text-on-surface-variant font-bold text-sm">modules</span>
+</div>
+<p class="text-xs text-outline mt-4">Basé sur le taux de complétion</p>
+</div>
+</div>
+<!-- Charts & Insights Row -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+<!-- Comparison Chart Placeholder -->
+<div class="lg:col-span-2 bg-surface-container-lowest p-8 rounded-[1.5rem] shadow-[0_10px_40px_rgba(25,28,30,0.06)]">
+<div class="flex items-center justify-between mb-8">
+<h3 class="text-xl font-bold text-primary font-headline">Comparaison des profils</h3>
+<div class="flex gap-2">
+<div class="flex items-center gap-2 text-xs font-semibold text-outline">
+<span class="w-3 h-3 rounded-full bg-primary"></span> Groupe A
+                        </div>
+<div class="flex items-center gap-2 text-xs font-semibold text-outline">
+<span class="w-3 h-3 rounded-full bg-secondary"></span> Groupe B
+                        </div>
+</div>
+</div>
+<div class="h-64 flex items-end justify-between px-4 pb-2 border-l border-b border-outline-variant/20 relative">
+<!-- Fake Spline Chart Rendering -->
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
+<span class="text-8xl font-black text-primary/10">PEDAGOLENS</span>
+</div>
+<!-- Bar Visuals (Representing spline points for clean visual) -->
+<div class="w-8 bg-gradient-to-t from-primary/10 to-primary rounded-t-lg h-[40%]"></div>
+<div class="w-8 bg-gradient-to-t from-secondary/10 to-secondary rounded-t-lg h-[65%]"></div>
+<div class="w-8 bg-gradient-to-t from-primary/10 to-primary rounded-t-lg h-[50%]"></div>
+<div class="w-8 bg-gradient-to-t from-secondary/10 to-secondary rounded-t-lg h-[80%]"></div>
+<div class="w-8 bg-gradient-to-t from-primary/10 to-primary rounded-t-lg h-[45%]"></div>
+<div class="w-8 bg-gradient-to-t from-secondary/10 to-secondary rounded-t-lg h-[55%]"></div>
+<div class="w-8 bg-gradient-to-t from-primary/10 to-primary rounded-t-lg h-[70%]"></div>
+<div class="w-8 bg-gradient-to-t from-secondary/10 to-secondary rounded-t-lg h-[90%]"></div>
+</div>
+<div class="flex justify-between mt-4 px-4 text-xs font-medium text-outline">
+<span>Sem 1</span><span>Sem 2</span><span>Sem 3</span><span>Sem 4</span><span>Sem 5</span><span>Sem 6</span><span>Sem 7</span><span>Sem 8</span>
+</div>
+</div>
+<!-- Side Card: Profils les plus pénalisés -->
+<div class="bg-primary text-white p-8 rounded-[1.5rem] shadow-xl flex flex-col">
+<h3 class="text-xl font-bold font-headline mb-6">Profils les plus pénalisés</h3>
+<div class="space-y-6 flex-1">
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-xs">JD</div>
+<div>
+<p class="text-sm font-bold">Jean Dupont</p>
+<p class="text-[10px] text-white/60">Dyslexie • Niveau B1</p>
+</div>
+</div>
+<span class="text-error font-bold text-sm">-4.2</span>
+</div>
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-xs">ML</div>
+<div>
+<p class="text-sm font-bold">Marie Laurent</p>
+<p class="text-[10px] text-white/60">Trouble Attention • Niveau A2</p>
+</div>
+</div>
+<span class="text-error font-bold text-sm">-3.8</span>
+</div>
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-xs">KB</div>
+<div>
+<p class="text-sm font-bold">Karim Benali</p>
+<p class="text-[10px] text-white/60">Allophone • Niveau B2</p>
+</div>
+</div>
+<span class="text-error font-bold text-sm">-2.5</span>
+</div>
+</div>
+<button class="mt-8 text-xs font-bold text-white/80 hover:text-white flex items-center gap-2 group">
+                    Voir tous les profils <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Bottom Grid: Priority Courses & Recent Analyses -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Cours prioritaires -->
+<div class="bg-surface-container-low p-8 rounded-[1.5rem]">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-xl font-bold text-primary font-headline">Cours prioritaires</h3>
+<span class="material-symbols-outlined text-outline" data-icon="priority_high">priority_high</span>
+</div>
+<div class="space-y-4">
+<div class="bg-white p-5 rounded-xl flex items-center gap-4 border border-outline-variant/10">
+<div class="w-12 h-12 bg-tertiary/10 rounded-lg flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold text-primary">Les Fondamentaux de la Thermodynamique</p>
+<p class="text-xs text-outline">Taux de complexité élevé (78%)</p>
+</div>
+<span class="px-3 py-1 bg-error-container text-on-error-container text-[10px] font-bold rounded-full">ACTION REQUISE</span>
+</div>
+<div class="bg-white p-5 rounded-xl flex items-center gap-4 border border-outline-variant/10">
+<div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold text-primary">Littérature du XIXe Siècle</p>
+<p class="text-xs text-outline">Accessibilité visuelle à améliorer</p>
+</div>
+<span class="px-3 py-1 bg-tertiary-fixed/30 text-on-tertiary-fixed-variant text-[10px] font-bold rounded-full">EN COURS</span>
+</div>
+</div>
+</div>
+<!-- Dernières analyses -->
+<div class="bg-surface-container-low p-8 rounded-[1.5rem]">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-xl font-bold text-primary font-headline">Dernières analyses</h3>
+<span class="material-symbols-outlined text-outline" data-icon="history">history</span>
+</div>
+<div class="space-y-3">
+<div class="flex items-center justify-between p-3 border-b border-outline-variant/20">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="auto_awesome">auto_awesome</span>
+<span class="text-sm font-medium">Algèbre Linéaire - Chapitre 4</span>
+</div>
+<span class="text-xs text-outline">Il y a 2h</span>
+</div>
+<div class="flex items-center justify-between p-3 border-b border-outline-variant/20">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="auto_awesome">auto_awesome</span>
+<span class="text-sm font-medium">Introduction à l'Économie</span>
+</div>
+<span class="text-xs text-outline">Hier</span>
+</div>
+<div class="flex items-center justify-between p-3 border-b border-outline-variant/20">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="auto_awesome">auto_awesome</span>
+<span class="text-sm font-medium">Biologie Cellulaire - TP1</span>
+</div>
+<span class="text-xs text-outline">3 oct.</span>
+</div>
+<div class="flex items-center justify-between p-3">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="auto_awesome">auto_awesome</span>
+<span class="text-sm font-medium">Géopolitique Mondiale</span>
+</div>
+<span class="text-xs text-outline">1 oct.</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Execution from JSON -->
+<footer class="fixed bottom-0 left-64 right-0 py-6 px-8 bg-[#00236F] dark:bg-black text-white rounded-t-[2rem] z-40 hidden md:block">
+<div class="max-w-7xl mx-auto flex items-center justify-between">
+<p class="font-['Inter'] text-xs text-slate-300">© 2024 PédagoLens AI. L'excellence éditoriale au service de l'éducation.</p>
+<div class="flex gap-6">
+<a class="font-['Inter'] text-xs text-slate-300 hover:text-white transition-colors" href="#">Confidentialité</a>
+<a class="font-['Inter'] text-xs text-slate-300 hover:text-white transition-colors" href="#">Conditions d'utilisation</a>
+<a class="font-['Inter'] text-xs text-slate-300 hover:text-white transition-colors" href="#">Support Technique</a>
+<a class="font-['Inter'] text-xs text-slate-300 hover:text-white transition-colors" href="#">Blog Éducatif</a>
+</div>
+</div>
+</footer>
+</body></html>

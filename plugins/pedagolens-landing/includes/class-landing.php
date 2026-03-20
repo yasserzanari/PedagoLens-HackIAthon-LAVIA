@@ -71,6 +71,9 @@ class PedagoLens_Landing {
         if ( ! has_action( 'wp_ajax_pl_create_project' ) ) {
             add_action( 'wp_ajax_pl_create_project',    [ 'PedagoLens_Dashboard_Admin', 'ajax_create_project' ] );
         }
+        if ( ! has_action( 'wp_ajax_pl_create_course' ) ) {
+            add_action( 'wp_ajax_pl_create_course',     [ 'PedagoLens_Dashboard_Admin', 'ajax_create_course' ] );
+        }
 
         // AJAX login / register (accessible aux visiteurs ET aux connectés)
         if ( ! has_action( 'wp_ajax_nopriv_pl_login' ) ) {
@@ -1238,6 +1241,7 @@ class PedagoLens_Landing {
 
         $login_nonce    = wp_create_nonce( 'pl_login_nonce' );
         $register_nonce = wp_create_nonce( 'pl_register_nonce' );
+        $compte_url     = home_url( '/compte' );
 
         ob_start();
         ?>
@@ -1250,6 +1254,8 @@ class PedagoLens_Landing {
         <div class="pl-login-orb pl-login-orb--accent"></div>
 
         <div class="pl-login-card">
+            <div class="pl-login-card-gradient"></div>
+
             <!-- Onglets -->
             <div class="pl-login-tabs">
                 <button class="pl-login-tab pl-login-tab--active" data-tab="login">Se connecter</button>
@@ -1261,15 +1267,32 @@ class PedagoLens_Landing {
                 <div id="pl-login-msg" class="pl-login-msg" style="display:none;"></div>
                 <form id="pl-login-form" autocomplete="on" novalidate>
                     <input type="hidden" name="_wpnonce" value="<?php echo $login_nonce; ?>" />
-                    <div class="pl-login-field">
-                        <label for="pl-login-email">Courriel</label>
-                        <input type="email" id="pl-login-email" name="email" placeholder="votre@courriel.ca" required />
+                    <div class="pl-login-field pl-login-field--icon">
+                        <label for="pl-login-email">Email professionnel</label>
+                        <div class="pl-input-icon-wrap">
+                            <span class="pl-input-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>
+                            <input type="email" id="pl-login-email" name="email" placeholder="votre@courriel.ca" required />
+                        </div>
+                    </div>
+                    <div class="pl-login-field pl-login-field--icon">
+                        <label for="pl-login-password">Mot de passe</label>
+                        <div class="pl-input-icon-wrap">
+                            <span class="pl-input-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+                            <input type="password" id="pl-login-password" name="password" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" required />
+                        </div>
                     </div>
                     <div class="pl-login-field">
-                        <label for="pl-login-password">Mot de passe</label>
-                        <input type="password" id="pl-login-password" name="password" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" required />
+                        <label class="pl-login-checkbox-row">
+                            <input type="checkbox" name="remember" value="1" />
+                            <span class="pl-login-cb-custom"></span>
+                            <span>Se souvenir de moi</span>
+                        </label>
                     </div>
                     <button type="submit" class="pl-login-submit">Se connecter</button>
+                    <div class="pl-login-links">
+                        <a href="<?php echo esc_url( wp_lostpassword_url() ); ?>" class="pl-login-link">Mot de passe oubli&eacute; ?</a>
+                        <button type="button" class="pl-login-link pl-login-link-register" data-switch-tab="register">Cr&eacute;er un compte</button>
+                    </div>
                 </form>
             </div>
 
@@ -1277,66 +1300,89 @@ class PedagoLens_Landing {
             <div class="pl-login-panel" id="pl-panel-register">
                 <div id="pl-register-msg" class="pl-login-msg" style="display:none;"></div>
 
-                <!-- Étape 1 : choix du rôle -->
-                <div id="pl-register-step-role" class="pl-register-step">
-                    <p class="pl-register-prompt">Je suis&hellip;</p>
-                    <div class="pl-role-cards">
-                        <button class="pl-role-card" data-role="teacher">
-                            <span class="pl-role-card-icon">&#128218;</span>
-                            <span class="pl-role-card-label">Enseignant</span>
-                            <span class="pl-role-card-desc">J&rsquo;enseigne au C&Eacute;GEP</span>
-                        </button>
-                        <button class="pl-role-card" data-role="student">
-                            <span class="pl-role-card-icon">&#127891;</span>
-                            <span class="pl-role-card-label">&Eacute;tudiant</span>
-                            <span class="pl-role-card-desc">Je suis inscrit &agrave; un cours</span>
-                        </button>
+                <!-- Progress indicator -->
+                <div class="pl-register-progress" id="pl-register-progress">
+                    <div class="pl-progress-step pl-progress-step--active" data-step="1">
+                        <span class="pl-progress-dot">1</span>
+                        <span class="pl-progress-label">R&ocirc;le</span>
+                    </div>
+                    <div class="pl-progress-line"><div class="pl-progress-line-fill"></div></div>
+                    <div class="pl-progress-step" data-step="2">
+                        <span class="pl-progress-dot">2</span>
+                        <span class="pl-progress-label">Compte</span>
                     </div>
                 </div>
 
-                <!-- Étape 2 : formulaire -->
-                <div id="pl-register-step-form" class="pl-register-step" style="display:none;">
-                    <button type="button" class="pl-register-back">&larr; Changer de r&ocirc;le</button>
-                    <form id="pl-register-form" autocomplete="off" novalidate>
-                        <input type="hidden" name="_wpnonce" value="<?php echo $register_nonce; ?>" />
-                        <input type="hidden" name="role" id="pl-register-role" value="" />
+                <!-- Steps container for slide animation -->
+                <div class="pl-register-steps-container">
 
-                        <div class="pl-login-field">
-                            <label for="pl-reg-name">Nom complet</label>
-                            <input type="text" id="pl-reg-name" name="display_name" placeholder="Pr&eacute;nom Nom" required />
+                    <!-- Étape 1 : choix du rôle -->
+                    <div id="pl-register-step-role" class="pl-register-step pl-register-step--active">
+                        <p class="pl-register-prompt">Je suis&hellip;</p>
+                        <div class="pl-role-cards">
+                            <button class="pl-role-card" data-role="teacher">
+                                <span class="pl-role-card-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--pl-cyan)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 20h5v-2a3 3 0 0 0-5.356-1.857"/><path d="M9 20H4v-2a3 3 0 0 1 5.356-1.857"/><circle cx="12" cy="7" r="4"/><path d="M12 11v3"/><path d="m9 17 3-3 3 3"/></svg></span>
+                                <span class="pl-role-card-label">Enseignant</span>
+                                <span class="pl-role-card-desc">Analysez et am&eacute;liorez vos cours</span>
+                            </button>
+                            <button class="pl-role-card" data-role="student">
+                                <span class="pl-role-card-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--pl-cyan)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
+                                <span class="pl-role-card-label">&Eacute;tudiant</span>
+                                <span class="pl-role-card-desc">Acc&eacute;dez &agrave; votre jumeau num&eacute;rique</span>
+                            </button>
                         </div>
+                    </div>
 
-                        <!-- Champ institut (enseignant seulement) -->
-                        <div class="pl-login-field pl-field-teacher" style="display:none;">
-                            <label for="pl-reg-institute">Institut / &Eacute;tablissement</label>
-                            <input type="text" id="pl-reg-institute" name="institute" placeholder="C&Eacute;GEP de&hellip;" />
-                        </div>
+                    <!-- Étape 2 : email + mot de passe seulement -->
+                    <div id="pl-register-step-form" class="pl-register-step">
+                        <button type="button" class="pl-register-back"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg> Changer de r&ocirc;le</button>
+                        <form id="pl-register-form" autocomplete="off" novalidate>
+                            <input type="hidden" name="_wpnonce" value="<?php echo $register_nonce; ?>" />
+                            <input type="hidden" name="role" id="pl-register-role" value="" />
 
-                        <div class="pl-login-field">
-                            <label for="pl-reg-email">Courriel</label>
-                            <input type="email" id="pl-reg-email" name="email" placeholder="votre@courriel.ca" required />
-                        </div>
-                        <div class="pl-login-field">
-                            <label for="pl-reg-password">Mot de passe</label>
-                            <input type="password" id="pl-reg-password" name="password" placeholder="Min. 6 caract&egrave;res" required />
-                        </div>
-                        <div class="pl-login-field">
-                            <label for="pl-reg-password2">Confirmer le mot de passe</label>
-                            <input type="password" id="pl-reg-password2" name="password_confirm" placeholder="Retapez le mot de passe" required />
-                        </div>
+                            <div class="pl-login-field pl-login-field--icon">
+                                <label for="pl-reg-email">Courriel</label>
+                                <div class="pl-input-icon-wrap">
+                                    <span class="pl-input-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>
+                                    <input type="email" id="pl-reg-email" name="email" placeholder="votre@courriel.ca" required />
+                                </div>
+                                <span class="pl-field-validation" id="pl-reg-email-validation"></span>
+                            </div>
+                            <div class="pl-login-field pl-login-field--icon">
+                                <label for="pl-reg-password">Mot de passe</label>
+                                <div class="pl-input-icon-wrap">
+                                    <span class="pl-input-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+                                    <input type="password" id="pl-reg-password" name="password" placeholder="Min. 6 caract&egrave;res" required />
+                                </div>
+                                <div class="pl-password-strength" id="pl-password-strength">
+                                    <div class="pl-password-strength-bar"><div class="pl-password-strength-fill" id="pl-password-strength-fill"></div></div>
+                                    <span class="pl-password-strength-text" id="pl-password-strength-text"></span>
+                                </div>
+                            </div>
+                            <div class="pl-login-field pl-login-field--icon">
+                                <label for="pl-reg-password2">Confirmer le mot de passe</label>
+                                <div class="pl-input-icon-wrap">
+                                    <span class="pl-input-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+                                    <input type="password" id="pl-reg-password2" name="password_confirm" placeholder="Retapez le mot de passe" required />
+                                </div>
+                                <span class="pl-field-validation" id="pl-reg-password2-validation"></span>
+                            </div>
 
-                        <!-- Checkbox difficultés (étudiant seulement) -->
-                        <div class="pl-login-field pl-field-student" style="display:none;">
-                            <label class="pl-login-checkbox-row">
-                                <input type="checkbox" id="pl-reg-difficulties-check" />
-                                <span class="pl-login-cb-custom"></span>
-                                <span>J&rsquo;ai des difficult&eacute;s d&rsquo;apprentissage</span>
-                            </label>
-                        </div>
+                            <!-- Checkbox difficultés (étudiant seulement) -->
+                            <div class="pl-login-field pl-field-student" style="display:none;">
+                                <label class="pl-login-checkbox-row">
+                                    <input type="checkbox" id="pl-reg-difficulties-check" />
+                                    <span class="pl-login-cb-custom"></span>
+                                    <span>J&rsquo;ai des difficult&eacute;s d&rsquo;apprentissage</span>
+                                </label>
+                            </div>
 
-                        <button type="submit" class="pl-login-submit">Cr&eacute;er mon compte</button>
-                    </form>
-                </div>
+                            <button type="submit" class="pl-login-submit">Cr&eacute;er mon compte</button>
+                            <p class="pl-register-note">Vous pourrez compl&eacute;ter votre profil (nom, &eacute;tablissement&hellip;) apr&egrave;s l&rsquo;inscription.</p>
+                        </form>
+                    </div>
+
+                </div><!-- .pl-register-steps-container -->
             </div>
         </div><!-- .pl-login-card -->
     </div><!-- .pl-login-wrapper -->
@@ -1397,6 +1443,9 @@ class PedagoLens_Landing {
         </div>
     </div>
 
+    <!-- Redirect URL for register -->
+    <script>window.plRegisterRedirect = <?php echo wp_json_encode( $compte_url ); ?>;</script>
+
     <?php echo self::render_footer(); ?>
 
 </div><!-- .pl-login-page -->
@@ -1455,17 +1504,15 @@ class PedagoLens_Landing {
     public static function ajax_register(): void {
         check_ajax_referer( 'pl_register_nonce' );
 
-        $display_name = sanitize_text_field( wp_unslash( $_POST['display_name'] ?? '' ) );
         $email        = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
         $password     = $_POST['password'] ?? '';
         $password2    = $_POST['password_confirm'] ?? '';
         $role         = sanitize_key( $_POST['role'] ?? '' );
-        $institute    = sanitize_text_field( wp_unslash( $_POST['institute'] ?? '' ) );
         $raw_diff     = isset( $_POST['difficulties'] ) ? sanitize_text_field( wp_unslash( $_POST['difficulties'] ) ) : '[]';
 
         // Validations
-        if ( ! $display_name || ! $email || ! $password ) {
-            wp_send_json_error( [ 'message' => 'Tous les champs obligatoires doivent &ecirc;tre remplis.' ] );
+        if ( ! $email || ! $password ) {
+            wp_send_json_error( [ 'message' => 'Courriel et mot de passe requis.' ] );
         }
         if ( ! in_array( $role, [ 'teacher', 'student' ], true ) ) {
             wp_send_json_error( [ 'message' => 'R&ocirc;le invalide.' ] );
@@ -1483,24 +1530,23 @@ class PedagoLens_Landing {
             wp_send_json_error( [ 'message' => 'Ce courriel est d&eacute;j&agrave; utilis&eacute;.' ] );
         }
 
-        // Créer le user
+        // Créer le user (display_name = partie avant @ du courriel par défaut)
         $user_id = wp_create_user( $email, $password, $email );
         if ( is_wp_error( $user_id ) ) {
             wp_send_json_error( [ 'message' => $user_id->get_error_message() ] );
         }
 
-        // Mettre à jour le display_name et le rôle
-        $wp_role = $role === 'teacher' ? 'pedagolens_teacher' : 'pedagolens_student';
+        // Mettre à jour le rôle + display_name temporaire
+        $wp_role      = $role === 'teacher' ? 'pedagolens_teacher' : 'pedagolens_student';
+        $display_name = ucfirst( explode( '@', $email )[0] );
         wp_update_user( [
             'ID'           => $user_id,
             'display_name' => $display_name,
             'role'         => $wp_role,
         ] );
 
-        // Sauvegarder l'institut (enseignant)
-        if ( $role === 'teacher' && $institute ) {
-            update_user_meta( $user_id, 'pl_teacher_institute', $institute );
-        }
+        // Marquer le profil comme incomplet pour forcer la complétion sur /compte
+        update_user_meta( $user_id, 'pl_profile_incomplete', '1' );
 
         // Sauvegarder les difficultés (étudiant)
         if ( $role === 'student' ) {
@@ -1526,12 +1572,8 @@ class PedagoLens_Landing {
         wp_set_auth_cookie( $user_id, true );
         wp_set_current_user( $user_id );
 
-        // Redirection
-        if ( $role === 'teacher' ) {
-            $redirect = self::page_url( 'dashboard-enseignant', 'pl-teacher-dashboard' );
-        } else {
-            $redirect = self::page_url( 'dashboard-etudiant', '' );
-        }
+        // Toujours rediriger vers /compte pour compléter le profil
+        $redirect = home_url( '/compte' );
 
         wp_send_json_success( [ 'redirect' => $redirect ] );
     }

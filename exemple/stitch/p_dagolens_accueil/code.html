@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PédagoLens - L'Intelligence Éditoriale au Service de l'Éducation</title>
+<!-- Google Fonts: Manrope & Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-tint": "#4059aa",
+              "on-background": "#191c1e",
+              "outline": "#757682",
+              "surface-bright": "#f7f9fb",
+              "inverse-surface": "#2d3133",
+              "secondary-fixed-dim": "#d2bbff",
+              "secondary": "#712ae2",
+              "primary": "#00236f",
+              "secondary-fixed": "#eaddff",
+              "inverse-on-surface": "#eff1f3",
+              "surface-variant": "#e0e3e5",
+              "on-secondary-fixed": "#25005a",
+              "on-primary-fixed-variant": "#264191",
+              "primary-container": "#1e3a8a",
+              "surface-container-highest": "#e0e3e5",
+              "on-primary-container": "#90a8ff",
+              "on-primary-fixed": "#00164e",
+              "on-error-container": "#93000a",
+              "on-surface-variant": "#444651",
+              "on-surface": "#191c1e",
+              "on-error": "#ffffff",
+              "on-tertiary-fixed": "#001f26",
+              "surface-container-low": "#f2f4f6",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary-container": "#1dbcda",
+              "tertiary-fixed": "#acedff",
+              "outline-variant": "#c5c5d3",
+              "primary-fixed": "#dce1ff",
+              "background": "#f7f9fb",
+              "on-secondary-container": "#fffbff",
+              "surface-dim": "#d8dadc",
+              "surface-container-high": "#e6e8ea",
+              "surface": "#f7f9fb",
+              "primary-fixed-dim": "#b6c4ff",
+              "on-secondary": "#ffffff",
+              "inverse-primary": "#b6c4ff",
+              "on-primary": "#ffffff",
+              "on-secondary-fixed-variant": "#5a00c6",
+              "error": "#ba1a1a",
+              "secondary-container": "#8a4cfc",
+              "error-container": "#ffdad6",
+              "tertiary-fixed-dim": "#4cd7f6",
+              "tertiary": "#002f38",
+              "tertiary-container": "#004754",
+              "on-tertiary": "#ffffff",
+              "on-tertiary-fixed-variant": "#004e5c",
+              "surface-container": "#eceef0"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+      }
+      .asymmetric-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+      }
+      @media (max-width: 768px) {
+        .asymmetric-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- TopNavBar -->
+<header class="bg-[#F7F9FB] dark:bg-slate-900 sticky top-0 z-50">
+<nav class="flex justify-between items-center w-full px-8 py-4 max-w-7xl mx-auto">
+<div class="text-xl font-black text-[#00236F] dark:text-white font-headline tracking-tight">PédagoLens</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-[#00236F] border-b-2 border-[#00236F] pb-1 font-headline font-bold tracking-tight" href="#">Découvrir</a>
+<a class="text-slate-500 hover:text-[#00236F] font-headline font-bold tracking-tight transition-colors" href="#">Ressources</a>
+<a class="text-slate-500 hover:text-[#00236F] font-headline font-bold tracking-tight transition-colors" href="#">Tarification</a>
+<a class="text-slate-500 hover:text-[#00236F] font-headline font-bold tracking-tight transition-colors" href="#">Contact</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="px-6 py-2 rounded-lg bg-gradient-to-r from-primary to-primary-container text-white font-semibold transition-transform hover:scale-95 duration-200">
+                    Connexion
+                </button>
+</div>
+</nav>
+</header>
+<main>
+<!-- Hero Section -->
+<section class="relative pt-20 pb-32 px-8 overflow-hidden">
+<div class="max-w-7xl mx-auto asymmetric-grid gap-16 items-center">
+<div class="z-10">
+<h1 class="font-headline font-extrabold text-5xl md:text-7xl text-primary leading-tight tracking-tight mb-8">
+                        Optimisez vos cours selon les profils réels de vos étudiants.
+                    </h1>
+<p class="text-lg text-on-surface-variant mb-10 max-w-xl leading-relaxed">
+                        PédagoLens utilise l'intelligence artificielle pour cartographier la diversité cognitive de vos classes et vous proposer des ajustements pédagogiques sur-mesure.
+                    </p>
+<div class="flex flex-wrap gap-4">
+<button class="px-8 py-4 rounded-xl bg-gradient-to-br from-primary to-primary-container text-white font-bold shadow-lg hover:translate-y-[-2px] transition-all">
+                            Démarrer l'analyse gratuite
+                        </button>
+<button class="px-8 py-4 rounded-xl border border-outline-variant text-primary font-bold hover:bg-surface-container-low transition-colors">
+                            Voir la démo
+                        </button>
+</div>
+</div>
+<!-- Teacher Dashboard Mockup -->
+<div class="relative">
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_10px_40px_rgba(25,28,30,0.06)] p-6 border border-outline-variant/10">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h3 class="font-headline font-bold text-primary">Tableau de bord IA</h3>
+<p class="text-xs text-on-surface-variant">Classe de Master 1 - Économie</p>
+</div>
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+<div class="space-y-4">
+<!-- Card 1 -->
+<div class="p-4 bg-surface-container-low rounded-lg border-l-4 border-secondary">
+<div class="flex justify-between items-center mb-2">
+<span class="text-xs font-bold text-primary uppercase tracking-wider">Score de compréhension</span>
+<span class="text-secondary font-bold">84%</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full w-[84%]"></div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="p-4 bg-surface-container-low rounded-lg border-l-4 border-tertiary">
+<div class="flex justify-between items-center mb-2">
+<span class="text-xs font-bold text-primary uppercase tracking-wider">Engagement moyen</span>
+<span class="text-tertiary font-bold">62%</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden">
+<div class="bg-tertiary h-full w-[62%]"></div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="p-4 bg-surface-container-lowest border border-outline-variant/30 rounded-lg shadow-sm">
+<p class="text-[10px] text-on-surface-variant mb-1">RECOMMANDATION IA</p>
+<p class="text-sm font-medium leading-snug">Ajouter un support visuel pour le concept de "Raréfaction". 15% des élèves ont un profil visuel dominant.</p>
+</div>
+</div>
+</div>
+<!-- Decorative element -->
+<div class="absolute -bottom-6 -right-6 w-32 h-32 bg-secondary/10 rounded-full blur-3xl -z-10"></div>
+<div class="absolute -top-10 -left-10 w-48 h-48 bg-primary/5 rounded-full blur-3xl -z-10"></div>
+</div>
+</div>
+</section>
+<!-- Problem Section -->
+<section class="py-24 bg-surface-container-low">
+<div class="max-w-7xl mx-auto px-8">
+<div class="text-center mb-20">
+<h2 class="font-headline text-3xl md:text-5xl font-extrabold text-primary mb-6">Le mythe de l'étudiant moyen</h2>
+<p class="text-on-surface-variant max-w-2xl mx-auto text-lg">La plupart des cours sont conçus pour une moyenne statistique qui n'existe pas. Vos étudiants sont divers ; votre pédagogie doit l'être aussi.</p>
+</div>
+<div class="grid md:grid-cols-2 gap-12 items-center">
+<div class="relative group">
+<img alt="Amphi traditionnel" class="rounded-xl grayscale hover:grayscale-0 transition-all duration-500 shadow-xl" data-alt="Conférence universitaire dans un amphithéâtre bondé" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7oS9ALFt9kJ95DBB5-tcRtHCbk9OX_mFPZsCcU6Zn0Qb1L8hXBZ-nHIoosdfQu955w6Q8ocxxkxjJ9VKyeg9_JJn3IbG553sas-jdT_w5arMeDr6mLQVhTH_QHyKKz1EavTwJGiqGMB26a8-hsVbGsRsWw44P1el4luwwsXsAVnPhD987tFhJSz53E1Dxh-1cavxnJQr3KHmH6UNEHY5TBC0fZ-hX_D1KLHO6i2npI2pIZvmk4Igry3HhaQdhRmKgmd1w9dGm4HaM"/>
+<div class="absolute inset-0 bg-primary/20 rounded-xl mix-blend-multiply"></div>
+</div>
+<div class="space-y-8">
+<div class="flex gap-6">
+<div class="flex-shrink-0 w-12 h-12 bg-white rounded-full flex items-center justify-center text-error shadow-sm">
+<span class="material-symbols-outlined">trending_down</span>
+</div>
+<div>
+<h4 class="font-headline font-bold text-xl mb-2">Décrochage invisible</h4>
+<p class="text-on-surface-variant">25% des étudiants décrochent car le rythme ne correspond pas à leur vitesse d'assimilation.</p>
+</div>
+</div>
+<div class="flex gap-6">
+<div class="flex-shrink-0 w-12 h-12 bg-white rounded-full flex items-center justify-center text-error shadow-sm">
+<span class="material-symbols-outlined">block</span>
+</div>
+<div>
+<h4 class="font-headline font-bold text-xl mb-2">Barrières cognitives</h4>
+<p class="text-on-surface-variant">Les supports monolithiques excluent les profils neuro-atypiques ou les besoins spécifiques.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- How it works -->
+<section class="py-24 px-8">
+<div class="max-w-7xl mx-auto">
+<h2 class="font-headline text-3xl md:text-4xl font-extrabold text-primary mb-16">La boucle de l'excellence</h2>
+<div class="grid md:grid-cols-3 gap-8">
+<!-- Step 1 -->
+<div class="p-10 bg-surface-container-lowest rounded-xl shadow-[0_10px_40px_rgba(25,28,30,0.06)] group hover:translate-y-[-8px] transition-transform duration-300">
+<div class="w-16 h-16 bg-primary-fixed text-primary rounded-xl flex items-center justify-center mb-8 font-headline text-2xl font-black">1</div>
+<h3 class="font-headline font-bold text-2xl mb-4">Analyser</h3>
+<p class="text-on-surface-variant leading-relaxed">Importez vos données anonymisées pour générer une cartographie cognitive précise de votre audience.</p>
+<div class="mt-8 flex items-center gap-2 text-primary font-bold text-sm">
+                            Explorer l'analyse <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="p-10 bg-surface-container-lowest rounded-xl shadow-[0_10px_40px_rgba(25,28,30,0.06)] group hover:translate-y-[-8px] transition-transform duration-300">
+<div class="w-16 h-16 bg-secondary-fixed text-secondary rounded-xl flex items-center justify-center mb-8 font-headline text-2xl font-black">2</div>
+<h3 class="font-headline font-bold text-2xl mb-4">Simuler</h3>
+<p class="text-on-surface-variant leading-relaxed">Testez vos contenus sur un jumeau numérique de votre classe pour prédire les zones de friction.</p>
+<div class="mt-8 flex items-center gap-2 text-secondary font-bold text-sm">
+                            Voir le jumeau <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="p-10 bg-surface-container-lowest rounded-xl shadow-[0_10px_40px_rgba(25,28,30,0.06)] group hover:translate-y-[-8px] transition-transform duration-300">
+<div class="w-16 h-16 bg-tertiary-fixed text-tertiary rounded-xl flex items-center justify-center mb-8 font-headline text-2xl font-black">3</div>
+<h3 class="font-headline font-bold text-2xl mb-4">Améliorer</h3>
+<p class="text-on-surface-variant leading-relaxed">Recevez des recommandations d'adaptation pour rendre votre cours universellement accessible.</p>
+<div class="mt-8 flex items-center gap-2 text-tertiary font-bold text-sm">
+                            Optimiser maintenant <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Showcase Bento Grid -->
+<section class="py-24 bg-surface-container-high/30">
+<div class="max-w-7xl mx-auto px-8">
+<div class="grid grid-cols-1 md:grid-cols-12 grid-rows-2 gap-6 h-auto md:h-[600px]">
+<!-- Large Card: Scores de compréhension -->
+<div class="md:col-span-8 bg-white rounded-xl p-8 relative overflow-hidden shadow-sm flex flex-col justify-between">
+<div>
+<span class="px-3 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded-full mb-4 inline-block tracking-widest uppercase">Analyse Granulaire</span>
+<h3 class="font-headline text-3xl font-extrabold text-primary mb-4">Scores de compréhension par segments</h3>
+<p class="text-on-surface-variant max-w-md">Identifiez précisément quels concepts bloquent pour quels groupes d'étudiants.</p>
+</div>
+<div class="mt-8">
+<img alt="Graphique de données" class="rounded-lg shadow-inner opacity-80" data-alt="Graphique analytique abstrait avec des courbes fluides bleues" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2r91oZyALTVAeQF4lW8M3uaX8zcQdNVJDQLLI3K0F-OvhY5JNe_oinLyqT9XrT8csnQGPDVgt6eFJUDsorunfWPtMorUGP8Cq5f42z3d6sD8X1UUdS0vrS2FTKz6j8RslUPwNx4EQEkTjDCcsEUubWPMRqXcqcAi9GPHUgefAept5tkrg5uxV3Pd1rKTL071zQeitXMb6xZX0OG0VNluSZosa-GULEb9CIw_xw1DTFvjqRASwFDNEtCCj0ByygNHmeOqx2GKhCLiI"/>
+</div>
+</div>
+<!-- Small Card: Recommandations -->
+<div class="md:col-span-4 bg-gradient-to-br from-secondary to-primary-container rounded-xl p-8 text-white shadow-xl flex flex-col justify-center items-center text-center">
+<span class="material-symbols-outlined text-5xl mb-6" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<h3 class="font-headline text-xl font-bold mb-4">Recommandations IA en temps réel</h3>
+<p class="text-white/80 text-sm">Optimisez vos slides et supports pédagogiques grâce à nos algorithmes prédictifs.</p>
+</div>
+<!-- Small Card: Jumeau numérique -->
+<div class="md:col-span-4 bg-tertiary text-white rounded-xl p-8 shadow-sm flex flex-col justify-between">
+<div class="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary-fixed-dim">model_training</span>
+</div>
+<div>
+<h3 class="font-headline text-xl font-bold mb-2">Jumeau Numérique</h3>
+<p class="text-white/70 text-sm">Simulez l'impact d'un changement de pédagogie avant de le déployer.</p>
+</div>
+</div>
+<!-- Large Card: Ethics -->
+<div class="md:col-span-8 bg-surface-container-lowest rounded-xl p-8 shadow-sm border border-outline-variant/20 flex flex-col md:flex-row gap-8 items-center">
+<div class="flex-1">
+<h3 class="font-headline text-2xl font-extrabold text-primary mb-4">IA Responsable &amp; Éthique</h3>
+<p class="text-on-surface-variant text-sm mb-6">Vos données sont anonymisées et stockées en Europe. Nous garantissons une transparence totale sur les biais algorithmiques.</p>
+<button class="text-primary font-bold text-sm flex items-center gap-2">Lire notre manifeste <span class="material-symbols-outlined text-sm">open_in_new</span></button>
+</div>
+<div class="flex-1 flex justify-center">
+<div class="grid grid-cols-2 gap-2">
+<div class="w-16 h-16 bg-primary-fixed rounded-lg"></div>
+<div class="w-16 h-16 bg-secondary-fixed rounded-full"></div>
+<div class="w-16 h-16 bg-tertiary-fixed rounded-full"></div>
+<div class="w-16 h-16 bg-outline-variant/20 rounded-lg"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Social Proof -->
+<section class="py-20 px-8">
+<div class="max-w-7xl mx-auto border-t border-outline-variant/30 pt-20">
+<p class="text-center font-headline font-bold text-on-surface-variant/60 uppercase tracking-widest text-sm mb-12">Ils transforment l'éducation avec nous</p>
+<div class="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-40 grayscale">
+<div class="text-2xl font-black font-headline">UNIVERSITÉ A</div>
+<div class="text-2xl font-black font-headline">ECOLE SUP B</div>
+<div class="text-2xl font-black font-headline">ACADÉMIE C</div>
+<div class="text-2xl font-black font-headline">INSTITUT D</div>
+</div>
+</div>
+</section>
+<!-- Final CTA -->
+<section class="py-32 px-8">
+<div class="max-w-4xl mx-auto bg-primary rounded-[2rem] p-12 md:p-20 text-center relative overflow-hidden shadow-2xl">
+<!-- Background pattern -->
+<div class="absolute inset-0 opacity-10 pointer-events-none">
+<svg height="100%" width="100%" xmlns="http://www.w3.org/2000/svg">
+<defs><pattern height="40" id="dots" patternunits="userSpaceOnUse" width="40" x="0" y="0"><circle cx="2" cy="2" fill="#fff" r="1"></circle></pattern></defs>
+<rect fill="url(#dots)" height="100%" width="100%"></rect>
+</svg>
+</div>
+<h2 class="font-headline text-4xl md:text-6xl font-extrabold text-white mb-8 relative z-10 leading-tight">
+                    Prêt à redéfinir votre pédagogie ?
+                </h2>
+<p class="text-primary-fixed text-lg mb-12 max-w-xl mx-auto relative z-10">
+                    Rejoignez les institutions qui placent l'humain au cœur de l'analyse technologique.
+                </p>
+<div class="flex flex-col md:flex-row justify-center gap-4 relative z-10">
+<button class="px-10 py-5 rounded-xl bg-white text-primary font-extrabold shadow-lg hover:bg-primary-fixed transition-colors">
+                        Créer mon compte expert
+                    </button>
+<button class="px-10 py-5 rounded-xl bg-transparent border-2 border-white/30 text-white font-extrabold hover:bg-white/10 transition-colors">
+                        Contacter un conseiller
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-12 px-8 mt-20 bg-[#00236F] dark:bg-black text-white rounded-t-[2rem]">
+<div class="max-w-7xl mx-auto">
+<div class="flex flex-col md:flex-row justify-between items-start mb-16 gap-12">
+<div class="max-w-xs">
+<div class="text-xl font-black text-white font-headline tracking-tight mb-4">PédagoLens</div>
+<p class="text-slate-300 text-xs leading-relaxed">
+                        L'intelligence artificielle dédiée à l'équité pédagogique et à l'excellence académique. 
+                        Designé pour les éducateurs de demain.
+                    </p>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-12">
+<div>
+<h4 class="font-headline font-bold text-sm mb-6 uppercase tracking-widest text-white/50">Produit</h4>
+<ul class="space-y-4 text-xs font-medium text-slate-300">
+<li><a class="hover:text-white transition-colors" href="#">Fonctionnalités</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Intégrations</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Tarifs</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-headline font-bold text-sm mb-6 uppercase tracking-widest text-white/50">Société</h4>
+<ul class="space-y-4 text-xs font-medium text-slate-300">
+<li><a class="hover:text-white transition-colors" href="#">Manifeste Éthique</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Blog Éducatif</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Partenaires</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-headline font-bold text-sm mb-6 uppercase tracking-widest text-white/50">Légal</h4>
+<ul class="space-y-4 text-xs font-medium text-slate-300">
+<li><a class="hover:text-white transition-colors" href="#">Confidentialité</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Conditions d'utilisation</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Support Technique</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/10 gap-4">
+<div class="text-slate-300 text-xs">
+                    © 2024 PédagoLens AI. L'excellence éditoriale au service de l'éducation.
+                </div>
+<div class="flex gap-6">
+<a class="text-slate-300 hover:text-white transition-colors opacity-80 hover:opacity-100" href="#">
+<span class="material-symbols-outlined">language</span>
+</a>
+<a class="text-slate-300 hover:text-white transition-colors opacity-80 hover:opacity-100" href="#">
+<span class="material-symbols-outlined">mail</span>
+</a>
+</div>
+</div>
+</div>
+</footer>
+</body></html>

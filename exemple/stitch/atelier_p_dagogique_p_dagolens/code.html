@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Atelier Pédagogique - PédagoLens AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-tint": "#4059aa",
+              "on-background": "#191c1e",
+              "outline": "#757682",
+              "surface-bright": "#f7f9fb",
+              "inverse-surface": "#2d3133",
+              "secondary-fixed-dim": "#d2bbff",
+              "secondary": "#712ae2",
+              "primary": "#00236f",
+              "secondary-fixed": "#eaddff",
+              "inverse-on-surface": "#eff1f3",
+              "surface-variant": "#e0e3e5",
+              "on-secondary-fixed": "#25005a",
+              "on-primary-fixed-variant": "#264191",
+              "primary-container": "#1e3a8a",
+              "surface-container-highest": "#e0e3e5",
+              "on-primary-container": "#90a8ff",
+              "on-primary-fixed": "#00164e",
+              "on-error-container": "#93000a",
+              "on-surface-variant": "#444651",
+              "on-surface": "#191c1e",
+              "on-error": "#ffffff",
+              "on-tertiary-fixed": "#001f26",
+              "surface-container-low": "#f2f4f6",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary-container": "#1dbcda",
+              "tertiary-fixed": "#acedff",
+              "outline-variant": "#c5c5d3",
+              "primary-fixed": "#dce1ff",
+              "background": "#f7f9fb",
+              "on-secondary-container": "#fffbff",
+              "surface-dim": "#d8dadc",
+              "surface-container-high": "#e6e8ea",
+              "surface": "#f7f9fb",
+              "primary-fixed-dim": "#b6c4ff",
+              "on-secondary": "#ffffff",
+              "inverse-primary": "#b6c4ff",
+              "on-primary": "#ffffff",
+              "on-secondary-fixed-variant": "#5a00c6",
+              "error": "#ba1a1a",
+              "secondary-container": "#8a4cfc",
+              "error-container": "#ffdad6",
+              "tertiary-fixed-dim": "#4cd7f6",
+              "tertiary": "#002f38",
+              "tertiary-container": "#004754",
+              "on-tertiary": "#ffffff",
+              "on-tertiary-fixed-variant": "#004e5c",
+              "surface-container": "#eceef0"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+        }
+        .ia-glow {
+            box-shadow: 0 0 15px rgba(113, 42, 226, 0.15);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F7F9FB;
+        }
+        h1, h2, h3, .font-headline {
+            font-family: 'Manrope', sans-serif;
+            letter-spacing: -0.02em;
+        }
+    </style>
+</head>
+<body class="text-on-surface">
+<!-- SideNavBar Component -->
+<nav class="fixed left-0 top-0 h-full flex flex-col p-6 bg-[#FFFFFF] dark:bg-slate-950 shadow-[0_10px_40px_rgba(25,28,30,0.06)] w-64 z-50">
+<div class="mb-10">
+<h1 class="text-lg font-bold text-[#00236F] font-headline">PédagoLens AI</h1>
+<p class="text-xs text-on-surface-variant font-medium">Portail Éducatif</p>
+</div>
+<button class="mb-8 w-full py-3 px-4 bg-gradient-to-r from-primary to-primary-container text-on-primary rounded-lg font-bold flex items-center justify-center gap-2 hover:scale-[0.98] transition-transform">
+<span class="material-symbols-outlined text-sm">add</span>
+            Nouvelle Analyse
+        </button>
+<div class="flex flex-col gap-2 flex-grow">
+<!-- Tableau de bord -->
+<a class="flex items-center gap-3 p-3 text-slate-500 hover:bg-slate-50 hover:translate-x-1 transition-all rounded-lg font-medium text-sm" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                Tableau de bord
+            </a>
+<!-- Analyses IA (ACTIVE) -->
+<a class="flex items-center gap-3 p-3 bg-[#F2F4F6] text-[#00236F] font-bold rounded-lg translate-x-1 transition-all text-sm" href="#">
+<span class="material-symbols-outlined">psychology</span>
+                Analyses IA
+            </a>
+<!-- Élèves -->
+<a class="flex items-center gap-3 p-3 text-slate-500 hover:bg-slate-50 hover:translate-x-1 transition-all rounded-lg font-medium text-sm" href="#">
+<span class="material-symbols-outlined">group</span>
+                Élèves
+            </a>
+<!-- Rapports -->
+<a class="flex items-center gap-3 p-3 text-slate-500 hover:bg-slate-50 hover:translate-x-1 transition-all rounded-lg font-medium text-sm" href="#">
+<span class="material-symbols-outlined">description</span>
+                Rapports
+            </a>
+<!-- Paramètres -->
+<a class="flex items-center gap-3 p-3 text-slate-500 hover:bg-slate-50 hover:translate-x-1 transition-all rounded-lg font-medium text-sm" href="#">
+<span class="material-symbols-outlined">settings</span>
+                Paramètres
+            </a>
+</div>
+<div class="pt-6 border-t border-surface-container flex flex-col gap-2">
+<a class="flex items-center gap-3 p-3 text-slate-500 hover:bg-slate-50 text-sm" href="#">
+<span class="material-symbols-outlined">help</span>
+                Aide
+            </a>
+<a class="flex items-center gap-3 p-3 text-slate-500 hover:bg-slate-50 text-sm" href="#">
+<span class="material-symbols-outlined">logout</span>
+                Déconnexion
+            </a>
+</div>
+</nav>
+<!-- Main Content Workspace -->
+<main class="ml-64 p-10 max-w-[1600px] mx-auto min-h-screen">
+<!-- Header Section -->
+<header class="flex justify-between items-end mb-12">
+<div>
+<h2 class="text-4xl font-extrabold text-primary font-headline">Atelier pédagogique</h2>
+<p class="text-on-surface-variant mt-2 text-lg">Optimisez vos supports pédagogiques grâce à l'analyse cognitive en temps réel.</p>
+</div>
+<div class="flex gap-4">
+<button class="px-6 py-2 border-2 border-primary text-primary font-bold rounded-lg hover:bg-primary/5 transition-colors">
+                    Comparer les versions
+                </button>
+<button class="px-8 py-2 bg-gradient-to-r from-primary to-primary-container text-white font-bold rounded-lg ia-glow">
+                    Lancer l'analyse
+                </button>
+</div>
+</header>
+<!-- Bento Grid Workspace -->
+<div class="grid grid-cols-12 gap-8 mb-8">
+<!-- Left Column: Input Area -->
+<div class="col-span-7 flex flex-col gap-6">
+<section class="bg-surface-container-lowest rounded-xl shadow-[0_10px_40px_rgba(25,28,30,0.06)] overflow-hidden flex flex-col min-h-[500px]">
+<!-- Tabs -->
+<div class="flex border-b border-surface-container-low px-4">
+<button class="px-6 py-4 text-primary font-bold border-b-2 border-primary text-sm">plan de cours</button>
+<button class="px-6 py-4 text-on-surface-variant hover:text-primary transition-colors text-sm">consigne</button>
+<button class="px-6 py-4 text-on-surface-variant hover:text-primary transition-colors text-sm">activité</button>
+<button class="px-6 py-4 text-on-surface-variant hover:text-primary transition-colors text-sm">évaluation</button>
+</div>
+<!-- Content Input -->
+<div class="p-6 flex-grow flex flex-col gap-4">
+<div class="flex-grow">
+<textarea class="w-full h-full p-4 bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary/20 text-on-surface text-sm leading-relaxed resize-none" placeholder="Saisissez ou collez votre contenu pédagogique ici pour analyse..."></textarea>
+</div>
+<!-- Upload Area -->
+<div class="border-2 border-dashed border-outline-variant rounded-lg p-6 flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-4xl mb-2 group-hover:text-primary transition-colors">cloud_upload</span>
+<p class="text-sm font-medium">Déposez un fichier (PDF, DOCX) ou cliquez pour parcourir</p>
+<p class="text-[10px] mt-1 opacity-60 uppercase tracking-widest">Limite : 25Mo</p>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Profiles & Analysis -->
+<div class="col-span-5 flex flex-col gap-6">
+<!-- Student Profiles Selector -->
+<section class="bg-surface-container-lowest rounded-xl p-6 shadow-[0_10px_40px_rgba(25,28,30,0.06)] relative overflow-hidden">
+<div class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-secondary/10 to-transparent"></div>
+<div class="flex items-center justify-between mb-5">
+<h3 class="font-bold text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">psychology</span>
+                            Profils d'élèves ciblés
+                        </h3>
+<span class="text-[10px] bg-secondary/10 text-secondary px-2 py-1 rounded-full font-bold uppercase">Analyse IA Active</span>
+</div>
+<div class="flex flex-wrap gap-2">
+<div class="px-4 py-2 bg-primary text-white rounded-full text-xs font-bold flex items-center gap-2">
+                            Concentration <span class="material-symbols-outlined text-xs">close</span>
+</div>
+<div class="px-4 py-2 bg-primary text-white rounded-full text-xs font-bold flex items-center gap-2">
+                            TDAH <span class="material-symbols-outlined text-xs">close</span>
+</div>
+<div class="px-4 py-2 bg-surface-container-high text-on-surface-variant rounded-full text-xs font-medium hover:bg-primary-fixed transition-colors cursor-pointer">
+                            Allophone
+                        </div>
+<div class="px-4 py-2 bg-surface-container-high text-on-surface-variant rounded-full text-xs font-medium hover:bg-primary-fixed transition-colors cursor-pointer">
+                            Dyslexie
+                        </div>
+<button class="w-8 h-8 rounded-full border-2 border-outline-variant flex items-center justify-center text-outline hover:border-primary hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+</section>
+<!-- Score Cards Grid -->
+<div class="grid grid-cols-2 gap-4">
+<!-- Compréhension -->
+<div class="bg-surface-container-lowest rounded-xl p-5 shadow-[0_10px_40px_rgba(25,28,30,0.06)] border-l-4 border-tertiary">
+<p class="text-label-sm text-on-surface-variant font-bold uppercase tracking-wider mb-2">Compréhension Globale</p>
+<div class="flex items-end gap-2">
+<span class="text-4xl font-extrabold text-primary font-headline">68</span>
+<span class="text-on-surface-variant font-medium mb-1">/100</span>
+</div>
+<div class="w-full bg-surface-container mt-4 h-1.5 rounded-full overflow-hidden">
+<div class="bg-tertiary h-full w-[68%]"></div>
+</div>
+</div>
+<!-- Charge Cognitive -->
+<div class="bg-surface-container-lowest rounded-xl p-5 shadow-[0_10px_40px_rgba(25,28,30,0.06)] border-l-4 border-error">
+<p class="text-label-sm text-on-surface-variant font-bold uppercase tracking-wider mb-2">Charge Cognitive</p>
+<div class="flex items-end gap-2">
+<span class="text-4xl font-extrabold text-error font-headline">82</span>
+<span class="text-on-surface-variant font-medium mb-1">/100</span>
+</div>
+<div class="w-full bg-surface-container mt-4 h-1.5 rounded-full overflow-hidden">
+<div class="bg-error h-full w-[82%]"></div>
+</div>
+</div>
+</div>
+<!-- Risk Indicators -->
+<section class="bg-surface-container-lowest rounded-xl p-6 shadow-[0_10px_40px_rgba(25,28,30,0.06)] flex-grow">
+<h3 class="font-bold text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">warning</span>
+                        Indicateurs de risque
+                    </h3>
+<div class="space-y-5">
+<div class="flex items-start gap-4">
+<div class="p-2 bg-error-container text-on-error-container rounded-lg">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">priority_high</span>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-center mb-1">
+<h4 class="text-sm font-bold">Complexité syntaxique</h4>
+<span class="text-[10px] text-error font-bold uppercase">Critique</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-tight">Phrases trop longues (&gt;25 mots) impactant le profil TDAH.</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="p-2 bg-tertiary-fixed text-on-tertiary-fixed-variant rounded-lg">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">info</span>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-center mb-1">
+<h4 class="text-sm font-bold">Clarté des consignes</h4>
+<span class="text-[10px] text-tertiary font-bold uppercase">Modéré</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-tight">Manque de connecteurs logiques pour les allophones.</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+<!-- Suggestions Section -->
+<section class="mt-12">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-2xl font-extrabold text-primary font-headline">Suggestions d'amélioration</h3>
+<div class="flex items-center gap-2 text-on-surface-variant text-sm font-medium">
+<span class="material-symbols-outlined text-secondary">auto_awesome</span>
+                    Généré par PédagoLens AI
+                </div>
+</div>
+<div class="grid grid-cols-3 gap-6">
+<!-- Suggestion 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-[0_10px_40px_rgba(25,28,30,0.06)] border-t-4 border-secondary flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-4">
+<span class="px-2 py-1 bg-surface-container text-[10px] font-bold uppercase rounded">Syntaxe</span>
+<span class="text-secondary font-bold text-xs">+15% Compréhension</span>
+</div>
+<h4 class="font-bold text-primary mb-2">Segmentation des consignes</h4>
+<p class="text-xs text-on-surface-variant mb-4 leading-relaxed">Le paragraphe 2 contient 3 instructions imbriquées. Divisez-les en une liste à puces numérotée.</p>
+</div>
+<button class="w-full py-2 bg-secondary/10 text-secondary font-bold text-xs rounded-lg hover:bg-secondary hover:text-white transition-all flex items-center justify-center gap-2">
+                        Appliquer une suggestion <span class="material-symbols-outlined text-sm">bolt</span>
+</button>
+</div>
+<!-- Suggestion 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-[0_10px_40px_rgba(25,28,30,0.06)] border-t-4 border-secondary flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-4">
+<span class="px-2 py-1 bg-surface-container text-[10px] font-bold uppercase rounded">Vocabulaire</span>
+<span class="text-secondary font-bold text-xs">+22% Rétention</span>
+</div>
+<h4 class="font-bold text-primary mb-2">Simplification lexicale</h4>
+<p class="text-xs text-on-surface-variant mb-4 leading-relaxed">Remplacer "concomitant" par "en même temps" pour favoriser les profils allophones et dyslexiques.</p>
+</div>
+<button class="w-full py-2 bg-secondary/10 text-secondary font-bold text-xs rounded-lg hover:bg-secondary hover:text-white transition-all flex items-center justify-center gap-2">
+                        Appliquer une suggestion <span class="material-symbols-outlined text-sm">bolt</span>
+</button>
+</div>
+<!-- Suggestion 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-[0_10px_40px_rgba(25,28,30,0.06)] border-t-4 border-secondary flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-4">
+<span class="px-2 py-1 bg-surface-container text-[10px] font-bold uppercase rounded">Structure</span>
+<span class="text-secondary font-bold text-xs">-30% Charge Cog.</span>
+</div>
+<h4 class="font-bold text-primary mb-2">Ancrage visuel</h4>
+<p class="text-xs text-on-surface-variant mb-4 leading-relaxed">Ajouter des sous-titres en gras pour permettre un balayage visuel efficace (Profil Concentration).</p>
+</div>
+<button class="w-full py-2 bg-secondary/10 text-secondary font-bold text-xs rounded-lg hover:bg-secondary hover:text-white transition-all flex items-center justify-center gap-2">
+                        Appliquer une suggestion <span class="material-symbols-outlined text-sm">bolt</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer Component -->
+<footer class="ml-64 bg-[#00236F] dark:bg-black w-auto py-12 px-8 mt-20 rounded-t-[2rem] text-white">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="flex flex-col gap-2">
+<h2 class="text-xl font-black text-white font-headline">PédagoLens AI</h2>
+<p class="font-['Inter'] text-xs text-slate-300">© 2024 PédagoLens AI. L'excellence éditoriale au service de l'éducation.</p>
+</div>
+<div class="flex gap-8">
+<a class="font-['Inter'] text-xs text-slate-300 hover:text-white transition-colors" href="#">Confidentialité</a>
+<a class="font-['Inter'] text-xs text-slate-300 hover:text-white transition-colors" href="#">Conditions d'utilisation</a>
+<a class="font-['Inter'] text-xs text-slate-300 hover:text-white transition-colors" href="#">Support Technique</a>
+<a class="font-['Inter'] text-xs text-slate-300 hover:text-white transition-colors" href="#">Blog Éducatif</a>
+</div>
+</div>
+</footer>
+</body></html>

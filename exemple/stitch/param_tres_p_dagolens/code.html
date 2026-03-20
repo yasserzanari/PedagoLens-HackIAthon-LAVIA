@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-tint": "#4059aa",
+              "on-background": "#191c1e",
+              "outline": "#757682",
+              "surface-bright": "#f7f9fb",
+              "inverse-surface": "#2d3133",
+              "secondary-fixed-dim": "#d2bbff",
+              "secondary": "#712ae2",
+              "primary": "#00236f",
+              "secondary-fixed": "#eaddff",
+              "inverse-on-surface": "#eff1f3",
+              "surface-variant": "#e0e3e5",
+              "on-secondary-fixed": "#25005a",
+              "on-primary-fixed-variant": "#264191",
+              "primary-container": "#1e3a8a",
+              "surface-container-highest": "#e0e3e5",
+              "on-primary-container": "#90a8ff",
+              "on-primary-fixed": "#00164e",
+              "on-error-container": "#93000a",
+              "on-surface-variant": "#444651",
+              "on-surface": "#191c1e",
+              "on-error": "#ffffff",
+              "on-tertiary-fixed": "#001f26",
+              "surface-container-low": "#f2f4f6",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary-container": "#1dbcda",
+              "tertiary-fixed": "#acedff",
+              "outline-variant": "#c5c5d3",
+              "primary-fixed": "#dce1ff",
+              "background": "#f7f9fb",
+              "on-secondary-container": "#fffbff",
+              "surface-dim": "#d8dadc",
+              "surface-container-high": "#e6e8ea",
+              "surface": "#f7f9fb",
+              "primary-fixed-dim": "#b6c4ff",
+              "on-secondary": "#ffffff",
+              "inverse-primary": "#b6c4ff",
+              "on-primary": "#ffffff",
+              "on-secondary-fixed-variant": "#5a00c6",
+              "error": "#ba1a1a",
+              "secondary-container": "#8a4cfc",
+              "error-container": "#ffdad6",
+              "tertiary-fixed-dim": "#4cd7f6",
+              "tertiary": "#002f38",
+              "tertiary-container": "#004754",
+              "on-tertiary": "#ffffff",
+              "on-tertiary-fixed-variant": "#004e5c",
+              "surface-container": "#eceef0"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #F7F9FB; }
+        .font-headline { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-effect { backdrop-filter: blur(12px); background-color: rgba(255, 255, 255, 0.8); }
+        .active-tab { background-color: #F2F4F6; color: #00236F; font-weight: 700; border-radius: 0.5rem; }
+    </style>
+</head>
+<body class="text-on-surface">
+<!-- Shell: SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-64 flex flex-col p-6 bg-[#FFFFFF] shadow-[0_10px_40px_rgba(25,28,30,0.06)] z-50">
+<div class="mb-10">
+<h1 class="text-lg font-bold text-[#00236F] font-headline">PédagoLens AI</h1>
+<p class="text-xs text-on-surface-variant font-medium">Portail Éducatif</p>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 transition-transform hover:translate-x-1 font-medium text-sm" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Tableau de bord</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 transition-transform hover:translate-x-1 font-medium text-sm" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span>Analyses IA</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 transition-transform hover:translate-x-1 font-medium text-sm" href="#">
+<span class="material-symbols-outlined">group</span>
+<span>Élèves</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 transition-transform hover:translate-x-1 font-medium text-sm" href="#">
+<span class="material-symbols-outlined">description</span>
+<span>Rapports</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-[#F2F4F6] text-[#00236F] font-bold rounded-lg transition-transform hover:translate-x-1 text-sm" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Paramètres</span>
+</a>
+</nav>
+<div class="mt-auto space-y-2 pt-6 border-t border-outline-variant/10">
+<button class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-primary-container text-white py-3 px-4 rounded-lg font-bold text-sm shadow-lg mb-6">
+<span>Nouvelle Analyse</span>
+</button>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 transition-transform hover:translate-x-1 text-sm" href="#">
+<span class="material-symbols-outlined">help</span>
+<span>Aide</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 transition-transform hover:translate-x-1 text-sm" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span>Déconnexion</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 min-h-screen p-12 max-w-7xl">
+<!-- Header Section -->
+<header class="mb-12">
+<h2 class="text-4xl font-extrabold font-headline text-primary tracking-tight mb-2">Paramètres du Système</h2>
+<p class="text-on-surface-variant font-body">Gérez vos préférences pédagogiques et la configuration de votre intelligence artificielle.</p>
+</header>
+<div class="grid grid-cols-12 gap-8">
+<!-- Column Left: Profile & Institution -->
+<div class="col-span-12 lg:col-span-4 space-y-8">
+<!-- Profil Enseignant -->
+<section class="bg-surface-container-lowest rounded-xl p-8 shadow-[0_10px_40px_rgba(25,28,30,0.06)]">
+<div class="flex flex-col items-center text-center">
+<div class="relative mb-6">
+<img alt="Avatar Enseignant" class="w-24 h-24 rounded-full object-cover border-4 border-surface-container-low" data-alt="Portrait professionnel d'une enseignante souriante" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgysGUEYn1QKKZBJlScXhE7N-WAjtGA4gn7H6--OPqL4sYLJBuLOOoac8ph-Ex-xAcN9uu8_KlUhO0FuCcSBm3Q3iuhR0K27TaPUX_Gko0mJlaI8R7mJ8CveNJVSIBAScPQ38MxIXlC7T80w6vOAV3SqDZtDJXZZcW-2l09QLM_rMQwPDCRh8pzfp7NX1V4oaFqmYfQb9wPeMCPet-AN0oudbZRg9uZqk4HzpMHUrJjMWJ7cC1Hu9ad9YnBFKqIAX5zQcx0wM3ocNP"/>
+<button class="absolute bottom-0 right-0 bg-primary text-white p-2 rounded-full shadow-md hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-sm">edit</span>
+</button>
+</div>
+<h3 class="text-xl font-bold font-headline text-primary">Dr. Sophie Martin</h3>
+<p class="text-on-surface-variant text-sm mb-6">sophie.martin@univ-edu.fr</p>
+<button class="w-full py-2.5 px-4 bg-surface-container-low text-primary font-bold rounded-lg hover:bg-surface-container-high transition-colors text-sm">
+                            Modifier le profil
+                        </button>
+</div>
+</section>
+<!-- Institution Settings -->
+<section class="bg-surface-container-lowest rounded-xl p-8 shadow-[0_10px_40px_rgba(25,28,30,0.06)]">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary">account_balance</span>
+<h3 class="text-lg font-bold font-headline text-primary">Institution</h3>
+</div>
+<div class="space-y-4">
+<div>
+<label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Université / Établissement</label>
+<input class="w-full bg-surface-container-low border-none rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all" type="text" value="Université de Paris-Sorbonne"/>
+</div>
+<div>
+<label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Département</label>
+<input class="w-full bg-surface-container-low border-none rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all" type="text" value="Sciences de l'Éducation"/>
+</div>
+</div>
+</section>
+</div>
+<!-- Column Right: Templates, AI, Config -->
+<div class="col-span-12 lg:col-span-8 space-y-8">
+<!-- Student Profile Templates -->
+<section class="bg-surface-container-lowest rounded-xl p-8 shadow-[0_10px_40px_rgba(25,28,30,0.06)] relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+<div class="flex justify-between items-center mb-8">
+<div>
+<h3 class="text-xl font-bold font-headline text-primary">Modèles de Profils Élèves</h3>
+<p class="text-sm text-on-surface-variant">Configurez les types d'analyses récurrents.</p>
+</div>
+<button class="flex items-center gap-2 text-secondary font-bold text-sm">
+<span class="material-symbols-outlined">add_circle</span>
+                            Nouveau modèle
+                        </button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Card TDAH -->
+<div class="p-5 rounded-xl border border-outline-variant/20 bg-surface-bright hover:border-secondary/30 transition-all cursor-pointer group">
+<div class="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary mb-4">
+<span class="material-symbols-outlined">neurology</span>
+</div>
+<h4 class="font-bold text-primary mb-1">TDAH</h4>
+<p class="text-xs text-on-surface-variant leading-relaxed">Focus sur la gestion de l'attention et l'organisation.</p>
+</div>
+<!-- Card Allophone -->
+<div class="p-5 rounded-xl border border-outline-variant/20 bg-surface-bright hover:border-secondary/30 transition-all cursor-pointer group">
+<div class="w-10 h-10 rounded-lg bg-tertiary-container/30 flex items-center justify-center text-tertiary mb-4">
+<span class="material-symbols-outlined">translate</span>
+</div>
+<h4 class="font-bold text-primary mb-1">Allophone</h4>
+<p class="text-xs text-on-surface-variant leading-relaxed">Adaptation linguistique et supports visuels accrus.</p>
+</div>
+<!-- Card Advanced -->
+<div class="p-5 rounded-xl border border-outline-variant/20 bg-surface-bright hover:border-secondary/30 transition-all cursor-pointer group">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4">
+<span class="material-symbols-outlined">rocket_launch</span>
+</div>
+<h4 class="font-bold text-primary mb-1">HPI / Avancé</h4>
+<p class="text-xs text-on-surface-variant leading-relaxed">Approfondissement critique et défis complexes.</p>
+</div>
+</div>
+</section>
+<!-- AI Preferences -->
+<section class="bg-surface-container-lowest rounded-xl p-8 shadow-[0_10px_40px_rgba(25,28,30,0.06)]">
+<div class="flex items-center gap-3 mb-8">
+<div class="bg-secondary/10 p-2 rounded-lg">
+<span class="material-symbols-outlined text-secondary">psychology_alt</span>
+</div>
+<h3 class="text-xl font-bold font-headline text-primary">Préférences de l'IA</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="space-y-6">
+<div>
+<label class="block text-xs font-bold text-on-surface-variant uppercase mb-3">Modèle d'Analyse</label>
+<select class="w-full bg-surface-container-low border-none rounded-lg p-3 text-sm focus:ring-2 focus:ring-secondary/20 transition-all">
+<option>PédagoLens-4-Elite (Par défaut)</option>
+<option>PédagoLens-Flash (Vitesse)</option>
+<option>Modèle de Recherche Académique</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-bold text-on-surface-variant uppercase mb-3">Ton Épistémologique</label>
+<div class="flex gap-2">
+<button class="flex-1 py-2 px-3 bg-secondary text-white text-xs font-bold rounded-lg">Académique</button>
+<button class="flex-1 py-2 px-3 bg-surface-container-low text-on-surface-variant text-xs font-bold rounded-lg hover:bg-surface-container-high">Pragmatique</button>
+<button class="flex-1 py-2 px-3 bg-surface-container-low text-on-surface-variant text-xs font-bold rounded-lg hover:bg-surface-container-high">Narratif</button>
+</div>
+</div>
+</div>
+<div class="space-y-6">
+<div>
+<label class="block text-xs font-bold text-on-surface-variant uppercase mb-3">Niveau de Détail des Rapports</label>
+<input class="w-full h-2 bg-surface-container-low rounded-lg appearance-none cursor-pointer accent-secondary" max="5" min="1" type="range" value="4"/>
+<div class="flex justify-between mt-2 text-[10px] text-on-surface-variant font-bold">
+<span>SYNTHÉTIQUE</span>
+<span>EXHAUSTIF</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 bg-surface-bright rounded-lg border border-outline-variant/10">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-primary">Suggestions Proactives</span>
+<span class="text-[10px] text-on-surface-variant">L'IA propose des ajustements en temps réel</span>
+</div>
+<div class="relative inline-flex h-6 w-11 items-center rounded-full bg-secondary">
+<span class="translate-x-6 inline-block h-4 w-4 transform rounded-full bg-white transition"></span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Notifications & API -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<section class="bg-surface-container-lowest rounded-xl p-8 shadow-[0_10px_40px_rgba(25,28,30,0.06)]">
+<h3 class="text-lg font-bold font-headline text-primary mb-6">Notifications</h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<span class="text-sm font-medium">Alertes de progression élève</span>
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">toggle_on</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-sm font-medium">Rapports hebdomadaires</span>
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">toggle_on</span>
+</div>
+<div class="flex items-center justify-between opacity-50">
+<span class="text-sm font-medium">Alertes système par SMS</span>
+<span class="material-symbols-outlined text-on-surface-variant">toggle_off</span>
+</div>
+</div>
+</section>
+<section class="bg-surface-container-lowest rounded-xl p-8 shadow-[0_10px_40px_rgba(25,28,30,0.06)]">
+<h3 class="text-lg font-bold font-headline text-primary mb-6">Clés API &amp; Intégrations</h3>
+<div class="space-y-4">
+<div>
+<label class="block text-[10px] font-bold text-on-surface-variant uppercase mb-2">Connecteur LMS (Moodle/Canvas)</label>
+<div class="flex gap-2">
+<input class="flex-1 bg-surface-container-low border-none rounded-lg p-2.5 text-xs" readonly="" type="password" value="••••••••••••••••"/>
+<button class="p-2 bg-surface-container-high rounded-lg">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+</button>
+</div>
+</div>
+<button class="w-full py-2 border-2 border-dashed border-outline-variant rounded-lg text-xs font-bold text-on-surface-variant hover:bg-surface-container-low transition-colors">
+                                + Connecter un nouveau service
+                            </button>
+</div>
+</section>
+</div>
+<!-- Action Footer -->
+<footer class="flex justify-end gap-4 pt-4">
+<button class="px-6 py-3 bg-transparent text-primary font-bold rounded-lg hover:bg-surface-container-low transition-colors">Annuler les modifications</button>
+<button class="px-8 py-3 bg-gradient-to-r from-primary to-primary-container text-white font-bold rounded-lg shadow-lg hover:shadow-primary/20 transition-all">Sauvegarder les paramètres</button>
+</footer>
+</div>
+</div>
+</main>
+</body></html>

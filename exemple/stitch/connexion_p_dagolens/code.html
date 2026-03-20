@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-tint": "#4059aa",
+              "on-background": "#191c1e",
+              "outline": "#757682",
+              "surface-bright": "#f7f9fb",
+              "inverse-surface": "#2d3133",
+              "secondary-fixed-dim": "#d2bbff",
+              "secondary": "#712ae2",
+              "primary": "#00236f",
+              "secondary-fixed": "#eaddff",
+              "inverse-on-surface": "#eff1f3",
+              "surface-variant": "#e0e3e5",
+              "on-secondary-fixed": "#25005a",
+              "on-primary-fixed-variant": "#264191",
+              "primary-container": "#1e3a8a",
+              "surface-container-highest": "#e0e3e5",
+              "on-primary-container": "#90a8ff",
+              "on-primary-fixed": "#00164e",
+              "on-error-container": "#93000a",
+              "on-surface-variant": "#444651",
+              "on-surface": "#191c1e",
+              "on-error": "#ffffff",
+              "on-tertiary-fixed": "#001f26",
+              "surface-container-low": "#f2f4f6",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary-container": "#1dbcda",
+              "tertiary-fixed": "#acedff",
+              "outline-variant": "#c5c5d3",
+              "primary-fixed": "#dce1ff",
+              "background": "#f7f9fb",
+              "on-secondary-container": "#fffbff",
+              "surface-dim": "#d8dadc",
+              "surface-container-high": "#e6e8ea",
+              "surface": "#f7f9fb",
+              "primary-fixed-dim": "#b6c4ff",
+              "on-secondary": "#ffffff",
+              "inverse-primary": "#b6c4ff",
+              "on-primary": "#ffffff",
+              "on-secondary-fixed-variant": "#5a00c6",
+              "error": "#ba1a1a",
+              "secondary-container": "#8a4cfc",
+              "error-container": "#ffdad6",
+              "tertiary-fixed-dim": "#4cd7f6",
+              "tertiary": "#002f38",
+              "tertiary-container": "#004754",
+              "on-tertiary": "#ffffff",
+              "on-tertiary-fixed-variant": "#004e5c",
+              "surface-container": "#eceef0"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .bg-editorial-gradient {
+        background: linear-gradient(135deg, #00236f 0%, #1e3a8a 100%);
+      }
+      .asymmetric-shape {
+        clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);
+      }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body min-h-screen flex items-center justify-center p-0 md:p-6 lg:p-12">
+<main class="w-full max-w-7xl h-full min-h-[870px] grid grid-cols-1 lg:grid-cols-12 overflow-hidden bg-surface-container-lowest lg:rounded-xl lg:shadow-[0_10px_40px_rgba(25,28,30,0.06)]">
+<!-- Section Gauche: Branding & Proposition de Valeur -->
+<section class="hidden lg:flex lg:col-span-7 bg-editorial-gradient relative flex-col justify-between p-16 text-on-primary">
+<div class="relative z-10">
+<div class="flex items-center gap-3 mb-16">
+<span class="material-symbols-outlined text-4xl" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-headline font-black text-2xl tracking-tight">PédagoLens</span>
+</div>
+<h1 class="font-headline text-5xl font-extrabold tracking-tight leading-tight mb-8">
+                    L'intelligence <span class="text-tertiary-fixed-dim">éditoriale</span> au service de l'éducation.
+                </h1>
+<p class="text-lg text-primary-fixed-dim max-w-md leading-relaxed mb-12">
+                    Analysez les parcours pédagogiques avec la précision d'un curateur et la puissance de l'IA pour transformer chaque donnée en levier de réussite.
+                </p>
+<!-- Bento-style Insights Mini-widgets -->
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-white/10 backdrop-blur-md p-6 rounded-xl border border-white/5">
+<span class="material-symbols-outlined text-secondary-fixed-dim mb-3" data-icon="psychology">psychology</span>
+<div class="text-sm font-semibold opacity-90">Analyses IA</div>
+<div class="text-xs opacity-70">Rapports prédictifs automatisés.</div>
+</div>
+<div class="bg-white/10 backdrop-blur-md p-6 rounded-xl border border-white/5">
+<span class="material-symbols-outlined text-tertiary-fixed-dim mb-3" data-icon="monitoring">monitoring</span>
+<div class="text-sm font-semibold opacity-90">Progression</div>
+<div class="text-xs opacity-70">+24% d'engagement moyen.</div>
+</div>
+</div>
+</div>
+<!-- Decorative Overlay -->
+<div class="absolute inset-0 opacity-20 pointer-events-none overflow-hidden">
+<div class="absolute -top-20 -right-20 w-96 h-96 bg-secondary rounded-full blur-[100px]"></div>
+<div class="absolute -bottom-40 -left-20 w-[600px] h-[600px] bg-tertiary rounded-full blur-[120px]"></div>
+</div>
+<footer class="relative z-10 flex items-center justify-between text-xs font-label opacity-60">
+<span>© 2024 PédagoLens AI</span>
+<div class="flex gap-4">
+<span>Confidentialité</span>
+<span>Conditions</span>
+</div>
+</footer>
+</section>
+<!-- Section Droite: Formulaire de Connexion -->
+<section class="col-span-1 lg:col-span-5 flex items-center justify-center p-8 md:p-12 lg:p-16 bg-surface-container-lowest">
+<div class="w-full max-w-sm">
+<!-- Mobile Branding -->
+<div class="lg:hidden flex items-center gap-2 mb-12">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-headline font-black text-xl text-primary tracking-tight">PédagoLens</span>
+</div>
+<div class="mb-10">
+<h2 class="font-headline text-3xl font-bold text-primary mb-2">Bon retour.</h2>
+<p class="text-on-surface-variant font-label text-sm">Veuillez entrer vos identifiants pour accéder au portail éducatif.</p>
+</div>
+<form action="#" class="space-y-6" method="POST">
+<div>
+<label class="block text-xs font-bold text-primary uppercase tracking-wider mb-2" for="email">Email professionnel</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low border-none rounded-lg px-4 py-3.5 text-on-surface placeholder:text-outline-variant focus:ring-2 focus:ring-primary transition-all font-body text-sm" id="email" name="email" placeholder="nom@etablissement.fr" required="" type="email"/>
+<span class="material-symbols-outlined absolute right-4 top-3.5 text-outline-variant text-xl" data-icon="mail">mail</span>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2">
+<label class="block text-xs font-bold text-primary uppercase tracking-wider" for="password">Mot de passe</label>
+<a class="text-xs font-semibold text-secondary hover:underline transition-all" href="#">Oublié ?</a>
+</div>
+<div class="relative">
+<input class="w-full bg-surface-container-low border-none rounded-lg px-4 py-3.5 text-on-surface placeholder:text-outline-variant focus:ring-2 focus:ring-primary transition-all font-body text-sm" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+<span class="material-symbols-outlined absolute right-4 top-3.5 text-outline-variant text-xl" data-icon="lock">lock</span>
+</div>
+</div>
+<div class="flex items-center">
+<input class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary/20 bg-surface-container-low" id="remember" name="remember" type="checkbox"/>
+<label class="ml-2 text-sm text-on-surface-variant" for="remember">Se souvenir de moi</label>
+</div>
+<div class="pt-2 space-y-4">
+<button class="w-full bg-editorial-gradient text-on-primary font-bold py-4 rounded-lg shadow-lg shadow-primary/20 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2" type="submit">
+<span>Se connecter</span>
+<span class="material-symbols-outlined text-lg" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<button class="w-full bg-surface-container text-primary font-bold py-4 rounded-lg hover:bg-surface-variant transition-all duration-300 flex items-center justify-center gap-2 border border-outline-variant/10" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="play_circle">play_circle</span>
+<span>Essayer la démo</span>
+</button>
+</div>
+</form>
+<div class="mt-12 text-center">
+<p class="text-sm text-on-surface-variant">
+                        Nouveau sur la plateforme ? 
+                        <a class="font-bold text-primary hover:text-secondary underline decoration-2 underline-offset-4 transition-colors" href="#">Créer un compte</a>
+</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Support Help Floating Button -->
+<div class="fixed bottom-6 right-6 lg:bottom-12 lg:right-12">
+<button class="flex items-center gap-2 bg-white shadow-xl px-5 py-3 rounded-full border border-outline-variant/20 hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-secondary" data-icon="help" style="font-variation-settings: 'FILL' 1;">help</span>
+<span class="text-sm font-semibold text-on-surface">Besoin d'aide ?</span>
+</button>
+</div>
+</body></html>

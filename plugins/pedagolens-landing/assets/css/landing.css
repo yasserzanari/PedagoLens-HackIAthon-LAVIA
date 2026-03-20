@@ -435,6 +435,12 @@ html { scroll-behavior:smooth; }
 .pl-login-submit:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,212,255,0.45); }
 .pl-login-submit:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
 
+/* Login links (forgot password, create account) */
+.pl-login-links { display:flex; align-items:center; justify-content:space-between; margin-top:16px; }
+.pl-login-link { font-size:0.85rem; color:var(--pl-text-muted); background:none; border:none; cursor:pointer; font-family:var(--pl-font); padding:0; transition:color var(--pl-transition); }
+.pl-login-link:hover { color:var(--pl-cyan); }
+.pl-login-link-register { color:var(--pl-cyan); font-weight:600; }
+
 /* Role cards */
 .pl-register-prompt { text-align:center; font-size:1.1rem; color:var(--pl-text-muted); margin-bottom:24px; }
 .pl-role-cards { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
@@ -457,6 +463,63 @@ html { scroll-behavior:smooth; }
 .pl-login-cb-custom::after { content:''; width:10px; height:10px; border-radius:2px; background:transparent; transition:background var(--pl-transition); }
 .pl-login-checkbox-row input:checked ~ .pl-login-cb-custom { border-color:var(--pl-cyan); background:var(--pl-cyan); }
 .pl-login-checkbox-row input:checked ~ .pl-login-cb-custom::after { background:#fff; }
+
+/* Card animated gradient border */
+.pl-login-card-gradient { position:absolute; inset:-1px; border-radius:var(--pl-radius-xl); background:linear-gradient(135deg,rgba(0,212,255,0.2),rgba(99,102,241,0.2),rgba(0,212,255,0.05),rgba(99,102,241,0.2)); background-size:300% 300%; animation:pl-gradient-shift 8s ease infinite; z-index:-1; pointer-events:none; }
+@keyframes pl-gradient-shift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+
+/* Progress indicator */
+.pl-register-progress { display:flex; align-items:center; justify-content:center; gap:0; margin-bottom:28px; padding:0 20px; }
+.pl-progress-step { display:flex; flex-direction:column; align-items:center; gap:6px; }
+.pl-progress-dot { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.82rem; font-weight:700; background:rgba(255,255,255,0.06); color:var(--pl-text-muted); border:2px solid rgba(255,255,255,0.1); transition:all var(--pl-transition); }
+.pl-progress-label { font-size:0.75rem; color:var(--pl-text-muted); font-weight:600; transition:color var(--pl-transition); }
+.pl-progress-step--active .pl-progress-dot { background:var(--pl-cyan); color:var(--pl-bg); border-color:var(--pl-cyan); box-shadow:0 0 16px rgba(0,212,255,0.35); }
+.pl-progress-step--active .pl-progress-label { color:var(--pl-cyan); }
+.pl-progress-step--done .pl-progress-dot { background:rgba(0,212,255,0.15); color:var(--pl-cyan); border-color:var(--pl-cyan); }
+.pl-progress-step--done .pl-progress-label { color:var(--pl-cyan-light); }
+.pl-progress-line { flex:1; height:2px; background:rgba(255,255,255,0.08); margin:0 12px; position:relative; margin-bottom:22px; }
+.pl-progress-line-fill { position:absolute; inset:0; background:linear-gradient(90deg,var(--pl-cyan),var(--pl-accent-light)); transform:scaleX(0); transform-origin:left; transition:transform 0.5s cubic-bezier(0.4,0,0.2,1); }
+.pl-progress-line--filled .pl-progress-line-fill { transform:scaleX(1); }
+
+/* Steps container for slide animation */
+.pl-register-steps-container { position:relative; overflow:hidden; }
+.pl-register-step { display:none; }
+.pl-register-step--active { display:block; animation:pl-slide-in-right 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.pl-register-step--exit-left { animation:pl-slide-out-left 0.3s cubic-bezier(0.4,0,1,1) both; }
+.pl-register-step--enter-left { animation:pl-slide-in-left 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+@keyframes pl-slide-in-right { from{opacity:0;transform:translateX(40px)} to{opacity:1;transform:translateX(0)} }
+@keyframes pl-slide-out-left { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(-40px)} }
+@keyframes pl-slide-in-left { from{opacity:0;transform:translateX(-40px)} to{opacity:1;transform:translateX(0)} }
+@keyframes pl-slide-out-right { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(40px)} }
+
+/* Input icon wrapper */
+.pl-input-icon-wrap { position:relative; display:flex; align-items:center; }
+.pl-input-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--pl-text-muted); display:flex; align-items:center; pointer-events:none; transition:color var(--pl-transition); z-index:1; }
+.pl-input-icon-wrap input { padding-left:44px !important; }
+.pl-input-icon-wrap input:focus ~ .pl-input-icon,
+.pl-login-field--icon .pl-input-icon-wrap:focus-within .pl-input-icon { color:var(--pl-cyan); }
+
+/* Field validation messages */
+.pl-field-validation { display:block; font-size:0.78rem; min-height:18px; margin-top:4px; transition:color var(--pl-transition); }
+.pl-field-validation--error { color:#ff6b6b; }
+.pl-field-validation--success { color:var(--pl-cyan-light); }
+
+/* Password strength indicator */
+.pl-password-strength { margin-top:8px; }
+.pl-password-strength-bar { height:4px; background:rgba(255,255,255,0.08); border-radius:2px; overflow:hidden; }
+.pl-password-strength-fill { height:100%; width:0; border-radius:2px; transition:width 0.4s ease,background 0.4s ease; }
+.pl-password-strength-text { display:block; font-size:0.75rem; margin-top:4px; color:var(--pl-text-muted); transition:color var(--pl-transition); }
+.pl-strength-weak .pl-password-strength-fill { width:25%; background:#ef4444; }
+.pl-strength-weak .pl-password-strength-text { color:#ef4444; }
+.pl-strength-fair .pl-password-strength-fill { width:50%; background:#eab308; }
+.pl-strength-fair .pl-password-strength-text { color:#eab308; }
+.pl-strength-good .pl-password-strength-fill { width:75%; background:var(--pl-cyan); }
+.pl-strength-good .pl-password-strength-text { color:var(--pl-cyan); }
+.pl-strength-strong .pl-password-strength-fill { width:100%; background:#22c55e; }
+.pl-strength-strong .pl-password-strength-text { color:#22c55e; }
+
+/* Register note */
+.pl-register-note { text-align:center; font-size:0.8rem; color:var(--pl-text-muted); margin-top:16px; margin-bottom:0; opacity:0.8; }
 
 
 /* ============================================================
