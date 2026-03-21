@@ -1040,6 +1040,38 @@ class PedagoLens_Landing {
                     </div>
                 </div>
             </div>
+            <!-- Chat Léa pour étudiant -->
+            <section class="pl-stu-lea-chat" style="margin-bottom:2rem;">
+                <div class="pl-lea-chat-area" style="border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;background:#fff;">
+                    <div class="pl-lea-chat-header">
+                        <div class="pl-lea-chat-header-left">
+                            <div class="pl-lea-chat-avatar">
+                                <span class="material-symbols-outlined">psychology</span>
+                            </div>
+                            <div class="pl-lea-chat-info">
+                                <h3>Agent IA L&eacute;a</h3>
+                                <p>Votre assistante d'apprentissage</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pl-lea-chat-messages" id="pl-lea-messages">
+                        <div class="pl-lea-msg pl-lea-msg--bot">
+                            Bonjour <?php echo $first_name; ?> ! Je suis L&eacute;a, ton assistante IA. Je suis l&agrave; pour t'aider &agrave; comprendre tes cours. Pose-moi une question sur n'importe quel sujet de tes cours !
+                        </div>
+                    </div>
+
+                    <div class="pl-lea-chat-input-area">
+                        <div class="pl-lea-chat-input-wrap">
+                            <textarea class="pl-lea-chat-input" id="pl-lea-input" placeholder="Pose ta question &agrave; L&eacute;a..." rows="1"></textarea>
+                            <button class="pl-lea-chat-send" id="pl-lea-send" title="Envoyer">
+                                <span class="material-symbols-outlined">send</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <section class="pl-stu-activity">
                 <h2 class="pl-stu-activity-title">
                     <span class="material-symbols-outlined">history</span>

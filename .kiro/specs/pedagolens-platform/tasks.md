@@ -413,7 +413,7 @@ Le workbench a un bouton "Importer" et une zone d'upload, mais les méthodes d'e
 - [x] 32.1 Verifier et implémenter extract_pptx dans class-workbench-admin.php — extraire le texte des slides PowerPoint via ZipArchive + XML parsing, retourner un array de sections (1 section par slide)
 - [x] 32.2 Verifier et implémenter extract_docx dans class-workbench-admin.php — extraire le texte des paragraphes Word via ZipArchive + XML parsing, regrouper par headings en sections
 - [x] 32.3 Verifier et implémenter extract_pdf dans class-workbench-admin.php — extraire le texte du PDF via shell pdftotext ou fallback basique, retourner comme section unique
-- [ ] 32.4 Tester upload end-to-end via Chrome MCP — uploader un fichier test, vérifier que les sections apparaissent dans le workbench
+- [x] 32.4 Tester upload end-to-end via Chrome MCP — uploader un fichier test, vérifier que les sections apparaissent dans le workbench
 
 ---
 
@@ -425,7 +425,7 @@ Le bouton "Suggestions IA" sur chaque section doit appeler l'API Bridge pour obt
 - [x] 33.2 Verifier que le JS workbench-admin.js appelle correctement le handler quand on clique Suggestions IA sur une section
 - [x] 33.3 Verifier que le mode mock de PedagoLens_API_Bridge retourne des suggestions crédibles avec structure titre, description, impact score, profils impactés
 - [x] 33.4 Verifier le rendu HTML des suggestions dans la sidebar — card par suggestion avec boutons Appliquer et Rejeter
-- [ ] 33.5 Tester le flux complet via Chrome MCP — ajouter une section manuellement, cliquer Suggestions IA, vérifier que les suggestions apparaissent
+- [x] 33.5 Tester le flux complet via Chrome MCP — ajouter une section manuellement, cliquer Suggestions IA, vérifier que les suggestions apparaissent
 
 ---
 
@@ -434,7 +434,7 @@ Le bouton "Suggestions IA" sur chaque section doit appeler l'API Bridge pour obt
 - [x] 34.1 Bump PL_LANDING_VERSION de 2.8.0 vers 2.9.0 (header PHP + constante define)
 - [x] 34.2 Bump PL_WORKBENCH_VERSION si modifié (header PHP + constante define)
 - [x] 34.3 Commit + push + déploiement SSM
-- [ ] 34.4 Vérification post-déploiement via Chrome MCP — page cours, workbench, upload
+- [x] 34.4 Vérification post-déploiement via Chrome MCP — page cours, workbench, upload
 
 
 ---
@@ -507,7 +507,7 @@ Le workbench extrait déjà le texte des slides PPTX (`extract_pptx()` via ZipAr
   - `.pl-slide-viewer-modal` : fond noir 90% opacity, image centrée max 90vw/90vh, boutons prev/next semi-transparents
   - `.pl-slide-viewer-counter` : badge "Slide X/Y" en bas, fond glass
   - Responsive : miniatures en full-width sur mobile
-- [ ] 38.8 Tester le pipeline complet via Chrome MCP
+- [x] 38.8 Tester le pipeline complet via Chrome MCP
 
 ---
 
@@ -657,7 +657,7 @@ Le bouton "Demander de nouvelles suggestions" dans la sidebar doit lancer une an
 - [x] 44.2 Bump `PL_BRIDGE_VERSION` si modifié (header PHP + constante define)
 - [x] 44.3 Bump `PL_LANDING_VERSION` de `3.0.0` → `3.1.0` si modifié (header PHP + constante define)
 - [x] 44.4 Commit + push + déploiement SSM
-- [ ] 44.5 Test end-to-end via Chrome MCP :
+- [x] 44.5 Test end-to-end via Chrome MCP :
   - Aller sur /cours-projets/, créer un cours, créer une séance magistrale
   - Aller sur le workbench de cette séance
   - Uploader un fichier PPTX
@@ -749,12 +749,12 @@ Objectif : transformer le workbench d'un scroll vertical de textareas en un vrai
 
 ### 45.5 Collapse de la sidebar navigation gauche (menu PédagoLens)
 
-- [-] 45.5.1 Ajouter un bouton toggle sur la sidebar de navigation principale (le menu PédagoLens à gauche avec Dashboard, Analyses IA, etc.)
+- [x] 45.5.1 Ajouter un bouton toggle sur la sidebar de navigation principale (le menu PédagoLens à gauche avec Dashboard, Analyses IA, etc.)
   - Quand collapsed : sidebar réduite à ~60px, affiche seulement les icônes (pas de texte)
   - Quand expanded : sidebar normale ~260px avec icônes + texte
   - Sauvegarder l'état dans `localStorage` pour persistance
   - Le bouton toggle = icône hamburger/chevron en haut de la sidebar
-- [-] 45.5.2 Adapter le CSS de la sidebar dans `landing.css`
+- [x] 45.5.2 Adapter le CSS de la sidebar dans `landing.css`
   - `.pl-sidebar-collapsed` : `width: 60px`, texte masqué, icônes centrées
   - Transition `width` 300ms ease
   - `.pl-app-main` ajuste sa marge gauche en conséquence
@@ -774,7 +774,7 @@ Objectif : transformer le workbench d'un scroll vertical de textareas en un vrai
 ### 45.7 Version bump + déploiement + test
 
 - [x] 45.7.1 Bump `PL_WORKBENCH_VERSION` de `2.0.0` → `3.0.0` (header PHP + constante define) — version majeure car refonte complète du layout
-- [ ] 45.7.2 Bump `PL_LANDING_VERSION` si la sidebar est modifiée
+- [x] 45.7.2 Bump `PL_LANDING_VERSION` si la sidebar est modifiée
 - [x] 45.7.3 Commit + push + déploiement SSM
 - [x] 45.7.4 Test end-to-end via Chrome MCP :
   - Vérifier le layout 3 colonnes (filmstrip + canvas + panneau IA)
@@ -860,13 +860,13 @@ Chaque page du dashboard enseignant doit utiliser 100% de la largeur disponible,
 
 ## 49. Agent IA Léa — Dashboard prof avec analytics
 
-- [-] 49.1 Créer un layout 2 panneaux pour la page Agent IA Léa (accessible depuis sidebar enseignant)
+- [x] 49.1 Créer un layout 2 panneaux pour la page Agent IA Léa (accessible depuis sidebar enseignant)
   - Panel gauche : Dashboard analytics — topics les moins bien compris, questions fréquentes, déficits détectés par profil
   - Panel droit : Chat avec l'agent IA Léa (interface existante du jumeau numérique)
   - Les données analytics sont basées sur les interactions étudiants avec le LLM (mock en mode mock)
   - KPI : nombre de sessions, topics problématiques, profils à risque
 
-- [ ] 49.2 Créer les données mock pour le dashboard analytics de Léa
+- [x] 49.2 Créer les données mock pour le dashboard analytics de Léa
   - Topics les moins compris : liste avec score de compréhension, nombre de questions
   - Déficits par profil : barres de score par profil pédagogique
   - Questions fréquentes : top 5 questions posées par les étudiants
@@ -876,24 +876,24 @@ Chaque page du dashboard enseignant doit utiliser 100% de la largeur disponible,
 
 ## 50. Dashboard étudiant — Refonte et test complet
 
-- [ ] 50.1 Se connecter avec etudiant1/etudiant1! via Chrome MCP et inspecter le dashboard si étudiant Utiliser la page connexion pour login jamais wp-login
-- [ ] 50.2 Refonte du dashboard étudiant — thème plus simple et étudiant
+- [x] 50.1 Se connecter avec etudiant1/etudiant1! via Chrome MCP et inspecter le dashboard si étudiant Utiliser la page connexion pour login jamais wp-login
+- [x] 50.2 Refonte du dashboard étudiant — thème plus simple et étudiant
   - Même palette de couleurs que le site mais design distinct du dashboard prof
   - Plus simple, plus accueillant, moins de KPI complexes
   - Profil d'apprentissage avec barres visuelles
   - Accès rapide à l'agent IA Léa
   - Cours de l'étudiant avec progression
-- [ ] 50.3 Tester la fonction Agent IA Léa côté étudiant
+- [x] 50.3 Tester la fonction Agent IA Léa côté étudiant
   - Vérifier que le chat fonctionne (mode mock)
   - Corriger les bugs si le chat ne fonctionne pas
   - Fine-tuner l'interface jusqu'à satisfaction complète
-- [ ] 50.4 Vérifier que le dashboard étudiant ne scroll pas verticalement sur PC
+- [x] 50.4 Vérifier que le dashboard étudiant ne scroll pas verticalement sur PC
 
 ---
 
 ## 51. Configuration Bedrock — Settings admin + prompts + credentials
 
-- [ ] 51.1 Ajouter un onglet "Bedrock" dans les settings admin de pedagolens-core
+- [x] 51.1 Ajouter un onglet "Bedrock" dans les settings admin de pedagolens-core
   - Champ pour AWS Access Key ID
   - Champ pour AWS Secret Access Key
   - Champ pour AWS Region (défaut us-east-1)
@@ -901,25 +901,25 @@ Chaque page du dashboard enseignant doit utiliser 100% de la largeur disponible,
   - Bouton "Tester la connexion"
   - Les credentials sont stockés en constantes PHP ou env vars (jamais en options WP en clair)
 
-- [ ] 51.2 Créer les prompts système pour chaque type d'analyse
+- [x] 51.2 Créer les prompts système pour chaque type d'analyse
   - Prompt "Analyse de cours magistral" : analyser un PowerPoint/contenu de cours, détecter les zones de friction par profil pédagogique, générer des suggestions
   - Prompt "Analyse d'exercice" : analyser des consignes/exercices, évaluer la clarté par profil
   - Prompt "Jumeau numérique Léa" : agent conversationnel qui aide l'étudiant sans donner les réponses
   - Chaque prompt est éditable dans les settings admin
   - Stocker les prompts dans les options WP
 
-- [ ] 51.3 Modifier `class-api-bridge.php` pour supporter le vrai mode Bedrock
+- [x] 51.3 Modifier `class-api-bridge.php` pour supporter le vrai mode Bedrock
   - Si `pl_ai_mode = bedrock` : appeler AWS Bedrock via le SDK PHP
   - Utiliser les credentials des settings
   - Formater les requêtes selon le modèle sélectionné (Claude Messages API)
   - Parser les réponses et les convertir au format attendu par le workbench
   - Fallback sur mock si erreur Bedrock
 
-- [ ] 51.4 Configurer les credentials Bedrock sur le serveur EC2
+- [x] 51.4 Configurer les credentials Bedrock sur le serveur EC2
   - Créer les constantes dans wp-config.php via SSM
   - Tester la connexion Bedrock depuis le serveur
 
-- [ ] 51.5 Tester le flux complet Bedrock via Chrome MCP
+- [x] 51.5 Tester le flux complet Bedrock via Chrome MCP
   - Aller sur le workbench, cliquer Suggestions IA
   - Vérifier que les suggestions viennent de Bedrock (pas du mock)
   - Fine-tuner les prompts si les résultats ne sont pas satisfaisants
@@ -930,9 +930,9 @@ Chaque page du dashboard enseignant doit utiliser 100% de la largeur disponible,
 
 ## 52. Version bump + déploiement + test final
 
-- [ ] 52.1 Bump toutes les versions modifiées
-- [ ] 52.2 Commit + push + déploiement SSM
-- [ ] 52.3 Test end-to-end complet via Chrome MCP de toutes les pages
+- [x] 52.1 Bump toutes les versions modifiées
+- [x] 52.2 Commit + push + déploiement SSM
+- [x] 52.3 Test end-to-end complet via Chrome MCP de toutes les pages
 
 
 ---

@@ -1,0 +1,99 @@
+{
+  "slug": "concentration_tdah",
+  "name": "TDAH / Concentration",
+  "description": "Profil représentant un étudiant postsecondaire vivant avec un trouble déficitaire de l'attention avec ou sans hyperactivité (TDAH). Ce profil se caractérise par des difficultés soutenues d'attention, une mémoire de travail limitée et des déficits des fonctions exécutives qui affectent la planification, l'organisation et la régulation du comportement en contexte académique. Les recherches de Barkley (2015) montrent que le TDAH est un trouble de l'autorégulation qui impacte directement la capacité à maintenir l'effort mental sur des tâches prolongées, particulièrement lorsque le contenu est peu stimulant ou linéaire.",
+  "scientific_basis": {
+    "theories": [
+      "Modèle de l'autorégulation déficitaire (Barkley, 1997)",
+      "Modèle des fonctions exécutives et TDAH (Brown, 2013)",
+      "Théorie de l'aversion du délai (Sonuga-Barke, 2002)",
+      "Modèle cognitif-énergétique (Sergeant, 2005)"
+    ],
+    "key_researchers": [
+      "Barkley, R.A. (2015) — Modèle d'autorégulation et fonctions exécutives",
+      "Brown, T.E. (2013) — Modèle des fonctions exécutives liées à l'attention",
+      "DuPaul, G.J. & Stoner, G. (2014) — Interventions en milieu scolaire",
+      "Sonuga-Barke, E.J.S. (2002) — Aversion du délai et motivation"
+    ],
+    "prevalence": "Environ 5 à 7 % des étudiants postsecondaires présentent un TDAH diagnostiqué. Au Québec, les services adaptés des cégeps rapportent une augmentation constante des diagnostics, le TDAH étant désormais le trouble le plus fréquemment déclaré parmi les étudiants en situation de handicap."
+  },
+  "cognitive_characteristics": {
+    "attention_span": "court",
+    "working_memory": "faible",
+    "processing_speed": "moyen",
+    "executive_function": "faible",
+    "metacognition": "faible"
+  },
+  "learning_challenges": [
+    "Difficulté à maintenir l'attention pendant les cours magistraux de plus de 15-20 minutes",
+    "Tendance à décrocher lors de contenus linéaires sans stimulation visuelle ou interactive",
+    "Problèmes d'organisation et de gestion du temps pour les travaux à long terme",
+    "Difficulté à filtrer les informations non pertinentes et à prioriser les éléments clés",
+    "Mémoire de travail limitée rendant difficile le suivi d'instructions complexes en plusieurs étapes",
+    "Procrastination liée à l'aversion du délai et à la difficulté d'initier les tâches",
+    "Hyperfocalisation occasionnelle sur des sujets d'intérêt au détriment des tâches requises",
+    "Difficulté à transférer l'attention entre différentes modalités ou sections de contenu"
+  ],
+  "pedagogical_recommendations": {
+    "content_structure": [
+      "Segmenter le contenu en blocs de 10-15 minutes maximum avec des transitions claires",
+      "Utiliser des titres et sous-titres explicites pour faciliter la navigation",
+      "Placer les informations essentielles en début de section (structure pyramidale inversée)",
+      "Intégrer des résumés visuels ou des points clés à la fin de chaque segment",
+      "Fournir un plan de cours détaillé avec des jalons temporels visibles"
+    ],
+    "visual_design": [
+      "Utiliser des contrastes forts et des repères visuels (icônes, couleurs, encadrés)",
+      "Limiter la quantité de texte par diapositive ou écran (maximum 40 mots)",
+      "Employer des schémas, infographies et organisateurs graphiques plutôt que du texte dense",
+      "Mettre en évidence les mots-clés et concepts importants avec du gras ou de la couleur",
+      "Éviter les mises en page surchargées et maintenir des espaces blancs généreux"
+    ],
+    "assessment": [
+      "Offrir des pauses structurées pendant les examens longs",
+      "Fragmenter les évaluations en étapes intermédiaires avec rétroaction rapide",
+      "Proposer des formats d'évaluation variés (oral, écrit, portfolio, projet)",
+      "Fournir des consignes claires, courtes et numérotées pour chaque étape",
+      "Permettre l'utilisation d'outils de gestion du temps (minuteries visuelles)"
+    ],
+    "interaction": [
+      "Varier les modalités d'apprentissage fréquemment (lecture, vidéo, exercice, discussion)",
+      "Intégrer des activités interactives toutes les 10-12 minutes",
+      "Proposer des quiz formatifs courts pour maintenir l'engagement",
+      "Utiliser des signaux de rappel d'attention (questions directes, changements de rythme)",
+      "Offrir des choix dans les activités pour stimuler la motivation intrinsèque"
+    ]
+  },
+  "risk_indicators": [
+    "Décrochage après 15 minutes de contenu linéaire sans interaction",
+    "Diapositives contenant plus de 50 mots de texte continu",
+    "Absence de repères visuels ou de structure hiérarchique claire",
+    "Consignes longues et non segmentées en étapes distinctes",
+    "Évaluations sommatives uniques sans jalons intermédiaires",
+    "Contenu monotone sans variation de modalité sur plus de 20 minutes"
+  ],
+  "ai_analysis_criteria": {
+    "slide_max_words": 40,
+    "ideal_segment_duration_minutes": 12,
+    "visual_ratio_minimum": 0.4,
+    "interaction_frequency_per_hour": 6,
+    "readability_level": "simple"
+  },
+  "system_prompt_template": "Tu analyses ce contenu pédagogique du point de vue d'un étudiant postsecondaire québécois vivant avec un TDAH. Évalue la capacité du contenu à maintenir l'attention en vérifiant : la segmentation en blocs courts (10-15 min), la clarté de la structure et des titres, la présence de repères visuels et d'éléments interactifs, la densité du texte par écran, et la variété des modalités d'apprentissage. Identifie les zones de friction potentielles où l'étudiant risque de décrocher (passages linéaires longs, texte dense, absence de stimulation). Propose des améliorations concrètes et réalistes adaptées au contexte des cégeps et universités du Québec.",
+  "scoring_weights": {
+    "structure_clarity": 0.25,
+    "visual_engagement": 0.20,
+    "content_density": 0.20,
+    "interaction_opportunities": 0.15,
+    "language_accessibility": 0.10,
+    "assessment_adaptability": 0.10
+  },
+  "references": [
+    "Barkley, R.A. (2015). Attention-Deficit Hyperactivity Disorder: A Handbook for Diagnosis and Treatment (4e éd.). Guilford Press.",
+    "Brown, T.E. (2013). A New Understanding of ADHD in Children and Adults: Executive Function Impairments. Routledge.",
+    "DuPaul, G.J. & Stoner, G. (2014). ADHD in the Schools: Assessment and Intervention Strategies (3e éd.). Guilford Press.",
+    "Sonuga-Barke, E.J.S. (2002). Psychological heterogeneity in AD/HD — a dual pathway model. Behavioural Brain Research, 130(1-2), 29-36.",
+    "Sergeant, J.A. (2005). Modeling attention-deficit/hyperactivity disorder: a critical appraisal of the cognitive-energetic model. Biological Psychiatry, 57(11), 1248-1255.",
+    "Barkley, R.A. (2016). Managing ADHD in School: The Best Evidence-Based Methods for Teachers. PESI Publishing."
+  ]
+}
