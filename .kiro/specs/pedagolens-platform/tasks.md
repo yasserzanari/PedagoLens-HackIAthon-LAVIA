@@ -380,3 +380,58 @@ La page de connexion est visuellement moche. Utiliser Chrome MCP pour diagnostiq
 - [x] 30.3 Mettre à jour les widgets : "Analyse intelligente" (lacunes dans PowerPoint/PDF), "Agent IA Léa" (jumeau numérique), nouveau widget "Suivi en temps réel" (tableaux de bord par séance)
 - [x] 30.4 Agrandir le logo de 96px → 120px dans le CSS
 - [x] 30.5 Bump version 2.6.0 → 2.6.1 + déploiement
+
+
+---
+
+## 31. CSS polish — Course cards et séance cards sur la page Cours & Séances
+
+Problème : les course cards (`.pl-course-card-front`) et les séance cards (`.pl-project-card-front`) n'ont pas de style visuel — pas de fond blanc, pas de border-radius, pas de shadow, pas de hover effect. Les éléments sont éparpillés sans structure de card visible.
+
+- [x] 31.1 Ajouter les styles CSS pour pl-course-card-front dans landing.css — fond blanc, border-radius 16px, box-shadow, padding 24px, border subtle, hover lift effect, transition
+- [x] 31.2 Ajouter les styles CSS pour pl-course-card-top — flex layout, gap entre header/meta/actions
+- [x] 31.3 Ajouter les styles CSS pour pl-course-card-header — flex row, align center, gap 12px entre icône et titre
+- [x] 31.4 Ajouter les styles CSS pour pl-course-type-icon — taille 40px, fond léger, border-radius 12px, centré
+- [x] 31.5 Ajouter les styles CSS pour pl-course-card-title — Manrope 600, 1.25rem, couleur #00236f
+- [x] 31.6 Ajouter les styles CSS pour pl-badge pl-type — badges colorés par type (magistral=bleu, exercice=vert, travail_equipe=orange, evaluation=rouge)
+- [x] 31.7 Ajouter les styles CSS pour pl-course-card-meta — flex row, gap, font-size 0.85rem, couleur muted
+- [x] 31.8 Ajouter les styles CSS pour pl-course-card-actions — flex row, gap 8px, align center, flex-wrap
+- [x] 31.9 Ajouter les styles CSS pour pl-course-card-edit-btn et pl-course-card-delete-btn — boutons icône ronds, hover coloré
+- [x] 31.10 Ajouter les styles CSS pour pl-projects-panel-front — fond surface léger, border-top, padding
+- [x] 31.11 Ajouter les styles CSS pour pl-projects-grid-front — grid 2-3 colonnes, gap 16px
+- [x] 31.12 Ajouter les styles CSS pour pl-project-card-front — card cliquable, fond blanc, border, border-radius 12px, padding 16px, hover glow, flex column, gap 8px
+- [x] 31.13 Ajouter les styles CSS pour pl-project-card-icon — taille 32px, centré
+- [x] 31.14 Ajouter les styles CSS pour pl-project-card-arrow — flèche à droite, couleur accent
+- [x] 31.15 Responsive — course cards en 1 colonne sur mobile, séance cards en 1-2 colonnes
+
+---
+
+## 32. Workbench — Extraction de fichiers (PPTX/DOCX/PDF)
+
+Le workbench a un bouton "Importer" et une zone d'upload, mais les méthodes d'extraction (`extract_pptx`, `extract_docx`, `extract_pdf`) dans `class-workbench-admin.php` doivent être vérifiées/implémentées pour extraire le texte des fichiers et créer des sections.
+
+- [x] 32.1 Verifier et implémenter extract_pptx dans class-workbench-admin.php — extraire le texte des slides PowerPoint via ZipArchive + XML parsing, retourner un array de sections (1 section par slide)
+- [x] 32.2 Verifier et implémenter extract_docx dans class-workbench-admin.php — extraire le texte des paragraphes Word via ZipArchive + XML parsing, regrouper par headings en sections
+- [x] 32.3 Verifier et implémenter extract_pdf dans class-workbench-admin.php — extraire le texte du PDF via shell pdftotext ou fallback basique, retourner comme section unique
+- [ ] 32.4 Tester upload end-to-end via Chrome MCP — uploader un fichier test, vérifier que les sections apparaissent dans le workbench
+
+---
+
+## 33. Workbench — Suggestions IA via API Bridge (mock mode)
+
+Le bouton "Suggestions IA" sur chaque section doit appeler l'API Bridge pour obtenir des suggestions. En mode mock, des suggestions crédibles doivent être retournées.
+
+- [x] 33.1 Verifier que le handler AJAX pl_get_suggestions existe et fonctionne dans class-workbench-admin.php
+- [x] 33.2 Verifier que le JS workbench-admin.js appelle correctement le handler quand on clique Suggestions IA sur une section
+- [x] 33.3 Verifier que le mode mock de PedagoLens_API_Bridge retourne des suggestions crédibles avec structure titre, description, impact score, profils impactés
+- [x] 33.4 Verifier le rendu HTML des suggestions dans la sidebar — card par suggestion avec boutons Appliquer et Rejeter
+- [ ] 33.5 Tester le flux complet via Chrome MCP — ajouter une section manuellement, cliquer Suggestions IA, vérifier que les suggestions apparaissent
+
+---
+
+## 34. Version bump et déploiement final v2.9.0
+
+- [ ] 34.1 Bump PL_LANDING_VERSION de 2.8.0 vers 2.9.0 (header PHP + constante define)
+- [ ] 34.2 Bump PL_WORKBENCH_VERSION si modifié (header PHP + constante define)
+- [ ] 34.3 Commit + push + déploiement SSM
+- [ ] 34.4 Vérification post-déploiement via Chrome MCP — page cours, workbench, upload
