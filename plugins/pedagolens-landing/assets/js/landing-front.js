@@ -954,3 +954,1019 @@
     }
 
 } )();
+
+// =========================================================================
+// 10. STITCH DESIGN SYSTEM — Animations & Interactions (v2.0)
+// =========================================================================
+
+( function () {
+    'use strict';
+
+    // Avoid double-init
+    if ( window.__plStitchInit ) return;
+    window.__plStitchInit = true;
+
+    // =====================================================================
+    // UTILS
+    // =====================================================================
+
+    var rAF = window.requestAnimationFrame || function ( cb ) { return setTimeout( cb, 16 ); };
+    var prefersReducedMotion = window.matchMedia && window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches;
+
+    // =====================================================================
+    // A. INTERSECTION OBSERVER — Fade-in / Slide-up on sections
+    //    Targets: [data-stitch-animate], .stitch-fade-in, .stitch-slide-up
+    // =====================================================================
+
+    function initStitchScrollReveal() {
+        if ( prefersReducedMotion ) {
+            document.querySelectorAll( '[data-stitch-animate], .stitch-fade-in, .stitch-slide-up' ).forEach( function ( el ) {
+                el.style.opacity = '1';
+                el.style.transform = 'none';
+            } );
+            return;
+        }
+
+        // Inject base styles once
+        var styleId = 'stitch-reveal-css';
+        if ( ! document.getElementById( styleId ) ) {
+            var css = document.createElement( 'style' );
+            css.id = styleId;
+            css.textContent =
+                '[data-stitch-animate], .stitch-fade-in, .stitch-slide-up {' +
+                '  opacity: 0; transition: opacity 0.7s cubic-bezier(.22,1,.36,1), transform 0.7s cubic-bezier(.22,1,.36,1); }' +
+                '.stitch-slide-up, [data-stitch-animate="slide-up"] { transform: translateY(32px); }' +
+                '[data-stitch-animate="fade-in"] { transform: translateY(0); }' +
+                '.stitch--visible { opacity: 1 !important; transform: translateY(0) !important; }';
+            document.head.appendChild( css );
+        }
+
+        if ( ! ( 'IntersectionObserver' in window ) ) {
+            document.querySelectorAll( '[data-stitch-animate], .stitch-fade-in, .stitch-slide-up' ).forEach( function ( el ) {
+                el.classList.add( 'stitch--visible' );
+            } );
+            return;
+        }
+
+        var revealObserver = new IntersectionObserver( function ( entries ) {
+            entries.forEach( function ( entry ) {
+                if ( entry.isIntersecting ) {
+                    var delay = parseInt( entry.target.getAttribute( 'data-stitch-delay' ), 10 ) || 0;
+                    setTimeout( function () {
+                        entry.target.classList.add( 'stitch--visible' );
+                    }, delay );
+                    revealObserver.unobserve( entry.target );
+                }
+            } );
+        }, { threshold: 0.12, rootMargin: '0px 0px -50px 0px' } );
+
+        document.querySelectorAll( '[data-stitch-animate], .stitch-fade-in, .stitch-slide-up' ).forEach( function ( el ) {
+            revealObserver.observe( el );
+        } );
+    }
+
+    // =====================================================================
+    // B. SMOOTH SCROLL — Internal anchors (enhanced, coexists with §4)
+    // =====================================================================
+
+    function initStitchSmoothScroll() {
+        document.addEventListener( 'click', function ( e ) {
+            var link = e.target.closest( 'a[href*="#"]' );
+            if ( ! link ) return;
+
+            var href = link.getAttribute( 'href' );
+            // Only handle same-page anchors
+            if ( ! href || href === '#' ) return;
+            var hashIndex = href.indexOf( '#' );
+            if ( hashIndex === -1 ) return;
+
+            var hash = href.substring( hashIndex );
+            // If href has a path part, make sure it matches current page
+            var pathPart = href.substring( 0, hashIndex );
+            if ( pathPart && pathPart !== window.location.pathname && pathPart !== '.' ) return;
+
+            var target;
+            try { target = document.querySelector( hash ); } catch ( ex ) { return; }
+            if ( ! target ) return;
+
+            e.preventDefault();
+
+            var nav = document.querySelector( '.pl-landing-nav, header.fixed, header.sticky' );
+            var navH = nav ? nav.offsetHeight + 16 : 80;
+            var top = target.getBoundingClientRect().top + window.pageYOffset - navH;
+
+            window.scrollTo( { top: top, behavior: prefersReducedMotion ? 'auto' : 'smooth' } );
+
+            // Update URL hash without jump
+            if ( history.pushState ) {
+                history.pushState( null, '', hash );
+            }
+
+            // Close mobile menu if open
+            var mobileMenu = document.querySelector( '.stitch-mobile-menu.stitch-mobile-menu--open' );
+            if ( mobileMenu ) closeMobileMenu();
+        } );
+    }
+
+    // =====================================================================
+    // C. PARALLAX HERO — Subtle vertical shift on scroll
+    // =====================================================================
+
+    function initStitchHeroParallax() {
+        var hero = document.querySelector( '.pl-hero, [data-stitch-parallax], .stitch-hero-parallax' );
+        if ( ! hero || prefersReducedMotion || window.innerWidth < 768 ) return;
+
+        var parallaxEls = hero.querySelectorAll( '.pl-hero-orb, .stitch-parallax-layer, [data-parallax-speed]' );
+        // Also apply a subtle shift to the hero background itself
+        var heroInner = hero.querySelector( '.stitch-hero-inner' ) || hero;
+
+        var ticking = false;
+
+        function onScroll() {
+            if ( ticking ) return;
+            ticking = true;
+            rAF( function () {
+                var scrollY = window.pageYOffset;
+                var heroRect = hero.getBoundingClientRect();
+                // Only animate when hero is in viewport
+                if ( heroRect.bottom > 0 ) {
+                    // Background parallax (slow)
+                    heroInner.style.transform = 'translate3d(0,' + ( scrollY * 0.15 ) + 'px,0)';
+
+                    // Individual layers
+                    parallaxEls.forEach( function ( el ) {
+                        var speed = parseFloat( el.getAttribute( 'data-parallax-speed' ) ) || 0.08;
+                        el.style.transform = 'translate3d(0,' + ( scrollY * speed ) + 'px,0)';
+                    } );
+                }
+                ticking = false;
+            } );
+        }
+
+        window.addEventListener( 'scroll', onScroll, { passive: true } );
+    }
+
+    // =====================================================================
+    // D. COUNT-UP ANIMATION — Animated counters (Stitch-enhanced)
+    //    Targets: [data-stitch-count]
+    // =====================================================================
+
+    function initStitchCountUp() {
+        var counters = document.querySelectorAll( '[data-stitch-count]' );
+        if ( ! counters.length ) return;
+
+        if ( prefersReducedMotion || ! ( 'IntersectionObserver' in window ) ) {
+            counters.forEach( function ( el ) {
+                el.textContent = el.getAttribute( 'data-stitch-count' ) + ( el.getAttribute( 'data-stitch-suffix' ) || '' );
+            } );
+            return;
+        }
+
+        var countObserver = new IntersectionObserver( function ( entries ) {
+            entries.forEach( function ( entry ) {
+                if ( ! entry.isIntersecting ) return;
+                var el = entry.target;
+                var end = parseFloat( el.getAttribute( 'data-stitch-count' ) );
+                var suffix = el.getAttribute( 'data-stitch-suffix' ) || '';
+                var prefix = el.getAttribute( 'data-stitch-prefix' ) || '';
+                var decimals = ( String( end ).split( '.' )[1] || '' ).length;
+                var duration = parseInt( el.getAttribute( 'data-stitch-duration' ), 10 ) || 2000;
+                var start = 0;
+                var startTime = null;
+
+                function step( ts ) {
+                    if ( ! startTime ) startTime = ts;
+                    var progress = Math.min( ( ts - startTime ) / duration, 1 );
+                    // Ease-out cubic
+                    var eased = 1 - Math.pow( 1 - progress, 3 );
+                    var current = start + ( end - start ) * eased;
+                    el.textContent = prefix + current.toFixed( decimals ) + suffix;
+                    if ( progress < 1 ) {
+                        rAF( step );
+                    } else {
+                        el.textContent = prefix + end.toFixed( decimals ) + suffix;
+                    }
+                }
+
+                rAF( step );
+                countObserver.unobserve( el );
+            } );
+        }, { threshold: 0.4 } );
+
+        counters.forEach( function ( el ) {
+            el.textContent = ( el.getAttribute( 'data-stitch-prefix' ) || '' ) + '0' + ( el.getAttribute( 'data-stitch-suffix' ) || '' );
+            countObserver.observe( el );
+        } );
+    }
+
+    // =====================================================================
+    // E. MOBILE MENU TOGGLE — Hamburger
+    //    Trigger: .stitch-hamburger / [data-stitch-toggle="menu"]
+    //    Menu:    .stitch-mobile-menu
+    // =====================================================================
+
+    var closeMobileMenu; // hoisted for smooth-scroll access
+
+    function initStitchMobileMenu() {
+        var toggle = document.querySelector( '.stitch-hamburger, [data-stitch-toggle="menu"]' );
+        var menu   = document.querySelector( '.stitch-mobile-menu' );
+        if ( ! toggle || ! menu ) return;
+
+        var isOpen = false;
+
+        // Inject overlay style
+        var styleId = 'stitch-mobile-menu-css';
+        if ( ! document.getElementById( styleId ) ) {
+            var css = document.createElement( 'style' );
+            css.id = styleId;
+            css.textContent =
+                '.stitch-mobile-menu { ' +
+                '  position: fixed; top: 0; right: 0; bottom: 0; width: 80vw; max-width: 320px;' +
+                '  background: #fff; z-index: 9999; transform: translateX(100%);' +
+                '  transition: transform 0.35s cubic-bezier(.22,1,.36,1);' +
+                '  box-shadow: -4px 0 24px rgba(0,0,0,0.08); overflow-y: auto; padding: 2rem; }' +
+                '.stitch-mobile-menu--open { transform: translateX(0); }' +
+                '.stitch-mobile-backdrop { position: fixed; inset: 0; background: rgba(0,35,111,0.25);' +
+                '  z-index: 9998; opacity: 0; pointer-events: none;' +
+                '  transition: opacity 0.3s ease; }' +
+                '.stitch-mobile-backdrop--visible { opacity: 1; pointer-events: auto; }' +
+                '.stitch-hamburger-line { display: block; width: 24px; height: 2px;' +
+                '  background: currentColor; transition: transform 0.3s ease, opacity 0.3s ease; }' +
+                '.stitch-hamburger--active .stitch-hamburger-line:nth-child(1) { transform: translateY(7px) rotate(45deg); }' +
+                '.stitch-hamburger--active .stitch-hamburger-line:nth-child(2) { opacity: 0; }' +
+                '.stitch-hamburger--active .stitch-hamburger-line:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }';
+            document.head.appendChild( css );
+        }
+
+        // Create backdrop if missing
+        var backdrop = document.querySelector( '.stitch-mobile-backdrop' );
+        if ( ! backdrop ) {
+            backdrop = document.createElement( 'div' );
+            backdrop.className = 'stitch-mobile-backdrop';
+            document.body.appendChild( backdrop );
+        }
+
+        function open() {
+            isOpen = true;
+            menu.classList.add( 'stitch-mobile-menu--open' );
+            backdrop.classList.add( 'stitch-mobile-backdrop--visible' );
+            toggle.classList.add( 'stitch-hamburger--active' );
+            toggle.setAttribute( 'aria-expanded', 'true' );
+            document.body.style.overflow = 'hidden';
+        }
+
+        function close() {
+            isOpen = false;
+            menu.classList.remove( 'stitch-mobile-menu--open' );
+            backdrop.classList.remove( 'stitch-mobile-backdrop--visible' );
+            toggle.classList.remove( 'stitch-hamburger--active' );
+            toggle.setAttribute( 'aria-expanded', 'false' );
+            document.body.style.overflow = '';
+        }
+
+        closeMobileMenu = close; // expose for smooth-scroll
+
+        toggle.addEventListener( 'click', function () {
+            isOpen ? close() : open();
+        } );
+
+        backdrop.addEventListener( 'click', close );
+
+        // Close on Escape
+        document.addEventListener( 'keydown', function ( e ) {
+            if ( e.key === 'Escape' && isOpen ) close();
+        } );
+    }
+
+    // =====================================================================
+    // F. SCORE BARS — Progressive fill animation (Stitch style)
+    //    Targets: [data-stitch-bar] with data-stitch-bar-value="75"
+    // =====================================================================
+
+    function initStitchScoreBars() {
+        var bars = document.querySelectorAll( '[data-stitch-bar]' );
+        if ( ! bars.length ) return;
+
+        // Inject styles
+        var styleId = 'stitch-bar-css';
+        if ( ! document.getElementById( styleId ) ) {
+            var css = document.createElement( 'style' );
+            css.id = styleId;
+            css.textContent =
+                '[data-stitch-bar] .stitch-bar-fill {' +
+                '  width: 0; transition: width 1.2s cubic-bezier(.22,1,.36,1); }' +
+                '[data-stitch-bar].stitch-bar--animated .stitch-bar-fill {' +
+                '  width: var(--stitch-bar-w); }';
+            document.head.appendChild( css );
+        }
+
+        if ( prefersReducedMotion || ! ( 'IntersectionObserver' in window ) ) {
+            bars.forEach( function ( bar ) {
+                bar.classList.add( 'stitch-bar--animated' );
+                var fill = bar.querySelector( '.stitch-bar-fill' );
+                if ( fill ) {
+                    var val = bar.getAttribute( 'data-stitch-bar-value' ) || '0';
+                    fill.style.setProperty( '--stitch-bar-w', val + '%' );
+                    fill.style.width = val + '%';
+                }
+            } );
+            return;
+        }
+
+        var barObserver = new IntersectionObserver( function ( entries ) {
+            entries.forEach( function ( entry ) {
+                if ( ! entry.isIntersecting ) return;
+                var bar = entry.target;
+                var fill = bar.querySelector( '.stitch-bar-fill' );
+                var val = bar.getAttribute( 'data-stitch-bar-value' ) || '0';
+                if ( fill ) {
+                    fill.style.setProperty( '--stitch-bar-w', val + '%' );
+                }
+                // Stagger if inside a group
+                var delay = parseInt( bar.getAttribute( 'data-stitch-bar-delay' ), 10 ) || 0;
+                setTimeout( function () {
+                    bar.classList.add( 'stitch-bar--animated' );
+                }, delay );
+                barObserver.unobserve( bar );
+            } );
+        }, { threshold: 0.2 } );
+
+        bars.forEach( function ( bar ) {
+            barObserver.observe( bar );
+        } );
+    }
+
+    // =====================================================================
+    // G. GLASS CARD HOVER EFFECTS
+    //    Targets: .glass-card, .stitch-glass-card
+    //    Effect: tilt + glow on mouse move (desktop only)
+    // =====================================================================
+
+    function initStitchGlassHover() {
+        if ( prefersReducedMotion || window.innerWidth < 768 ) return;
+
+        var cards = document.querySelectorAll( '.glass-card, .stitch-glass-card' );
+        if ( ! cards.length ) return;
+
+        // Inject styles
+        var styleId = 'stitch-glass-css';
+        if ( ! document.getElementById( styleId ) ) {
+            var css = document.createElement( 'style' );
+            css.id = styleId;
+            css.textContent =
+                '.glass-card, .stitch-glass-card {' +
+                '  transition: transform 0.25s cubic-bezier(.22,1,.36,1), box-shadow 0.25s ease; }' +
+                '.stitch-glass-glow {' +
+                '  position: absolute; width: 180px; height: 180px; border-radius: 50%;' +
+                '  background: radial-gradient(circle, rgba(112,58,226,0.12) 0%, transparent 70%);' +
+                '  pointer-events: none; opacity: 0; transition: opacity 0.3s ease;' +
+                '  transform: translate(-50%,-50%); z-index: 0; }';
+            document.head.appendChild( css );
+        }
+
+        cards.forEach( function ( card ) {
+            // Ensure relative positioning
+            var pos = window.getComputedStyle( card ).position;
+            if ( pos === 'static' ) card.style.position = 'relative';
+            card.style.overflow = 'hidden';
+
+            // Create glow element
+            var glow = document.createElement( 'div' );
+            glow.className = 'stitch-glass-glow';
+            card.appendChild( glow );
+
+            card.addEventListener( 'mousemove', function ( e ) {
+                var rect = card.getBoundingClientRect();
+                var x = e.clientX - rect.left;
+                var y = e.clientY - rect.top;
+                var cx = rect.width / 2;
+                var cy = rect.height / 2;
+
+                // Subtle tilt (max ±3deg)
+                var rotateX = ( ( y - cy ) / cy ) * -3;
+                var rotateY = ( ( x - cx ) / cx ) * 3;
+                card.style.transform = 'perspective(600px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) scale(1.02)';
+                card.style.boxShadow = '0 12px 40px rgba(0,35,111,0.12)';
+
+                // Move glow
+                glow.style.left = x + 'px';
+                glow.style.top = y + 'px';
+                glow.style.opacity = '1';
+            } );
+
+            card.addEventListener( 'mouseleave', function () {
+                card.style.transform = '';
+                card.style.boxShadow = '';
+                glow.style.opacity = '0';
+            } );
+        } );
+    }
+
+    // =====================================================================
+    // H. SIDEBAR TOGGLE — Dashboard pages
+    //    Trigger: .stitch-sidebar-toggle / [data-stitch-toggle="sidebar"]
+    //    Sidebar: .stitch-sidebar / .pl-dashboard-sidebar
+    //    Main:    .stitch-main / .pl-dashboard-main
+    // =====================================================================
+
+    function initStitchSidebarToggle() {
+        var toggle  = document.querySelector( '.stitch-sidebar-toggle, [data-stitch-toggle="sidebar"]' );
+        var sidebar = document.querySelector( '.stitch-sidebar, .pl-dashboard-sidebar' );
+        var main    = document.querySelector( '.stitch-main, .pl-dashboard-main' );
+        if ( ! sidebar ) return;
+
+        // Inject styles
+        var styleId = 'stitch-sidebar-css';
+        if ( ! document.getElementById( styleId ) ) {
+            var css = document.createElement( 'style' );
+            css.id = styleId;
+            css.textContent =
+                '.stitch-sidebar, .pl-dashboard-sidebar {' +
+                '  transition: transform 0.35s cubic-bezier(.22,1,.36,1), width 0.35s cubic-bezier(.22,1,.36,1); }' +
+                '.stitch-sidebar--collapsed { transform: translateX(-100%); width: 0 !important;' +
+                '  overflow: hidden; padding: 0 !important; opacity: 0; }' +
+                '@media (min-width: 768px) {' +
+                '  .stitch-sidebar--collapsed { transform: none; width: 64px !important;' +
+                '    opacity: 1; padding: 1.5rem 0.5rem !important; }' +
+                '  .stitch-sidebar--collapsed .stitch-sidebar-label,' +
+                '  .stitch-sidebar--collapsed .pl-sidebar-label { display: none; }' +
+                '}' +
+                '.stitch-main, .pl-dashboard-main {' +
+                '  transition: margin-left 0.35s cubic-bezier(.22,1,.36,1); }';
+            document.head.appendChild( css );
+        }
+
+        var collapsed = false;
+
+        function toggleSidebar() {
+            collapsed = ! collapsed;
+            sidebar.classList.toggle( 'stitch-sidebar--collapsed', collapsed );
+            if ( toggle ) {
+                toggle.setAttribute( 'aria-expanded', String( ! collapsed ) );
+            }
+        }
+
+        if ( toggle ) {
+            toggle.addEventListener( 'click', toggleSidebar );
+        }
+
+        // On mobile, close sidebar when clicking outside
+        if ( window.innerWidth < 768 ) {
+            document.addEventListener( 'click', function ( e ) {
+                if ( collapsed ) return;
+                if ( ! sidebar.contains( e.target ) && ( ! toggle || ! toggle.contains( e.target ) ) ) {
+                    toggleSidebar();
+                }
+            } );
+        }
+    }
+
+    // =====================================================================
+    // I. STAGGER CHILDREN — Stitch variant
+    //    Container: [data-stitch-stagger]
+    //    Children get incremental delay
+    // =====================================================================
+
+    function initStitchStagger() {
+        if ( prefersReducedMotion || ! ( 'IntersectionObserver' in window ) ) return;
+
+        var containers = document.querySelectorAll( '[data-stitch-stagger]' );
+        if ( ! containers.length ) return;
+
+        var staggerObs = new IntersectionObserver( function ( entries ) {
+            entries.forEach( function ( entry ) {
+                if ( ! entry.isIntersecting ) return;
+                var gap = parseInt( entry.target.getAttribute( 'data-stitch-stagger' ), 10 ) || 100;
+                var children = entry.target.querySelectorAll( '[data-stitch-animate], .stitch-fade-in, .stitch-slide-up' );
+                children.forEach( function ( child, i ) {
+                    setTimeout( function () {
+                        child.classList.add( 'stitch--visible' );
+                    }, i * gap );
+                } );
+                staggerObs.unobserve( entry.target );
+            } );
+        }, { threshold: 0.08 } );
+
+        containers.forEach( function ( c ) { staggerObs.observe( c ); } );
+    }
+
+    // =====================================================================
+    // J. HOVER LIFT — Cards with .stitch-hover-lift
+    //    Adds translateY(-8px) + shadow on hover via CSS injection
+    // =====================================================================
+
+    function initStitchHoverLift() {
+        var styleId = 'stitch-hover-lift-css';
+        if ( ! document.getElementById( styleId ) ) {
+            var css = document.createElement( 'style' );
+            css.id = styleId;
+            css.textContent =
+                '.stitch-hover-lift {' +
+                '  transition: transform 0.4s cubic-bezier(.22,1,.36,1), box-shadow 0.4s ease; }' +
+                '.stitch-hover-lift:hover {' +
+                '  transform: translateY(-8px);' +
+                '  box-shadow: 0 20px 60px rgba(0,35,111,0.10); }';
+            document.head.appendChild( css );
+        }
+    }
+
+    // =====================================================================
+    // INIT
+    // =====================================================================
+
+    function initStitch() {
+        initStitchScrollReveal();
+        initStitchSmoothScroll();
+        initStitchHeroParallax();
+        initStitchCountUp();
+        initStitchMobileMenu();
+        initStitchScoreBars();
+        initStitchGlassHover();
+        initStitchSidebarToggle();
+        initStitchStagger();
+        initStitchHoverLift();
+    }
+
+    if ( document.readyState === 'loading' ) {
+        document.addEventListener( 'DOMContentLoaded', initStitch );
+    } else {
+        initStitch();
+    }
+
+} )();
+
+// =========================================================================
+// 11. EXTENDED INTERACTIONS — Fade-in, Tabs, Modals, Toasts, AJAX helpers
+//     (v2.2.0 — completes Stitch design system interactions)
+// =========================================================================
+
+(function ($) {
+    'use strict';
+
+    // Avoid double-init
+    if (window.__plExtendedInit) return;
+    window.__plExtendedInit = true;
+
+    // =====================================================================
+    // A. INTERSECTION OBSERVER — .pl-fade-in support
+    //    Adds visibility class when elements scroll into view.
+    //    Works alongside existing .pl-animate-in from section 1.
+    // =====================================================================
+
+    function initFadeIn() {
+        var els = document.querySelectorAll('.pl-fade-in');
+        if (!els.length) return;
+
+        // Inject CSS once
+        var styleId = 'pl-fade-in-css';
+        if (!document.getElementById(styleId)) {
+            var css = document.createElement('style');
+            css.id = styleId;
+            css.textContent =
+                '.pl-fade-in {' +
+                '  opacity: 0; transform: translateY(24px);' +
+                '  transition: opacity 0.6s cubic-bezier(.22,1,.36,1), transform 0.6s cubic-bezier(.22,1,.36,1); }' +
+                '.pl-fade-in.pl-fade-in--visible {' +
+                '  opacity: 1; transform: translateY(0); }';
+            document.head.appendChild(css);
+        }
+
+        var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (prefersReduced || !('IntersectionObserver' in window)) {
+            els.forEach(function (el) { el.classList.add('pl-fade-in--visible'); });
+            return;
+        }
+
+        var obs = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    var delay = parseInt(entry.target.getAttribute('data-fade-delay'), 10) || 0;
+                    setTimeout(function () {
+                        entry.target.classList.add('pl-fade-in--visible');
+                    }, delay);
+                    obs.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+        els.forEach(function (el) { obs.observe(el); });
+    }
+
+    // =====================================================================
+    // B. STAGGER ANIMATION — Cards lists
+    //    Container: [data-pl-stagger] or .pl-stagger-cards
+    //    Children: .pl-fade-in inside the container get incremental delay
+    // =====================================================================
+
+    function initStaggerCards() {
+        var containers = document.querySelectorAll('[data-pl-stagger], .pl-stagger-cards');
+        if (!containers.length || !('IntersectionObserver' in window)) return;
+
+        var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReduced) return;
+
+        var obs = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (!entry.isIntersecting) return;
+                var gap = parseInt(entry.target.getAttribute('data-pl-stagger'), 10) || 120;
+                var children = entry.target.querySelectorAll('.pl-fade-in');
+                children.forEach(function (child, i) {
+                    setTimeout(function () {
+                        child.classList.add('pl-fade-in--visible');
+                    }, i * gap);
+                });
+                obs.unobserve(entry.target);
+            });
+        }, { threshold: 0.08 });
+
+        containers.forEach(function (c) { obs.observe(c); });
+    }
+
+    // =====================================================================
+    // C. TABS SWITCHING — Generic tab component
+    //    Trigger: [data-pl-tab]  (value = panel id suffix)
+    //    Panel:   [data-pl-tab-panel]
+    //    Group:   closest [data-pl-tabs] or .pl-tabs
+    // =====================================================================
+
+    function initTabs() {
+        document.addEventListener('click', function (e) {
+            var tab = e.target.closest('[data-pl-tab]');
+            if (!tab) return;
+
+            var group = tab.closest('[data-pl-tabs], .pl-tabs');
+            if (!group) return;
+
+            var target = tab.getAttribute('data-pl-tab');
+
+            // Deactivate all tabs in group
+            group.querySelectorAll('[data-pl-tab]').forEach(function (t) {
+                t.classList.remove('pl-tab--active');
+                t.setAttribute('aria-selected', 'false');
+            });
+
+            // Hide all panels in group
+            group.querySelectorAll('[data-pl-tab-panel]').forEach(function (p) {
+                p.classList.remove('pl-tab-panel--active');
+                p.style.display = 'none';
+            });
+
+            // Activate clicked tab
+            tab.classList.add('pl-tab--active');
+            tab.setAttribute('aria-selected', 'true');
+
+            // Show target panel
+            var panel = group.querySelector('[data-pl-tab-panel="' + target + '"]');
+            if (panel) {
+                panel.classList.add('pl-tab-panel--active');
+                panel.style.display = '';
+            }
+        });
+    }
+
+    // =====================================================================
+    // D. MODAL OPEN / CLOSE — Generic modal component
+    //    Open:  [data-pl-modal-open="modalId"]
+    //    Close: [data-pl-modal-close] or .pl-modal-backdrop click
+    //    Modal: .pl-modal#modalId or [data-pl-modal="modalId"]
+    // =====================================================================
+
+    function initModals() {
+        // Inject base styles
+        var styleId = 'pl-modal-css';
+        if (!document.getElementById(styleId)) {
+            var css = document.createElement('style');
+            css.id = styleId;
+            css.textContent =
+                '.pl-modal { display: none; position: fixed; inset: 0; z-index: 10000;' +
+                '  align-items: center; justify-content: center; }' +
+                '.pl-modal--open { display: flex; }' +
+                '.pl-modal-backdrop { position: absolute; inset: 0; background: rgba(0,35,111,0.3);' +
+                '  backdrop-filter: blur(4px); }' +
+                '.pl-modal-content { position: relative; z-index: 1; background: #fff;' +
+                '  border-radius: 1.5rem; padding: 2rem; max-width: 560px; width: 90%;' +
+                '  max-height: 85vh; overflow-y: auto;' +
+                '  box-shadow: 0 20px 60px rgba(0,35,111,0.15);' +
+                '  animation: plModalIn 0.3s cubic-bezier(.22,1,.36,1); }' +
+                '@keyframes plModalIn {' +
+                '  from { opacity: 0; transform: translateY(16px) scale(0.97); }' +
+                '  to { opacity: 1; transform: translateY(0) scale(1); } }';
+            document.head.appendChild(css);
+        }
+
+        // Open
+        document.addEventListener('click', function (e) {
+            var opener = e.target.closest('[data-pl-modal-open]');
+            if (opener) {
+                e.preventDefault();
+                var id = opener.getAttribute('data-pl-modal-open');
+                var modal = document.getElementById(id) || document.querySelector('[data-pl-modal="' + id + '"]');
+                if (modal) {
+                    modal.classList.add('pl-modal--open');
+                    document.body.style.overflow = 'hidden';
+                }
+                return;
+            }
+
+            // Close via button
+            var closer = e.target.closest('[data-pl-modal-close]');
+            if (closer) {
+                var modal = closer.closest('.pl-modal');
+                if (modal) {
+                    modal.classList.remove('pl-modal--open');
+                    document.body.style.overflow = '';
+                }
+                return;
+            }
+
+            // Close via backdrop click
+            if (e.target.classList.contains('pl-modal-backdrop')) {
+                var modal = e.target.closest('.pl-modal');
+                if (modal) {
+                    modal.classList.remove('pl-modal--open');
+                    document.body.style.overflow = '';
+                }
+            }
+        });
+
+        // Close on Escape
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                var open = document.querySelector('.pl-modal--open');
+                if (open) {
+                    open.classList.remove('pl-modal--open');
+                    document.body.style.overflow = '';
+                }
+            }
+        });
+    }
+
+    // =====================================================================
+    // E. TOAST NOTIFICATIONS — Success / Error / Info
+    //    API: window.plToast(message, type, duration)
+    //    type: 'success' | 'error' | 'info'  (default: 'info')
+    // =====================================================================
+
+    function initToasts() {
+        // Inject styles
+        var styleId = 'pl-toast-css';
+        if (!document.getElementById(styleId)) {
+            var css = document.createElement('style');
+            css.id = styleId;
+            css.textContent =
+                '.pl-toast-container { position: fixed; top: 24px; right: 24px; z-index: 11000;' +
+                '  display: flex; flex-direction: column; gap: 10px; pointer-events: none; }' +
+                '.pl-toast { pointer-events: auto; display: flex; align-items: center; gap: 10px;' +
+                '  padding: 14px 20px; border-radius: 12px; font-size: 14px; font-weight: 600;' +
+                '  color: #fff; min-width: 280px; max-width: 420px;' +
+                '  box-shadow: 0 8px 32px rgba(0,0,0,0.12);' +
+                '  animation: plToastIn 0.35s cubic-bezier(.22,1,.36,1); }' +
+                '.pl-toast--success { background: #059669; }' +
+                '.pl-toast--error   { background: #dc2626; }' +
+                '.pl-toast--info    { background: #00236f; }' +
+                '.pl-toast--exit { animation: plToastOut 0.3s ease forwards; }' +
+                '@keyframes plToastIn {' +
+                '  from { opacity: 0; transform: translateX(40px); }' +
+                '  to   { opacity: 1; transform: translateX(0); } }' +
+                '@keyframes plToastOut {' +
+                '  from { opacity: 1; transform: translateX(0); }' +
+                '  to   { opacity: 0; transform: translateX(40px); } }';
+            document.head.appendChild(css);
+        }
+
+        // Create container
+        var container = document.querySelector('.pl-toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'pl-toast-container';
+            container.setAttribute('aria-live', 'polite');
+            document.body.appendChild(container);
+        }
+
+        var icons = {
+            success: '✓',
+            error: '✕',
+            info: 'ℹ'
+        };
+
+        /**
+         * Show a toast notification.
+         * @param {string} message
+         * @param {string} [type='info']  — 'success' | 'error' | 'info'
+         * @param {number} [duration=4000] — ms before auto-dismiss
+         */
+        window.plToast = function (message, type, duration) {
+            type = type || 'info';
+            duration = duration || 4000;
+
+            var toast = document.createElement('div');
+            toast.className = 'pl-toast pl-toast--' + type;
+            toast.setAttribute('role', 'status');
+            toast.innerHTML = '<span>' + (icons[type] || '') + '</span><span>' + message + '</span>';
+            container.appendChild(toast);
+
+            // Auto-dismiss
+            var timer = setTimeout(function () { dismiss(); }, duration);
+
+            // Click to dismiss
+            toast.addEventListener('click', function () {
+                clearTimeout(timer);
+                dismiss();
+            });
+
+            function dismiss() {
+                toast.classList.add('pl-toast--exit');
+                setTimeout(function () {
+                    if (toast.parentNode) toast.parentNode.removeChild(toast);
+                }, 300);
+            }
+        };
+    }
+
+    // =====================================================================
+    // F. AJAX HELPER — plAjax(action, data) → Promise
+    //    Wraps jQuery.post with nonce from plFront.nonces
+    //    Also provides button loading state management.
+    // =====================================================================
+
+    function initAjaxHelper() {
+        var frontData = window.plFront || {};
+        var ajaxUrl = frontData.ajaxUrl || '/wp-admin/admin-ajax.php';
+        var nonces = frontData.nonces || {};
+
+        /**
+         * Send an AJAX request to WordPress.
+         *
+         * @param {string} action  — WP AJAX action name (e.g. 'pl_analyze')
+         * @param {Object} [data]  — Additional data to send
+         * @returns {jQuery.Deferred|Promise}
+         */
+        window.plAjax = function (action, data) {
+            data = data || {};
+            data.action = action;
+
+            // Auto-attach nonce: try action-specific, then generic patterns
+            if (!data._wpnonce && !data.nonce) {
+                // Try matching nonce key from action name (e.g. pl_dashboard_xxx → nonces.dashboard)
+                var parts = action.replace(/^pl_/, '').split('_');
+                var nonceKey = parts[0]; // first segment after pl_
+                if (nonces[nonceKey]) {
+                    data._wpnonce = nonces[nonceKey];
+                } else if (nonces.settings) {
+                    // Fallback to settings nonce
+                    data._wpnonce = nonces.settings;
+                }
+            }
+
+            if ($ && $.post) {
+                return $.post(ajaxUrl, data);
+            }
+
+            // Fallback to fetch if jQuery not available
+            var formData = new FormData();
+            Object.keys(data).forEach(function (key) {
+                formData.append(key, typeof data[key] === 'object' ? JSON.stringify(data[key]) : data[key]);
+            });
+
+            return fetch(ajaxUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                body: formData
+            }).then(function (r) { return r.json(); });
+        };
+
+        /**
+         * Set a button to loading state.
+         * @param {HTMLElement|jQuery} btn
+         * @param {string} [loadingText] — text to show while loading
+         */
+        window.plBtnLoading = function (btn, loadingText) {
+            var el = btn instanceof $ ? btn[0] : btn;
+            if (!el) return;
+            el._plOrigText = el.textContent;
+            el._plOrigHTML = el.innerHTML;
+            el.disabled = true;
+            el.classList.add('pl-btn--loading');
+            el.innerHTML = '<span class="pl-spinner"></span> ' + (loadingText || frontData.i18n && frontData.i18n.sending || 'Chargement…');
+        };
+
+        /**
+         * Reset a button from loading state.
+         * @param {HTMLElement|jQuery} btn
+         * @param {string} [text] — override text (otherwise restores original)
+         */
+        window.plBtnReset = function (btn, text) {
+            var el = btn instanceof $ ? btn[0] : btn;
+            if (!el) return;
+            el.disabled = false;
+            el.classList.remove('pl-btn--loading');
+            if (text) {
+                el.textContent = text;
+            } else if (el._plOrigHTML) {
+                el.innerHTML = el._plOrigHTML;
+            }
+        };
+
+        // Inject spinner CSS
+        var styleId = 'pl-btn-loading-css';
+        if (!document.getElementById(styleId)) {
+            var css = document.createElement('style');
+            css.id = styleId;
+            css.textContent =
+                '.pl-btn--loading { opacity: 0.7; cursor: wait; }' +
+                '.pl-spinner { display: inline-block; width: 14px; height: 14px;' +
+                '  border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;' +
+                '  border-radius: 50%; animation: plSpin 0.6s linear infinite;' +
+                '  vertical-align: middle; }' +
+                '@keyframes plSpin { to { transform: rotate(360deg); } }';
+            document.head.appendChild(css);
+        }
+    }
+
+    // =====================================================================
+    // G. SCORE BAR — Dynamic color based on score value
+    //    Targets: .pl-score-bar[data-score] or [data-pl-score-color]
+    //    Colors: ≥80 green, ≥60 blue, ≥40 yellow, ≥20 orange, <20 red
+    // =====================================================================
+
+    function initScoreBarColors() {
+        var bars = document.querySelectorAll('.pl-score-bar[data-score], [data-pl-score-color]');
+        if (!bars.length) return;
+
+        var colorMap = [
+            { min: 80, color: '#059669', cls: 'pl-score--green' },
+            { min: 60, color: '#2563eb', cls: 'pl-score--blue' },
+            { min: 40, color: '#d97706', cls: 'pl-score--yellow' },
+            { min: 20, color: '#ea580c', cls: 'pl-score--orange' },
+            { min: 0,  color: '#dc2626', cls: 'pl-score--red' }
+        ];
+
+        function getScoreColor(score) {
+            for (var i = 0; i < colorMap.length; i++) {
+                if (score >= colorMap[i].min) return colorMap[i];
+            }
+            return colorMap[colorMap.length - 1];
+        }
+
+        bars.forEach(function (bar) {
+            var score = parseInt(bar.getAttribute('data-score') || bar.getAttribute('data-pl-score-color'), 10);
+            if (isNaN(score)) return;
+
+            var info = getScoreColor(score);
+            var fill = bar.querySelector('.pl-score-bar-fill, .stitch-bar-fill, .pl-bar-fill');
+
+            if (fill) {
+                fill.style.backgroundColor = info.color;
+                fill.style.width = score + '%';
+            }
+
+            bar.classList.add(info.cls);
+        });
+
+        // Also handle bars animated by IntersectionObserver (section 3)
+        // Re-apply color after animation triggers
+        if ('IntersectionObserver' in window) {
+            var colorObs = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (!entry.isIntersecting) return;
+                    var container = entry.target;
+                    container.querySelectorAll('.pl-score-bar[data-score]').forEach(function (bar) {
+                        var score = parseInt(bar.getAttribute('data-score'), 10);
+                        if (isNaN(score)) return;
+                        var info = getScoreColor(score);
+                        var fill = bar.querySelector('.pl-score-bar-fill, .stitch-bar-fill, .pl-bar-fill');
+                        if (fill) fill.style.backgroundColor = info.color;
+                        bar.classList.add(info.cls);
+                    });
+                    colorObs.unobserve(container);
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.pl-score-bars').forEach(function (c) {
+                colorObs.observe(c);
+            });
+        }
+    }
+
+    // =====================================================================
+    // INIT
+    // =====================================================================
+
+    function initExtended() {
+        initFadeIn();
+        initStaggerCards();
+        initTabs();
+        initModals();
+        initToasts();
+        initAjaxHelper();
+        initScoreBarColors();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initExtended);
+    } else {
+        initExtended();
+    }
+
+})(window.jQuery || window.$ || null);

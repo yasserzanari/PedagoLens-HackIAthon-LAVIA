@@ -1,0 +1,147 @@
+/* PédagoLens Core — Settings Page */
+
+/* ── Layout ── */
+.pl-settings-wrap {
+    max-width: 900px;
+}
+
+.pl-tab-content {
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-top: none;
+}
+
+/* ── Form table inputs ── */
+.pl-tab-content .form-table th {
+    padding-top: 16px;
+    padding-bottom: 16px;
+}
+
+.pl-tab-content .form-table input[type="number"] {
+    width: 80px;
+}
+
+.pl-tab-content .form-table select {
+    min-width: 200px;
+}
+
+.pl-tab-content .form-table textarea {
+    font-family: monospace;
+}
+
+/* ── Password toggle fields ── */
+.pl-password-field {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pl-password-field .pl-secret-input {
+    font-family: monospace;
+}
+
+.pl-password-field .pl-toggle-password {
+    padding: 2px 6px;
+    min-height: 30px;
+    line-height: 28px;
+}
+
+.pl-password-field .pl-toggle-password .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+}
+
+/* ── Status badges ── */
+.pl-status-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.6;
+}
+
+.pl-status-active {
+    background: #d7f0d7;
+    color: #1a6b1a;
+}
+
+.pl-status-inactive {
+    background: #f0f0f0;
+    color: #666;
+}
+
+/* ── Profiles list (tab 2) ── */
+.pl-profiles-list {
+    margin-top: 12px;
+}
+
+.pl-profiles-list td {
+    vertical-align: middle;
+}
+
+.pl-profile-row td {
+    padding: 10px 8px;
+}
+
+.pl-profile-actions {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.pl-profile-summary {
+    color: #50575e;
+    font-style: italic;
+}
+
+.pl-profiles-actions-bar {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ── AJAX feedback spans ── */
+.pl-ajax-feedback {
+    display: inline-block;
+    margin-left: 10px;
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-size: 13px;
+    vertical-align: middle;
+    transition: opacity 0.3s ease;
+}
+
+.pl-ajax-feedback.pl-loading {
+    color: #826200;
+    background: #fff8e5;
+}
+
+.pl-ajax-feedback.pl-success {
+    color: #1a6b1a;
+    background: #d7f0d7;
+}
+
+.pl-ajax-feedback.pl-error {
+    color: #8b0000;
+    background: #fce4e4;
+}
+
+/* ── Buttons loading state ── */
+button.pl-is-loading {
+    opacity: 0.6;
+    pointer-events: none;
+    cursor: wait;
+}
+
+/* ── Separator consistency ── */
+.pl-tab-content hr {
+    border: none;
+    border-top: 1px solid #dcdcde;
+    margin: 20px 0;
+}

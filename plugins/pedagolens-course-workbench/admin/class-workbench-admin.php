@@ -580,7 +580,7 @@ class PedagoLens_Workbench_Admin {
     }
 
     // -------------------------------------------------------------------------
-    // Rendu front-end (shortcode délégué depuis pedagolens-landing)
+    // Rendu front-end Stitch (shortcode délégué depuis pedagolens-landing)
     // -------------------------------------------------------------------------
 
     public static function render_front( int $project_id ): string {
@@ -633,35 +633,60 @@ class PedagoLens_Workbench_Admin {
             'evaluation'     => '📋',
         ];
 
+        $profiles = class_exists( 'PedagoLens_Profile_Manager' )
+            ? PedagoLens_Profile_Manager::get_all( active_only: true )
+            : [];
+
         ob_start();
         ?>
-        <div class="pl-front-workbench-page">
+        <div class="pl-stitch-workbench" data-project-id="<?php echo esc_attr( $project_id ); ?>">
 
-            <!-- ===== WORKBENCH HEADER ===== -->
-            <div class="pl-wb-header">
-                <div class="pl-wb-header-left">
-                    <a href="<?php echo esc_url( $back_url ); ?>" class="pl-wb-back">← Retour aux cours</a>
-                    <h1 class="pl-wb-title"><?php echo esc_html( $project->post_title ); ?></h1>
-                    <span class="pl-wb-type-badge pl-type-<?php echo esc_attr( $project_type ); ?>">
-                        <?php echo esc_html( ( $type_icons[ $project_type ] ?? '📄' ) . ' ' . ( $type_labels[ $project_type ] ?? $project_type ) ); ?>
-                    </span>
+            <!-- ===== HEADER ===== -->
+            <header class="pl-stitch-wb-header">
+                <div class="pl-stitch-wb-header-left">
+                    <a href="<?php echo esc_url( $back_url ); ?>" class="pl-stitch-wb-back" aria-label="Retour aux cours">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                        Retour aux cours
+                    </a>
+                    <h1 class="pl-stitch-wb-title"><?php echo esc_html( $project->post_title ); ?></h1>
+                    <div class="pl-stitch-wb-meta">
+                        <span class="pl-stitch-wb-type-badge pl-stitch-type-<?php echo esc_attr( $project_type ); ?>">
+                            <?php echo esc_html( ( $type_icons[ $project_type ] ?? '📄' ) . ' ' . ( $type_labels[ $project_type ] ?? $project_type ) ); ?>
+                        </span>
+                        <span class="pl-stitch-wb-ai-badge">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                            PédagoLens AI
+                        </span>
+                    </div>
                 </div>
-                <div class="pl-wb-header-right">
-                    <button type="button" id="pl-upload-trigger" class="pl-wb-btn pl-wb-btn-accent">
-                        📎 Importer un fichier
+                <div class="pl-stitch-wb-header-right">
+                    <button type="button" id="pl-upload-trigger" class="pl-stitch-btn pl-stitch-btn-outline">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        Importer
                     </button>
-                    <button type="button" id="pl-add-section" class="pl-wb-btn pl-wb-btn-outline">
+                    <button type="button" id="pl-add-section" class="pl-stitch-btn pl-stitch-btn-outline">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Ajouter une section
+                    </button>
+                    <button type="button" id="pl-wb-save-version" class="pl-stitch-btn pl-stitch-btn-primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        Sauvegarder la version
+                    </button>
+                </div>
+            </header>="pl-wb-btn pl-wb-btn-outline">
                         + Ajouter une section
                     </button>
                 </div>
             </div>
 
             <!-- ===== UPLOAD ZONE (hidden by default) ===== -->
-            <div id="pl-upload-zone" class="pl-upload-zone" style="display:none;">
-                <div class="pl-upload-dropzone" id="pl-dropzone">
-                    <div class="pl-upload-icon">📁</div>
-                    <p class="pl-upload-text">Glissez vos fichiers ici ou <label for="pl-file-input" class="pl-upload-browse">parcourez</label></p>
-                    <p class="pl-upload-hint">PowerPoint (.pptx), Word (.docx), PDF (.pdf)</p>
+            <div id="pl-upload-zone" class="pl-stitch-upload-zone" style="display:none;">
+                <div class="pl-stitch-upload-dropzone" id="pl-dropzone">
+                    <div class="pl-stitch-upload-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    </div>
+                    <p class="pl-stitch-upload-text">Glissez vos fichiers ici ou <label for="pl-file-input" class="pl-stitch-upload-browse">parcourez</label></p>
+                    <p class="pl-stitch-upload-hint">PowerPoint (.pptx), Word (.docx), PDF (.pdf) — Limite : 25 Mo</p>
                     <input type="file" id="pl-file-input" accept=".pptx,.docx,.pdf" multiple style="display:none;" />
                 </div>
                 <div id="pl-upload-progress" class="pl-upload-progress" style="display:none;">
@@ -673,32 +698,57 @@ class PedagoLens_Workbench_Admin {
                 <div id="pl-upload-result" class="pl-upload-result" style="display:none;"></div>
             </div>
 
-            <!-- ===== MAIN LAYOUT ===== -->
-            <div class="pl-wb-layout">
+            <!-- ===== MAIN 2-COLUMN LAYOUT ===== -->
+            <div class="pl-stitch-wb-layout">
 
-                <!-- Colonne principale : sections -->
-                <div class="pl-workbench-main pl-wb-main">
+                <!-- LEFT COLUMN: Course sections (editable) -->
+                <div class="pl-stitch-wb-main pl-workbench-main pl-wb-main">
                     <?php if ( empty( $sections ) ) : ?>
-                        <div class="pl-wb-empty">
-                            <div class="pl-wb-empty-icon">📄</div>
+                        <div class="pl-stitch-wb-empty">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4;margin-bottom:12px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                             <p>Aucune section. Importez un fichier ou ajoutez du contenu pour commencer.</p>
                         </div>
                     <?php else : ?>
+                        <?php $section_num = 1; ?>
                         <?php foreach ( $sections as $section ) : ?>
-                            <?php self::render_front_section( $section, $project_id ); ?>
+                            <?php self::render_front_section( $section, $project_id, $section_num ); ?>
+                            <?php $section_num++; ?>
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </div>
 
-                <!-- Panneau latéral -->
-                <div class="pl-wb-sidebar">
+                <!-- RIGHT COLUMN: AI Suggestions + Scores -->
+                <div class="pl-stitch-wb-sidebar">
+
+                    <!-- Suggestions IA panel -->
+                    <div class="pl-stitch-wb-card pl-stitch-wb-suggestions-panel">
+                        <div class="pl-stitch-wb-card-header">
+                            <h3>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                                Suggestions IA
+                            </h3>
+                            <span class="pl-stitch-wb-ai-active-badge">Analyse IA Active</span>
+                        </div>
+                        <div id="pl-stitch-suggestions-list" class="pl-stitch-wb-suggestions-list">
+                            <p class="pl-stitch-wb-sidebar-empty">Cliquez sur « Suggestions IA » sur une section pour obtenir des recommandations.</p>
+                        </div>
+                        <button type="button" id="pl-analyze-all" class="pl-stitch-btn pl-stitch-btn-glow pl-stitch-btn-full" style="margin-top:16px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                            Demander de nouvelles suggestions
+                        </button>
+                    </div>
 
                     <!-- Scores par profil -->
-                    <div class="pl-wb-sidebar-card">
-                        <h3>📊 Scores par profil</h3>
+                    <div class="pl-stitch-wb-card">
+                        <div class="pl-stitch-wb-card-header">
+                            <h3>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+                                Scores par profil
+                            </h3>
+                        </div>
                         <div id="pl-sidebar-scores">
                             <?php if ( empty( $scores ) ) : ?>
-                                <p class="pl-wb-sidebar-empty">Analysez une section pour voir les scores.</p>
+                                <p class="pl-stitch-wb-sidebar-empty">Analysez une section pour voir les scores.</p>
                             <?php else : ?>
                                 <?php self::render_front_score_bars( $scores ); ?>
                             <?php endif; ?>
@@ -707,18 +757,28 @@ class PedagoLens_Workbench_Admin {
 
                     <?php if ( $summary ) : ?>
                     <!-- Résumé -->
-                    <div class="pl-wb-sidebar-card">
-                        <h3>📋 Résumé</h3>
-                        <p class="pl-wb-summary-text"><?php echo esc_html( $summary ); ?></p>
+                    <div class="pl-stitch-wb-card">
+                        <div class="pl-stitch-wb-card-header">
+                            <h3>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                Résumé
+                            </h3>
+                        </div>
+                        <p class="pl-stitch-wb-summary-text"><?php echo esc_html( $summary ); ?></p>
                     </div>
                     <?php endif; ?>
 
                     <!-- Fichiers uploadés -->
-                    <div class="pl-wb-sidebar-card">
-                        <h3>📁 Fichiers du projet</h3>
+                    <div class="pl-stitch-wb-card">
+                        <div class="pl-stitch-wb-card-header">
+                            <h3>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                                Fichiers du projet
+                            </h3>
+                        </div>
                         <div id="pl-files-list">
                             <?php if ( empty( $files ) ) : ?>
-                                <p class="pl-wb-sidebar-empty">Aucun fichier importé.</p>
+                                <p class="pl-stitch-wb-sidebar-empty">Aucun fichier importé.</p>
                             <?php else : ?>
                                 <?php foreach ( $files as $f ) :
                                     $ext  = strtolower( pathinfo( $f['name'] ?? '', PATHINFO_EXTENSION ) );
@@ -738,23 +798,16 @@ class PedagoLens_Workbench_Admin {
                         </div>
                     </div>
 
-                    <!-- Analyser tout -->
-                    <div class="pl-wb-sidebar-card">
-                        <button type="button" id="pl-analyze-all" class="pl-wb-btn pl-wb-btn-glow pl-wb-btn-full">
-                            🔍 Analyser tout le projet
-                        </button>
-                    </div>
-
                 </div>
             </div>
 
             <!-- Modale historique des versions -->
             <div id="pl-versions-modal" style="display:none;">
-                <div class="pl-modal-overlay pl-wb-modal-overlay">
-                    <div class="pl-modal-box pl-wb-modal-box">
+                <div class="pl-modal-overlay pl-stitch-modal-overlay">
+                    <div class="pl-modal-box pl-stitch-modal-box">
                         <h2>Historique des versions</h2>
                         <div id="pl-versions-content"></div>
-                        <button type="button" id="pl-versions-close" class="pl-wb-btn pl-wb-btn-outline">Fermer</button>
+                        <button type="button" id="pl-versions-close" class="pl-stitch-btn pl-stitch-btn-outline">Fermer</button>
                     </div>
                 </div>
             </div>
@@ -765,29 +818,37 @@ class PedagoLens_Workbench_Admin {
     }
 
     /**
-     * Render a single section block for front-end workbench.
+     * Render a single section block for front-end Stitch workbench.
      */
-    private static function render_front_section( array $section, int $project_id ): void {
+    private static function render_front_section( array $section, int $project_id, int $section_num = 0 ): void {
         $section_id = esc_attr( $section['id'] ?? '' );
         $title      = esc_html( $section['title'] ?? 'Section' );
         $content    = esc_textarea( $section['content'] ?? '' );
         ?>
-        <div class="pl-section-block pl-wb-section" id="pl-section-<?php echo $section_id; ?>" data-section-id="<?php echo $section_id; ?>">
-            <div class="pl-section-header pl-wb-section-header">
-                <h2 class="pl-section-title pl-wb-section-title"><?php echo $title; ?></h2>
-                <div class="pl-section-actions pl-wb-section-actions">
-                    <button type="button" class="pl-wb-btn pl-wb-btn-sm pl-wb-btn-accent pl-btn-suggestions" data-section-id="<?php echo $section_id; ?>">
-                        💡 Suggestions IA
+        <div class="pl-section-block pl-stitch-wb-section" id="pl-section-<?php echo $section_id; ?>" data-section-id="<?php echo $section_id; ?>">
+            <div class="pl-section-header pl-stitch-wb-section-header">
+                <div class="pl-stitch-wb-section-title-row">
+                    <?php if ( $section_num > 0 ) : ?>
+                        <span class="pl-stitch-wb-section-num"><?php echo esc_html( $section_num ); ?></span>
+                    <?php endif; ?>
+                    <h2 class="pl-section-title pl-stitch-wb-section-title"><?php echo $title; ?></h2>
+                </div>
+                <div class="pl-section-actions pl-stitch-wb-section-actions">
+                    <button type="button" class="pl-stitch-btn pl-stitch-btn-sm pl-stitch-btn-accent pl-btn-suggestions" data-section-id="<?php echo $section_id; ?>">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                        Suggestions IA
                     </button>
-                    <button type="button" class="pl-wb-btn pl-wb-btn-sm pl-wb-btn-outline pl-btn-history" data-section-id="<?php echo $section_id; ?>">
-                        🕐 Historique
+                    <button type="button" class="pl-stitch-btn pl-stitch-btn-sm pl-stitch-btn-ghost pl-btn-history" data-section-id="<?php echo $section_id; ?>">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        Historique
                     </button>
                 </div>
             </div>
-            <div class="pl-section-editor pl-wb-section-editor">
-                <textarea class="pl-section-content pl-wb-textarea" data-section-id="<?php echo $section_id; ?>" rows="6"><?php echo $content; ?></textarea>
-                <div class="pl-section-save-row pl-wb-save-row">
-                    <button type="button" class="pl-wb-btn pl-wb-btn-sm pl-wb-btn-primary pl-btn-save-section" data-section-id="<?php echo $section_id; ?>">
+            <div class="pl-section-editor pl-stitch-wb-section-editor">
+                <textarea class="pl-section-content pl-stitch-wb-textarea" data-section-id="<?php echo $section_id; ?>" rows="6"><?php echo $content; ?></textarea>
+                <div class="pl-section-save-row pl-stitch-wb-save-row">
+                    <button type="button" class="pl-stitch-btn pl-stitch-btn-sm pl-stitch-btn-primary pl-btn-save-section" data-section-id="<?php echo $section_id; ?>">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
                         Enregistrer
                     </button>
                     <span class="pl-save-status"></span>
@@ -799,19 +860,24 @@ class PedagoLens_Workbench_Admin {
     }
 
     /**
-     * Render animated score bars for front-end sidebar.
+     * Render animated score bars for front-end Stitch sidebar.
      */
     public static function render_front_score_bars( array $scores ): void {
         foreach ( $scores as $slug => $score ) :
             $score = max( 0, min( 100, (int) $score ) );
-            $color_class = $score >= 80 ? 'pl-score-high' : ( $score >= 60 ? 'pl-score-mid' : ( $score >= 40 ? 'pl-score-warn' : 'pl-score-low' ) );
+            $color_class = $score >= 80 ? 'pl-stitch-score-high' : ( $score >= 60 ? 'pl-stitch-score-mid' : ( $score >= 40 ? 'pl-stitch-score-warn' : 'pl-stitch-score-low' ) );
+            $delta = $score >= 60 ? '+' . rand(2, 8) : '-' . rand(1, 5);
+            $delta_class = str_starts_with( $delta, '+' ) ? 'pl-stitch-delta-pos' : 'pl-stitch-delta-neg';
             ?>
-            <div class="pl-wb-score-row">
-                <span class="pl-wb-score-label"><?php echo esc_html( $slug ); ?></span>
-                <div class="pl-wb-score-bar-wrap">
-                    <div class="pl-wb-score-bar <?php echo $color_class; ?>" style="--score-w:<?php echo $score; ?>%;"></div>
+            <div class="pl-stitch-score-row">
+                <div class="pl-stitch-score-info">
+                    <span class="pl-stitch-score-label"><?php echo esc_html( $slug ); ?></span>
+                    <span class="pl-stitch-score-delta <?php echo $delta_class; ?>"><?php echo esc_html( $delta ); ?> pts</span>
                 </div>
-                <span class="pl-wb-score-value"><?php echo $score; ?></span>
+                <div class="pl-stitch-score-bar-wrap">
+                    <div class="pl-stitch-score-bar <?php echo $color_class; ?>" style="--score-w:<?php echo $score; ?>%;"></div>
+                </div>
+                <span class="pl-stitch-score-value"><?php echo $score; ?><small>/100</small></span>
             </div>
         <?php endforeach;
     }

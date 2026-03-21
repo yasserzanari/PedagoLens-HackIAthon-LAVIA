@@ -4,6 +4,7 @@
  *
  * Logique métier : analyse de cours, persistance des analyses,
  * lecture des scores/recommandations, gestion des projets.
+ * Front-end : Design System Stitch (Manrope/Inter, Material tokens, glass cards).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -22,11 +23,6 @@ class PedagoLens_Teacher_Dashboard {
     // Analyse
     // -------------------------------------------------------------------------
 
-    /**
-     * Déclenche une analyse IA du cours et persiste le résultat.
-     *
-     * @return array  Résultat structuré ou tableau d'erreur.
-     */
     public static function analyze_course( int $course_id ): array {
         $course = get_post( $course_id );
         if ( ! $course || $course->post_type !== 'pl_course' ) {
@@ -57,20 +53,14 @@ class PedagoLens_Teacher_Dashboard {
             return $result;
         }
 
-        // Garantir que les scores couvrent exactement les profils actifs
         $result = self::normalize_scores( $result, $profiles );
-
         $analysis_id = self::save_analysis( $course_id, $result );
         $result['analysis_id'] = $analysis_id;
 
         do_action( 'pedagolens_after_analysis', $course_id, $result );
-
         return $result;
     }
 
-    /**
-     * Persiste un résultat d'analyse dans un CPT pl_analysis.
-     */
     public static function save_analysis( int $course_id, array $result ): int {
         $course = get_post( $course_id );
         $title  = sprintf(
@@ -101,23 +91,15 @@ class PedagoLens_Teacher_Dashboard {
         return $post_id;
     }
 
-    /**
-     * Retourne les scores par profil d'une analyse.
-     */
     public static function get_profile_scores( int $analysis_id ): array {
         $raw = get_post_meta( $analysis_id, '_pl_profile_scores', true );
         return is_string( $raw ) ? (array) json_decode( $raw, true ) : [];
     }
 
-    /**
-     * Retourne les recommandations d'une analyse, triées par priorité décroissante.
-     */
     public static function get_recommendations( int $analysis_id ): array {
         $raw  = get_post_meta( $analysis_id, '_pl_recommendations', true );
         $recs = is_string( $raw ) ? (array) json_decode( $raw, true ) : [];
-
         usort( $recs, fn( $a, $b ) => ( $a['priority'] ?? 99 ) <=> ( $b['priority'] ?? 99 ) );
-
         return $recs;
     }
 
@@ -125,9 +107,6 @@ class PedagoLens_Teacher_Dashboard {
     // Projets
     // -------------------------------------------------------------------------
 
-    /**
-     * Crée un projet pl_project rattaché à un cours.
-     */
     public static function create_project( int $course_id, string $type, string $title ): int {
         $allowed_types = [ 'magistral', 'exercice', 'evaluation', 'travail_equipe' ];
         if ( ! in_array( $type, $allowed_types, true ) ) {
@@ -158,9 +137,6 @@ class PedagoLens_Teacher_Dashboard {
         return $post_id;
     }
 
-    /**
-     * Retourne les projets d'un cours, triés par date décroissante.
-     */
     public static function get_projects( int $course_id ): array {
         $query = new WP_Query( [
             'post_type'      => 'pl_project',
@@ -189,17 +165,17 @@ class PedagoLens_Teacher_Dashboard {
     }
 
     // -------------------------------------------------------------------------
-    // Rendu front-end (shortcode délégué depuis pedagolens-landing)
+    // Rendu front-end — Design System Stitch
     // -------------------------------------------------------------------------
 
     /**
-     * Rendu HTML du dashboard enseignant pour le front-end (shortcode).
-     * Layout professionnel : header, sidebar, main, footer.
+     * Rendu HTML du dashboard enseignant (shortcode).
+     * Design System Stitch : Manrope/Inter, Material tokens, glass cards, rounded-[1.5rem].
      */
     public static function render_front(): string {
         if ( ! is_user_logged_in() ) {
             $login_url = esc_url( wp_login_url( get_permalink() ) );
-            return "<div class=\"pl-notice pl-notice-warning\"><p>Vous devez être connecté pour accéder au tableau de bord enseignant. <a href=\"{$login_url}\">Se connecter</a></p></div>";
+            return '<div class="pl-stitch-notice pl-stitch-notice--warning"><p>Vous devez être connecté pour accéder au tableau de bord. <a href="' . $login_url . '">Se connecter</a></p></div>';
         }
 
         $user       = wp_get_current_user();
@@ -207,7 +183,19 @@ class PedagoLens_Teacher_Dashboard {
                    || in_array( 'administrator',      (array) $user->roles, true );
 
         if ( ! $is_teacher ) {
-            return '<div class="pl-notice pl-notice-error"><p>Accès réservé aux enseignants.</p></div>';
+            return '<div class="pl-stitch-notice pl-stitch-notice--error"><p>Accès réservé aux enseignants.</p></div>';
+        }
+
+        // Detect analysis detail mode
+        $analysis_detail_id = isset( $_GET['analysis_id'] ) ? absint( $_GET['analysis_id'] ) : 0;
+        if ( $analysis_detail_id ) {
+            return self::render_analysis_content( $analysis_detail_id );
+        }
+
+        // Detect course detail mode
+        $course_detail_id = isset( $_GET['course_id'] ) ? absint( $_GET['course_id'] ) : 0;
+        if ( $course_detail_id ) {
+            return self::render_course_detail( $course_detail_id );
         }
 
         wp_enqueue_style(
@@ -263,172 +251,179 @@ class PedagoLens_Teacher_Dashboard {
         $total_analyses = self::count_all_analyses();
         $avg_score      = ! empty( $all_scores ) ? (int) round( array_sum( $all_scores ) / count( $all_scores ) ) : 0;
 
-        // Resolve page URLs
+        // Recent analyses
+        $recent_analyses = get_posts( [
+            'post_type'      => 'pl_analysis',
+            'posts_per_page' => 5,
+            'orderby'        => 'date',
+            'order'          => 'DESC',
+            'post_status'    => 'publish',
+        ] );
+
+        // URLs
         $workbench_page = get_page_by_path( 'workbench' );
         $workbench_url  = $workbench_page ? get_permalink( $workbench_page ) : admin_url( 'admin.php?page=pl-course-workbench' );
-        $twin_page      = get_page_by_path( 'dashboard-etudiant' );
-        $twin_url       = $twin_page ? get_permalink( $twin_page ) : admin_url( 'admin.php?page=pl-student-twin' );
-        $account_page   = get_page_by_path( 'compte' );
-        $account_url    = $account_page ? get_permalink( $account_page ) : home_url( '/compte' );
-        $settings_url   = admin_url( 'admin.php?page=pl-api-bridge-settings' );
-        $logout_url     = wp_logout_url( home_url( '/' ) );
+        $current_url    = get_permalink();
 
         ob_start();
         ?>
-        <div class="pl-dash-wrap">
+        <div class="pl-stitch-wrap" style="font-family:'Inter',sans-serif;background:#f7f9fb;color:#191c1e;min-height:100vh;">
+        <style>
+            .pl-stitch-wrap *,.pl-stitch-wrap *::before,.pl-stitch-wrap *::after{box-sizing:border-box}
+            .pl-stitch-headline{font-family:'Manrope',sans-serif}
+            .pl-stitch-card{background:#fff;border-radius:1.5rem;box-shadow:0 10px 40px rgba(25,28,30,.06);border:1px solid rgba(197,197,211,.1);transition:all .3s ease}
+            .pl-stitch-card:hover{box-shadow:0 25px 50px -12px rgba(0,0,0,.12);transform:translateY(-2px)}
+            .pl-stitch-btn-primary{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.5rem;background:linear-gradient(135deg,#00236f,#1e3a8a);color:#fff;font-weight:700;font-size:.875rem;border-radius:.75rem;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(0,35,111,.25);transition:all .3s ease;text-decoration:none;font-family:'Inter',sans-serif}
+            .pl-stitch-btn-primary:hover{opacity:.9;box-shadow:0 8px 25px rgba(0,35,111,.35);color:#fff;text-decoration:none}
+            .pl-stitch-btn-outline{display:inline-flex;align-items:center;gap:.5rem;padding:.625rem 1.25rem;border:1px solid rgba(117,118,130,.2);background:#fff;color:#00236f;font-weight:600;font-size:.8125rem;border-radius:.75rem;cursor:pointer;transition:all .3s ease;text-decoration:none;font-family:'Inter',sans-serif}
+            .pl-stitch-btn-outline:hover{background:#f2f4f6;border-color:#00236f;color:#00236f;text-decoration:none}
+            .pl-stitch-kpi-value{font-family:'Manrope',sans-serif;font-size:3rem;font-weight:900;color:#00236f;letter-spacing:-.03em;line-height:1.1}
+            .pl-stitch-notice{padding:1rem 1.5rem;border-radius:.75rem;margin-bottom:1.25rem;font-size:.875rem}
+            .pl-stitch-notice--warning{background:rgba(255,193,7,.08);border:1px solid rgba(255,193,7,.2);color:#7a5900}
+            .pl-stitch-notice--error{background:rgba(186,26,26,.06);border:1px solid rgba(186,26,26,.15);color:#93000a}
+            .pl-stitch-notice p{margin:0}
+            .pl-stitch-notice a{color:inherit;text-decoration:underline}
+            .pl-stitch-score-bar-wrap{height:.5rem;width:100%;background:#f2f4f6;border-radius:9999px;overflow:hidden}
+            .pl-stitch-score-bar{height:100%;border-radius:9999px;transition:width 1.2s cubic-bezier(.25,.8,.25,1)}
+            .pl-stitch-tag{display:inline-flex;padding:.25rem .75rem;border-radius:9999px;font-size:.625rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+            @media(max-width:768px){
+                .pl-stitch-grid-4{grid-template-columns:1fr 1fr !important}
+                .pl-stitch-grid-courses{grid-template-columns:1fr !important}
+                .pl-stitch-grid-2{grid-template-columns:1fr !important}
+            }
+            @media(max-width:480px){
+                .pl-stitch-grid-4{grid-template-columns:1fr !important}
+            }
+        </style>
 
-            <!-- ============ TOP HEADER ============ -->
-            <header class="pl-dash-header">
-                <div class="pl-dash-header-inner">
-                    <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="pl-dash-header-logo">PédagoLens</a>
-                    <nav class="pl-dash-header-nav">
-                        <a href="<?php echo esc_url( home_url( '/' ) ); ?>">Accueil</a>
-                        <a href="<?php echo esc_url( $twin_url ); ?>">Jumeau</a>
-                        <a href="<?php echo esc_url( $account_url ); ?>">Compte</a>
-                    </nav>
-                    <button class="pl-dash-hamburger" id="pl-hamburger" aria-label="Menu">
-                        <span></span><span></span><span></span>
-                    </button>
+        <!-- Header -->
+        <header style="padding:2rem 3rem 1.5rem;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:1.5rem;">
+            <div>
+                <p style="color:#712ae2;font-weight:700;font-size:.8125rem;letter-spacing:.1em;text-transform:uppercase;margin:0 0 .5rem">Enseignement & IA</p>
+                <h2 class="pl-stitch-headline" style="font-size:2.5rem;font-weight:800;color:#00236f;margin:0;letter-spacing:-.02em;">Tableau de bord</h2>
+                <p style="color:#444651;margin:.5rem 0 0;font-size:.9375rem;">Bonjour, <?php echo $firstname; ?> 👋</p>
+            </div>
+            <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+                <button type="button" class="pl-stitch-btn-primary" id="pl-btn-add-course">
+                    <span style="font-size:1.1rem">+</span> Nouveau cours
+                </button>
+                <button type="button" class="pl-stitch-btn-outline" onclick="document.getElementById('pl-btn-add-course').click()">
+                    📊 Analyser un cours
+                </button>
+            </div>
+        </header>
+
+        <div style="padding:0 3rem 3rem;">
+
+            <!-- KPI Stats Row -->
+            <div class="pl-stitch-grid-4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-bottom:3rem;">
+                <?php
+                $kpis = [
+                    [ 'label' => 'Cours',        'value' => $total_courses,  'icon' => '📚', 'color' => '#00236f' ],
+                    [ 'label' => 'Analyses',      'value' => $total_analyses, 'icon' => '🔍', 'color' => '#712ae2' ],
+                    [ 'label' => 'Projets',       'value' => $total_projects, 'icon' => '📄', 'color' => '#004754' ],
+                    [ 'label' => 'Score moyen',   'value' => $avg_score,      'icon' => '🏆', 'color' => '#00236f' ],
+                ];
+                foreach ( $kpis as $kpi ) : ?>
+                <div class="pl-stitch-card" style="padding:1.75rem;position:relative;overflow:hidden;">
+                    <div style="position:absolute;top:0;right:0;width:6rem;height:6rem;background:<?php echo esc_attr( $kpi['color'] ); ?>;opacity:.04;border-radius:0 0 0 100%;margin-right:-2rem;margin-top:-2rem;"></div>
+                    <p style="color:#444651;font-weight:500;font-size:.875rem;margin:0 0 1rem;"><?php echo esc_html( $kpi['label'] ); ?></p>
+                    <div style="display:flex;align-items:baseline;gap:.5rem;">
+                        <span class="pl-stitch-kpi-value pl-stat-number" data-target="<?php echo (int) $kpi['value']; ?>" style="color:<?php echo esc_attr( $kpi['color'] ); ?>">0</span>
+                    </div>
+                    <p style="font-size:.75rem;color:#757682;margin:.75rem 0 0;font-style:italic;"><?php echo esc_html( $kpi['icon'] ); ?> <?php echo esc_html( $kpi['label'] ); ?></p>
                 </div>
-            </header>
-
-            <div class="pl-dash-body">
-
-                <!-- ============ SIDEBAR ============ -->
-                <aside class="pl-dash-sidebar" id="pl-sidebar">
-                    <div class="pl-sidebar-logo">
-                        <span class="pl-sidebar-logo-icon">🎓</span>
-                        <span class="pl-sidebar-logo-text">PédagoLens</span>
-                    </div>
-                    <nav class="pl-sidebar-nav">
-                        <a href="#" class="pl-sidebar-link pl-sidebar-active" data-view="overview">
-                            <span class="pl-sidebar-icon">📊</span> Vue d'ensemble
-                        </a>
-                        <a href="#" class="pl-sidebar-link" data-view="courses">
-                            <span class="pl-sidebar-icon">📚</span> Mes cours
-                        </a>
-                        <a href="<?php echo esc_url( $workbench_url ); ?>" class="pl-sidebar-link">
-                            <span class="pl-sidebar-icon">📝</span> Workbench
-                        </a>
-                        <a href="<?php echo esc_url( $twin_url ); ?>" class="pl-sidebar-link">
-                            <span class="pl-sidebar-icon">🤖</span> Jumeau numérique
-                        </a>
-                        <a href="<?php echo esc_url( $settings_url ); ?>" class="pl-sidebar-link">
-                            <span class="pl-sidebar-icon">⚙️</span> Paramètres API
-                        </a>
-                        <a href="<?php echo esc_url( $account_url ); ?>" class="pl-sidebar-link">
-                            <span class="pl-sidebar-icon">👤</span> Mon compte
-                        </a>
-                    </nav>
-                    <div class="pl-sidebar-bottom">
-                        <div class="pl-sidebar-divider"></div>
-                        <span class="pl-mode-badge pl-mode-badge--<?php echo esc_attr( $mode ); ?>">
-                            <span class="pl-pulse-dot"></span>
-                            <?php echo $mode === 'mock' ? 'Mode Mock' : 'AWS Bedrock'; ?>
-                        </span>
-                        <a href="<?php echo esc_url( $logout_url ); ?>" class="pl-sidebar-logout">🚪 Déconnexion</a>
-                    </div>
-                </aside>
-
-                <!-- ============ MAIN CONTENT ============ -->
-                <main class="pl-dash-main">
-
-                    <!-- VIEW: Overview -->
-                    <section class="pl-dash-view pl-dash-view--active" id="pl-view-overview">
-                        <div class="pl-welcome pl-animate-in">Bonjour, <?php echo $firstname; ?> 👋</div>
-
-                        <div class="pl-stats-grid">
-                            <div class="pl-stat-card pl-animate-in" data-accent="courses">
-                                <span class="pl-stat-icon">📚</span>
-                                <div class="pl-stat-number" data-target="<?php echo (int) $total_courses; ?>">0</div>
-                                <div class="pl-stat-label">Cours</div>
-                            </div>
-                            <div class="pl-stat-card pl-animate-in" data-accent="analyses">
-                                <span class="pl-stat-icon">🔍</span>
-                                <div class="pl-stat-number" data-target="<?php echo (int) $total_analyses; ?>">0</div>
-                                <div class="pl-stat-label">Analyses</div>
-                            </div>
-                            <div class="pl-stat-card pl-animate-in" data-accent="projects">
-                                <span class="pl-stat-icon">📄</span>
-                                <div class="pl-stat-number" data-target="<?php echo (int) $total_projects; ?>">0</div>
-                                <div class="pl-stat-label">Projets</div>
-                            </div>
-                            <div class="pl-stat-card pl-animate-in" data-accent="score">
-                                <span class="pl-stat-icon">🏆</span>
-                                <div class="pl-stat-number" data-target="<?php echo (int) $avg_score; ?>">0</div>
-                                <div class="pl-stat-label">Score moyen</div>
-                            </div>
-                        </div>
-
-                        <div class="pl-section-header-row">
-                            <h3 class="pl-section-title">
-                                <span class="pl-section-icon">📚</span> Mes cours
-                                <span class="pl-section-count"><?php echo (int) $total_courses; ?></span>
-                            </h3>
-                        </div>
-
-                        <div class="pl-add-course-zone pl-animate-in">
-                            <button type="button" class="pl-btn-add-course" id="pl-btn-add-course">
-                                <span class="pl-add-icon">➕</span> Ajouter un cours
-                            </button>
-                        </div>
-
-                        <?php if ( ! empty( $courses_data ) ) : ?>
-                        <div class="pl-courses-grid">
-                            <?php foreach ( $courses_data as $cd ) :
-                                $course      = $cd['post'];
-                                $course_type = $cd['type'];
-                                $projects    = $cd['projects'];
-                                $analysis    = $cd['analysis'];
-                                $last_date   = '';
-                                if ( $analysis && ! empty( $analysis['analysis_id'] ) ) {
-                                    $a_post = get_post( $analysis['analysis_id'] );
-                                    if ( $a_post ) { $last_date = wp_date( 'j M Y', strtotime( $a_post->post_date ) ); }
-                                }
-                            ?>
-                            <div class="pl-course-card pl-animate-in" data-course-id="<?php echo (int) $course->ID; ?>">
-                                <div class="pl-course-card-body">
-                                    <div class="pl-course-header">
-                                        <h3><?php echo esc_html( $course->post_title ); ?></h3>
-                                        <span class="pl-badge pl-type-<?php echo esc_attr( $course_type ); ?>"><?php echo esc_html( $course_type ); ?></span>
-                                    </div>
-                                    <div class="pl-course-meta">
-                                        <span>📅 <?php echo esc_html( get_the_date( 'j M Y', $course ) ); ?></span>
-                                        <span>📄 <?php echo count( $projects ); ?> projet(s)</span>
-                                        <?php if ( $last_date ) : ?><span>🔍 <?php echo esc_html( $last_date ); ?></span><?php endif; ?>
-                                    </div>
-                                    <div class="pl-course-actions">
-                                        <button class="pl-btn-glow pl-btn-sm pl-btn-analyze-front" data-course-id="<?php echo (int) $course->ID; ?>">🔍 Analyser</button>
-                                        <button class="pl-btn-ghost pl-btn-sm pl-btn-open-course" data-course-id="<?php echo (int) $course->ID; ?>">📂 Ouvrir</button>
-                                    </div>
-                                </div>
-                                <div id="pl-analysis-result-<?php echo (int) $course->ID; ?>" class="pl-analysis-front-result">
-                                    <?php if ( $analysis ) : ?><?php PedagoLens_Dashboard_Admin::render_analysis_result( $analysis ); ?><?php endif; ?>
-                                </div>
-                            </div>
-                            <?php endforeach; ?>
-                        </div>
-                        <?php endif; ?>
-                    </section>
-
-                    <!-- VIEW: Course detail -->
-                    <section class="pl-dash-view" id="pl-view-courses">
-                        <div class="pl-view-back-row">
-                            <button class="pl-btn-ghost pl-btn-sm pl-btn-back-overview">← Retour</button>
-                        </div>
-                        <div id="pl-course-detail-content"></div>
-                    </section>
-
-                </main>
+                <?php endforeach; ?>
             </div>
 
-            <!-- ============ FOOTER ============ -->
-            <footer class="pl-dash-footer">
-                <div class="pl-dash-footer-inner">
-                    <span class="pl-footer-logo">PédagoLens</span>
-                    <p class="pl-footer-copy">© 2026 PédagoLens — Propulsé par AWS Bedrock</p>
+            <!-- Mes cours -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+                <h3 class="pl-stitch-headline" style="font-size:1.25rem;font-weight:700;color:#00236f;margin:0;">Mes cours</h3>
+                <span style="font-size:.75rem;font-weight:700;padding:.25rem .75rem;border-radius:9999px;background:rgba(0,35,111,.06);color:#00236f;"><?php echo (int) $total_courses; ?> cours</span>
+            </div>
+
+            <?php if ( empty( $courses_data ) ) : ?>
+                <div class="pl-stitch-card" style="padding:3rem;text-align:center;">
+                    <p style="color:#757682;margin:0;">Aucun cours trouvé. Créez votre premier cours pour commencer.</p>
                 </div>
-            </footer>
+            <?php else : ?>
+            <div class="pl-stitch-grid-courses" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:1.5rem;margin-bottom:3rem;">
+                <?php foreach ( $courses_data as $cd ) :
+                    $course      = $cd['post'];
+                    $course_type = $cd['type'];
+                    $projects    = $cd['projects'];
+                    $analysis    = $cd['analysis'];
+                    $last_score  = '';
+                    $last_date   = '';
+                    if ( $analysis && ! empty( $analysis['analysis_id'] ) ) {
+                        $a_post = get_post( $analysis['analysis_id'] );
+                        if ( $a_post ) { $last_date = wp_date( 'j M Y', strtotime( $a_post->post_date ) ); }
+                        $scores_vals = array_values( $analysis['profile_scores'] ?? [] );
+                        if ( ! empty( $scores_vals ) ) {
+                            $last_score = (int) round( array_sum( $scores_vals ) / count( $scores_vals ) );
+                        }
+                    }
+                    $detail_url = add_query_arg( 'course_id', $course->ID, $current_url );
+                ?>
+                <div class="pl-stitch-card" style="padding:0;overflow:hidden;" data-course-id="<?php echo (int) $course->ID; ?>">
+                    <div style="padding:1.5rem 1.5rem 1rem;">
+                        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;margin-bottom:.75rem;">
+                            <h4 class="pl-stitch-headline" style="font-size:1rem;font-weight:700;color:#00236f;margin:0;line-height:1.4;"><?php echo esc_html( $course->post_title ); ?></h4>
+                            <span class="pl-stitch-tag" style="background:rgba(0,35,111,.06);color:#00236f;flex-shrink:0;"><?php echo esc_html( $course_type ); ?></span>
+                        </div>
+                        <div style="display:flex;gap:1rem;flex-wrap:wrap;font-size:.8125rem;color:#757682;margin-bottom:1rem;">
+                            <span>📅 <?php echo esc_html( get_the_date( 'j M Y', $course ) ); ?></span>
+                            <span>📄 <?php echo count( $projects ); ?> projet(s)</span>
+                            <?php if ( $last_date ) : ?><span>🔍 <?php echo esc_html( $last_date ); ?></span><?php endif; ?>
+                        </div>
+                        <?php if ( $last_score ) : ?>
+                        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;">
+                            <span style="font-size:.75rem;font-weight:600;color:#444651;">Score</span>
+                            <div class="pl-stitch-score-bar-wrap">
+                                <div class="pl-stitch-score-bar pl-score-bar" data-score="<?php echo $last_score; ?>" style="width:0%;background:<?php echo self::stitch_score_color( $last_score ); ?>;"></div>
+                            </div>
+                            <span style="font-size:.8125rem;font-weight:700;color:#00236f;"><?php echo $last_score; ?>%</span>
+                        </div>
+                        <?php endif; ?>
+                        <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                            <button class="pl-stitch-btn-primary pl-btn-analyze-front" data-course-id="<?php echo (int) $course->ID; ?>" style="padding:.5rem 1rem;font-size:.75rem;">🔍 Analyser</button>
+                            <a href="<?php echo esc_url( $detail_url ); ?>" class="pl-stitch-btn-outline" style="padding:.5rem 1rem;font-size:.75rem;">📂 Détails</a>
+                        </div>
+                    </div>
+                    <div id="pl-analysis-result-<?php echo (int) $course->ID; ?>" class="pl-analysis-front-result"></div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+
+            <!-- Analyses récentes -->
+            <?php if ( ! empty( $recent_analyses ) ) : ?>
+            <div style="display:grid;grid-template-columns:1fr;gap:1.5rem;">
+                <div class="pl-stitch-card" style="padding:2rem;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+                        <h3 class="pl-stitch-headline" style="font-size:1.25rem;font-weight:700;color:#00236f;margin:0;">Analyses récentes</h3>
+                        <span style="color:#757682;font-size:1.25rem;">📋</span>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:0;">
+                        <?php foreach ( $recent_analyses as $ra ) :
+                            $ra_course_id = (int) get_post_meta( $ra->ID, '_pl_course_id', true );
+                            $ra_course    = $ra_course_id ? get_post( $ra_course_id ) : null;
+                            $ra_date      = human_time_diff( strtotime( $ra->post_date ), current_time( 'timestamp' ) );
+                        ?>
+                        <div style="display:flex;align-items:center;justify-content:space-between;padding:.875rem 0;border-bottom:1px solid rgba(197,197,211,.15);">
+                            <div style="display:flex;align-items:center;gap:.75rem;">
+                                <span style="color:#712ae2;">✨</span>
+                                <span style="font-size:.875rem;font-weight:500;color:#191c1e;"><?php echo esc_html( $ra_course ? $ra_course->post_title : $ra->post_title ); ?></span>
+                            </div>
+                            <span style="font-size:.75rem;color:#757682;">Il y a <?php echo esc_html( $ra_date ); ?></span>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+        </div>
         </div>
 
         <script type="application/json" id="pl-courses-json"><?php
@@ -460,6 +455,414 @@ class PedagoLens_Teacher_Dashboard {
         return ob_get_clean();
     }
 
+    // -------------------------------------------------------------------------
+    // Tâche 9.5 — Vue détaillée du cours (Design System Stitch)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Rendu de la page détail d'un cours.
+     * Inspiré du template d_tails_du_cours_p_dagolens.
+     */
+    public static function render_course_detail( int $course_id ): string {
+        $course = get_post( $course_id );
+        if ( ! $course || $course->post_type !== 'pl_course' ) {
+            return '<div class="pl-stitch-notice pl-stitch-notice--error"><p>Cours introuvable.</p></div>';
+        }
+
+        wp_enqueue_style(
+            'pl-dashboard-front',
+            PL_DASHBOARD_PLUGIN_URL . 'assets/css/dashboard-admin.css',
+            [],
+            PL_DASHBOARD_VERSION
+        );
+        wp_enqueue_script(
+            'pl-dashboard-front',
+            PL_DASHBOARD_PLUGIN_URL . 'assets/js/dashboard-admin.js',
+            [],
+            PL_DASHBOARD_VERSION,
+            true
+        );
+
+        $course_type = get_post_meta( $course_id, '_pl_course_type', true ) ?: 'magistral';
+        $analysis    = self::get_latest_analysis_front( $course_id );
+        $projects    = self::get_projects( $course_id );
+        $profiles    = self::get_active_profiles();
+
+        $scores = $analysis['profile_scores'] ?? [];
+        $recs   = $analysis['recommendations'] ?? [];
+        $avg_score = 0;
+        if ( ! empty( $scores ) ) {
+            $avg_score = (int) round( array_sum( array_map( 'intval', $scores ) ) / count( $scores ) );
+        }
+
+        $back_url = remove_query_arg( 'course_id' );
+
+        // Workbench URL
+        $workbench_page = get_page_by_path( 'workbench' );
+        $workbench_url  = $workbench_page ? get_permalink( $workbench_page ) : admin_url( 'admin.php?page=pl-course-workbench' );
+
+        ob_start();
+        ?>
+        <div class="pl-stitch-wrap" style="font-family:'Inter',sans-serif;background:#f7f9fb;color:#191c1e;min-height:100vh;">
+        <style>
+            .pl-stitch-wrap *,.pl-stitch-wrap *::before,.pl-stitch-wrap *::after{box-sizing:border-box}
+            .pl-stitch-headline{font-family:'Manrope',sans-serif}
+            .pl-stitch-card{background:#fff;border-radius:1.5rem;box-shadow:0 10px 40px rgba(25,28,30,.06);border:1px solid rgba(197,197,211,.1);transition:all .3s ease}
+            .pl-stitch-btn-primary{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.5rem;background:linear-gradient(135deg,#00236f,#1e3a8a);color:#fff;font-weight:700;font-size:.875rem;border-radius:.75rem;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(0,35,111,.25);transition:all .3s ease;text-decoration:none;font-family:'Inter',sans-serif}
+            .pl-stitch-btn-primary:hover{opacity:.9;color:#fff;text-decoration:none}
+            .pl-stitch-btn-outline{display:inline-flex;align-items:center;gap:.5rem;padding:.625rem 1.25rem;border:1px solid rgba(117,118,130,.2);background:#fff;color:#00236f;font-weight:600;font-size:.8125rem;border-radius:.75rem;cursor:pointer;transition:all .3s ease;text-decoration:none;font-family:'Inter',sans-serif}
+            .pl-stitch-btn-outline:hover{background:#f2f4f6;border-color:#00236f;color:#00236f;text-decoration:none}
+            .pl-stitch-kpi-value{font-family:'Manrope',sans-serif;font-size:3rem;font-weight:900;color:#00236f;letter-spacing:-.03em;line-height:1.1}
+            .pl-stitch-score-bar-wrap{height:.5rem;width:100%;background:#f2f4f6;border-radius:9999px;overflow:hidden}
+            .pl-stitch-score-bar{height:100%;border-radius:9999px;transition:width 1.2s cubic-bezier(.25,.8,.25,1)}
+            .pl-stitch-tag{display:inline-flex;padding:.25rem .75rem;border-radius:9999px;font-size:.625rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+            @media(max-width:768px){
+                .pl-stitch-grid-4{grid-template-columns:1fr 1fr !important}
+                .pl-stitch-grid-2{grid-template-columns:1fr !important}
+            }
+        </style>
+
+        <!-- Header -->
+        <header style="background:#f2f4f6;padding:2rem 3rem;">
+            <nav style="display:flex;align-items:center;gap:.5rem;font-size:.8125rem;color:#444651;margin-bottom:1rem;">
+                <a href="<?php echo esc_url( $back_url ); ?>" style="color:#444651;text-decoration:none;">Tableau de bord</a>
+                <span style="font-size:.75rem;">›</span>
+                <span style="color:#00236f;font-weight:600;"><?php echo esc_html( $course->post_title ); ?></span>
+            </nav>
+            <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:1.5rem;">
+                <div>
+                    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;">
+                        <span class="pl-stitch-tag" style="background:rgba(172,237,255,.2);color:#004e5c;"><?php echo esc_html( $course_type ); ?></span>
+                        <?php if ( $analysis ) : ?>
+                        <span style="display:flex;align-items:center;gap:.25rem;font-size:.625rem;font-weight:700;color:#712ae2;text-transform:uppercase;letter-spacing:.05em;">✓ Analysé</span>
+                        <?php endif; ?>
+                    </div>
+                    <h2 class="pl-stitch-headline" style="font-size:2.25rem;font-weight:800;color:#00236f;margin:0;letter-spacing:-.02em;"><?php echo esc_html( $course->post_title ); ?></h2>
+                    <p style="color:#444651;margin:.5rem 0 0;font-size:.875rem;">Enseignant : <strong style="color:#191c1e;"><?php echo esc_html( wp_get_current_user()->display_name ); ?></strong></p>
+                </div>
+                <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+                    <a href="<?php echo esc_url( $workbench_url ); ?>" class="pl-stitch-btn-outline">📝 Ouvrir dans l'atelier</a>
+                    <button class="pl-stitch-btn-primary pl-btn-analyze-front" data-course-id="<?php echo (int) $course_id; ?>">🔄 Relancer l'analyse</button>
+                </div>
+            </div>
+        </header>
+
+        <div style="padding:2.5rem 3rem;">
+
+            <!-- Summary KPI Cards -->
+            <div class="pl-stitch-grid-4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-bottom:3rem;">
+                <div class="pl-stitch-card" style="padding:1.5rem;position:relative;overflow:hidden;">
+                    <p style="font-size:.625rem;font-weight:700;color:#444651;text-transform:uppercase;letter-spacing:.1em;margin:0 0 1rem;">Score Moyen</p>
+                    <div style="display:flex;align-items:baseline;gap:.5rem;">
+                        <span class="pl-stitch-kpi-value"><?php echo $avg_score; ?></span>
+                        <span style="color:#444651;font-weight:700;font-size:1.25rem;">/100</span>
+                    </div>
+                </div>
+                <div class="pl-stitch-card" style="padding:1.5rem;">
+                    <p style="font-size:.625rem;font-weight:700;color:#444651;text-transform:uppercase;letter-spacing:.1em;margin:0 0 1rem;">Profils analysés</p>
+                    <div style="display:flex;align-items:baseline;gap:.5rem;">
+                        <span class="pl-stitch-kpi-value" style="color:#712ae2;"><?php echo str_pad( count( $scores ), 2, '0', STR_PAD_LEFT ); ?></span>
+                        <span style="color:#444651;font-weight:700;font-size:.875rem;">profils</span>
+                    </div>
+                </div>
+                <div class="pl-stitch-card" style="padding:1.5rem;">
+                    <p style="font-size:.625rem;font-weight:700;color:#444651;text-transform:uppercase;letter-spacing:.1em;margin:0 0 1rem;">Recommandations</p>
+                    <div style="display:flex;align-items:baseline;gap:.5rem;">
+                        <span class="pl-stitch-kpi-value" style="color:#004754;"><?php echo str_pad( count( $recs ), 2, '0', STR_PAD_LEFT ); ?></span>
+                        <span style="color:#444651;font-weight:700;font-size:.875rem;">actions</span>
+                    </div>
+                </div>
+                <div class="pl-stitch-card" style="padding:1.5rem;">
+                    <p style="font-size:.625rem;font-weight:700;color:#444651;text-transform:uppercase;letter-spacing:.1em;margin:0 0 1rem;">Projets</p>
+                    <div style="display:flex;align-items:baseline;gap:.5rem;">
+                        <span class="pl-stitch-kpi-value"><?php echo str_pad( count( $projects ), 2, '0', STR_PAD_LEFT ); ?></span>
+                        <span style="color:#444651;font-weight:700;font-size:.875rem;">projets</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Radar Chart Placeholder + Scores par profil -->
+            <div class="pl-stitch-grid-2" style="display:grid;grid-template-columns:5fr 7fr;gap:1.5rem;margin-bottom:3rem;">
+                <!-- Radar placeholder -->
+                <div class="pl-stitch-card" style="padding:2rem;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:320px;"
+                     data-radar-scores="<?php echo esc_attr( wp_json_encode( $scores ) ); ?>">
+                    <h3 class="pl-stitch-headline" style="font-size:1rem;font-weight:700;color:#00236f;margin:0 0 1.5rem;align-self:flex-start;">Radar des profils</h3>
+                    <div style="width:220px;height:220px;border-radius:50%;border:2px dashed rgba(117,118,130,.2);display:flex;align-items:center;justify-content:center;position:relative;">
+                        <div style="text-align:center;">
+                            <span class="pl-stitch-headline" style="font-size:2.5rem;font-weight:900;color:#00236f;"><?php echo $avg_score; ?></span>
+                            <p style="font-size:.75rem;color:#712ae2;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin:.25rem 0 0;">
+                                <?php echo $avg_score >= 80 ? 'Excellent' : ( $avg_score >= 60 ? 'Bon' : ( $avg_score >= 40 ? 'Moyen' : 'À améliorer' ) ); ?>
+                            </p>
+                        </div>
+                    </div>
+                    <p style="font-size:.75rem;color:#757682;margin:1rem 0 0;text-align:center;">Graphique radar — intégration Chart.js à venir</p>
+                </div>
+
+                <!-- Scores par profil -->
+                <div class="pl-stitch-card" style="padding:2rem;">
+                    <h3 class="pl-stitch-headline" style="font-size:1.125rem;font-weight:700;color:#00236f;margin:0 0 2rem;">Scores par profil pédagogique</h3>
+                    <?php if ( ! empty( $scores ) ) : ?>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem 3rem;">
+                        <?php foreach ( $scores as $slug => $score ) :
+                            $score     = max( 0, min( 100, (int) $score ) );
+                            $bar_color = self::stitch_score_color( $score );
+                            $label     = self::profile_label( $slug, $profiles );
+                        ?>
+                        <div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;">
+                                <span style="font-size:.875rem;font-weight:600;color:#191c1e;"><?php echo esc_html( $label ); ?></span>
+                                <span style="font-size:.875rem;font-weight:700;color:#00236f;"><?php echo $score; ?>%</span>
+                            </div>
+                            <div class="pl-stitch-score-bar-wrap">
+                                <div class="pl-stitch-score-bar pl-score-bar" data-score="<?php echo $score; ?>" style="width:0%;background:<?php echo esc_attr( $bar_color ); ?>;"></div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php else : ?>
+                    <p style="color:#757682;font-size:.875rem;">Aucune analyse disponible. Lancez une analyse pour voir les scores.</p>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Recommandations -->
+            <?php if ( ! empty( $recs ) ) : ?>
+            <div class="pl-stitch-card" style="padding:2rem;margin-bottom:3rem;">
+                <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;">
+                    <span style="display:flex;align-items:center;justify-content:center;width:2.25rem;height:2.25rem;background:rgba(234,221,255,.5);color:#712ae2;border-radius:.5rem;font-size:1.1rem;">💡</span>
+                    <h3 class="pl-stitch-headline" style="font-size:1.25rem;font-weight:700;color:#00236f;margin:0;">Recommandations</h3>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:1rem;">
+                    <?php $idx = 1; foreach ( $recs as $rec ) :
+                        $priority     = (int) ( $rec['priority'] ?? 99 );
+                        $priority_bg  = $priority <= 2 ? '#ba1a1a' : ( $priority <= 4 ? '#ff9100' : '#2979ff' );
+                    ?>
+                    <div style="display:flex;gap:1rem;align-items:flex-start;padding:1rem;border-radius:.75rem;transition:background .2s;" onmouseover="this.style.background='#f2f4f6'" onmouseout="this.style.background='transparent'">
+                        <span style="flex-shrink:0;font-size:1.25rem;font-weight:900;color:#712ae2;"><?php echo str_pad( $idx, 2, '0', STR_PAD_LEFT ); ?></span>
+                        <div style="flex:1;">
+                            <h4 style="font-size:.875rem;font-weight:700;color:#00236f;margin:0 0 .25rem;"><?php echo esc_html( $rec['section'] ?? '' ); ?></h4>
+                            <p style="font-size:.8125rem;color:#444651;margin:0;line-height:1.6;"><?php echo esc_html( $rec['text'] ?? '' ); ?></p>
+                            <?php if ( ! empty( $rec['profile_target'] ) ) : ?>
+                            <span class="pl-stitch-tag" style="background:rgba(234,221,255,.3);color:#712ae2;margin-top:.5rem;"><?php echo esc_html( $rec['profile_target'] ); ?></span>
+                            <?php endif; ?>
+                        </div>
+                        <span style="flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:1.5rem;height:1.5rem;border-radius:50%;background:<?php echo esc_attr( $priority_bg ); ?>;color:#fff;font-size:.625rem;font-weight:800;"><?php echo $priority; ?></span>
+                    </div>
+                    <?php $idx++; endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <!-- Analysis result zone (for AJAX re-analysis) -->
+            <div id="pl-analysis-result-<?php echo (int) $course_id; ?>" class="pl-analysis-front-result"></div>
+
+            <!-- Back button -->
+            <div style="margin-top:2rem;">
+                <a href="<?php echo esc_url( $back_url ); ?>" class="pl-stitch-btn-outline">← Retour au tableau de bord</a>
+            </div>
+
+        </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    // -------------------------------------------------------------------------
+    // Tâche 9.6 — Résultat d'analyse (Design System Stitch)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Rendu HTML d'un résultat d'analyse complet.
+     * Inspiré du template analyse_de_contenu_p_dagolens.
+     *
+     * @param array $analysis Tableau avec profile_scores, recommendations, summary, impact_estimates, analysis_id.
+     */
+    public static function render_analysis_result( array $analysis ): string {
+        $scores   = $analysis['profile_scores']   ?? [];
+        $recs     = $analysis['recommendations']  ?? [];
+        $summary  = $analysis['summary']          ?? '';
+        $impacts  = $analysis['impact_estimates'] ?? [];
+        $profiles = self::get_active_profiles();
+
+        if ( empty( $scores ) ) {
+            return '';
+        }
+
+        $avg_score = (int) round( array_sum( array_map( 'intval', $scores ) ) / count( $scores ) );
+        $score_label = $avg_score >= 80 ? 'Excellent' : ( $avg_score >= 60 ? 'Bon' : ( $avg_score >= 40 ? 'Modéré' : 'À améliorer' ) );
+
+        // Workbench URL
+        $workbench_page = get_page_by_path( 'workbench' );
+        $workbench_url  = $workbench_page ? get_permalink( $workbench_page ) : admin_url( 'admin.php?page=pl-course-workbench' );
+
+        // Analysis date
+        $analyzed_at = '';
+        if ( ! empty( $analysis['analysis_id'] ) ) {
+            $a_post = get_post( $analysis['analysis_id'] );
+            if ( $a_post ) {
+                $analyzed_at = wp_date( 'j F Y à H:i', strtotime( $a_post->post_date ) );
+            }
+        }
+
+        ob_start();
+        ?>
+        <div class="pl-stitch-analysis" style="font-family:'Inter',sans-serif;background:#f7f9fb;color:#191c1e;">
+        <style>
+            .pl-stitch-analysis *,.pl-stitch-analysis *::before,.pl-stitch-analysis *::after{box-sizing:border-box}
+            .pl-stitch-analysis .pl-stitch-headline{font-family:'Manrope',sans-serif}
+            .pl-stitch-analysis .pl-stitch-card{background:#fff;border-radius:1.5rem;box-shadow:0 10px 40px rgba(25,28,30,.06);border:1px solid rgba(197,197,211,.1)}
+            .pl-stitch-analysis .pl-stitch-btn-primary{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.5rem;background:linear-gradient(135deg,#00236f,#1e3a8a);color:#fff;font-weight:700;font-size:.875rem;border-radius:.75rem;border:none;cursor:pointer;transition:all .3s ease;text-decoration:none;font-family:'Inter',sans-serif}
+            .pl-stitch-analysis .pl-stitch-btn-primary:hover{opacity:.9;color:#fff;text-decoration:none}
+            .pl-stitch-analysis .pl-stitch-btn-outline{display:inline-flex;align-items:center;gap:.5rem;padding:.625rem 1.25rem;border:1px solid rgba(117,118,130,.2);background:#fff;color:#00236f;font-weight:600;font-size:.8125rem;border-radius:.75rem;cursor:pointer;transition:all .3s ease;text-decoration:none;font-family:'Inter',sans-serif}
+            .pl-stitch-analysis .pl-stitch-btn-outline:hover{background:#f2f4f6;color:#00236f;text-decoration:none}
+            .pl-stitch-analysis .pl-stitch-score-bar-wrap{height:.5rem;width:100%;background:#f2f4f6;border-radius:9999px;overflow:hidden}
+            .pl-stitch-analysis .pl-stitch-score-bar{height:100%;border-radius:9999px;transition:width 1.2s cubic-bezier(.25,.8,.25,1)}
+            @media(max-width:768px){
+                .pl-stitch-analysis .pl-stitch-grid-12{grid-template-columns:1fr !important}
+            }
+        </style>
+
+        <!-- Header -->
+        <div style="margin-bottom:2rem;">
+            <h2 class="pl-stitch-headline" style="font-size:2rem;font-weight:800;color:#00236f;margin:0;letter-spacing:-.02em;">Résultat de l'analyse</h2>
+            <?php if ( $analyzed_at ) : ?>
+            <p style="color:#444651;margin:.5rem 0 0;font-size:.875rem;">Analysé le <?php echo esc_html( $analyzed_at ); ?></p>
+            <?php endif; ?>
+        </div>
+
+        <!-- Score global + Scores par profil -->
+        <div class="pl-stitch-grid-12" style="display:grid;grid-template-columns:4fr 8fr;gap:1.5rem;margin-bottom:2rem;">
+
+            <!-- Score global gauge -->
+            <div class="pl-stitch-card" style="padding:2rem;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                <div style="position:absolute;top:1rem;right:1rem;color:#712ae2;opacity:.15;font-size:2rem;">✨</div>
+                <h3 style="color:#444651;font-weight:500;font-size:.875rem;margin:0 0 2rem;display:flex;align-items:center;gap:.5rem;align-self:flex-start;">
+                    <span style="color:#712ae2;">⚡</span> Indice Global de Clarté
+                </h3>
+                <div style="position:relative;width:12rem;height:12rem;">
+                    <svg viewBox="0 0 192 192" style="width:100%;height:100%;transform:rotate(-90deg);">
+                        <circle cx="96" cy="96" r="88" fill="transparent" stroke="#f2f4f6" stroke-width="8"></circle>
+                        <circle cx="96" cy="96" r="88" fill="transparent" stroke="#712ae2" stroke-width="12"
+                                stroke-linecap="round"
+                                stroke-dasharray="552.92"
+                                stroke-dashoffset="<?php echo 552.92 - ( 552.92 * $avg_score / 100 ); ?>"
+                                style="transition:stroke-dashoffset 1.5s cubic-bezier(.25,.8,.25,1);"></circle>
+                    </svg>
+                    <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                        <span class="pl-stitch-headline" style="font-size:3rem;font-weight:900;color:#00236f;letter-spacing:-.03em;"><?php echo $avg_score; ?><span style="font-size:1.25rem;">%</span></span>
+                        <span style="font-size:.625rem;font-weight:700;color:#712ae2;text-transform:uppercase;letter-spacing:.1em;margin-top:.25rem;"><?php echo esc_html( $score_label ); ?></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scores par profil -->
+            <div class="pl-stitch-card" style="padding:2rem;">
+                <h3 class="pl-stitch-headline" style="font-size:1.125rem;font-weight:700;color:#00236f;margin:0 0 2rem;">Compréhension par profil</h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem 3rem;">
+                    <?php foreach ( $scores as $slug => $score ) :
+                        $score     = max( 0, min( 100, (int) $score ) );
+                        $bar_color = self::stitch_score_color( $score );
+                        $label     = self::profile_label( $slug, $profiles );
+                    ?>
+                    <div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.375rem;">
+                            <span style="font-size:.875rem;font-weight:600;color:#191c1e;"><?php echo esc_html( $label ); ?></span>
+                            <span style="font-size:.875rem;font-weight:700;color:#00236f;"><?php echo $score; ?>%</span>
+                        </div>
+                        <div class="pl-stitch-score-bar-wrap">
+                            <div class="pl-stitch-score-bar pl-score-bar" data-score="<?php echo $score; ?>" style="width:0%;background:<?php echo esc_attr( $bar_color ); ?>;"></div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommandations -->
+        <?php if ( ! empty( $recs ) ) : ?>
+        <div class="pl-stitch-card" style="padding:2rem;margin-bottom:2rem;">
+            <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;">
+                <span style="display:flex;align-items:center;justify-content:center;width:2.25rem;height:2.25rem;background:rgba(234,221,255,.5);color:#712ae2;border-radius:.5rem;font-size:1.1rem;">💡</span>
+                <h3 class="pl-stitch-headline" style="font-size:1.25rem;font-weight:700;color:#00236f;margin:0;">Recommandations IA</h3>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.75rem;">
+                <?php $idx = 1; foreach ( $recs as $rec ) :
+                    $priority    = (int) ( $rec['priority'] ?? 99 );
+                    $priority_bg = $priority <= 2 ? 'rgba(186,26,26,.08)' : 'transparent';
+                    $border_l    = $priority <= 2 ? '3px solid #ba1a1a' : ( $priority <= 4 ? '3px solid #ff9100' : '3px solid #2979ff' );
+                ?>
+                <div style="display:flex;gap:1rem;align-items:flex-start;padding:1rem;border-radius:.75rem;background:<?php echo $priority_bg; ?>;border-left:<?php echo $border_l; ?>;">
+                    <span style="flex-shrink:0;font-size:1.25rem;font-weight:900;color:#712ae2;"><?php echo str_pad( $idx, 2, '0', STR_PAD_LEFT ); ?></span>
+                    <div style="flex:1;">
+                        <h4 style="font-size:.875rem;font-weight:700;color:#00236f;margin:0 0 .25rem;"><?php echo esc_html( $rec['section'] ?? '' ); ?></h4>
+                        <p style="font-size:.8125rem;color:#444651;margin:0;line-height:1.6;"><?php echo esc_html( $rec['text'] ?? '' ); ?></p>
+                        <?php if ( ! empty( $rec['profile_target'] ) ) : ?>
+                        <span style="display:inline-flex;padding:.125rem .5rem;border-radius:9999px;font-size:.625rem;font-weight:700;background:rgba(234,221,255,.3);color:#712ae2;margin-top:.375rem;"><?php echo esc_html( $rec['profile_target'] ); ?></span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php $idx++; endforeach; ?>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <!-- Impact estimé -->
+        <?php if ( ! empty( $impacts ) && is_array( $impacts ) ) : ?>
+        <div class="pl-stitch-card" style="padding:2rem;margin-bottom:2rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+                <h3 class="pl-stitch-headline" style="font-size:1.25rem;font-weight:700;color:#00236f;margin:0;">Impact estimé après correction</h3>
+                <span style="padding:.375rem 1rem;background:rgba(172,237,255,.3);color:#004e5c;font-size:.625rem;font-weight:700;border-radius:9999px;text-transform:uppercase;letter-spacing:.1em;">Prévisionnel</span>
+            </div>
+            <table style="width:100%;text-align:left;border-collapse:collapse;">
+                <thead>
+                    <tr style="border-bottom:1px solid rgba(197,197,211,.15);">
+                        <th style="padding-bottom:1rem;font-size:.75rem;font-weight:700;color:#444651;text-transform:uppercase;">Indicateur</th>
+                        <th style="padding-bottom:1rem;font-size:.75rem;font-weight:700;color:#444651;text-transform:uppercase;">Actuel</th>
+                        <th style="padding-bottom:1rem;font-size:.75rem;font-weight:700;color:#444651;text-transform:uppercase;">Post-correction</th>
+                        <th style="padding-bottom:1rem;font-size:.75rem;font-weight:700;color:#444651;text-transform:uppercase;">Progression</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ( $impacts as $impact ) : ?>
+                    <tr style="border-bottom:1px solid rgba(197,197,211,.08);">
+                        <td style="padding:1.25rem 0;font-size:.875rem;font-weight:600;color:#00236f;"><?php echo esc_html( $impact['indicator'] ?? $impact['label'] ?? '' ); ?></td>
+                        <td style="padding:1.25rem 0;font-size:.875rem;color:#444651;"><?php echo esc_html( $impact['current'] ?? '' ); ?></td>
+                        <td style="padding:1.25rem 0;font-size:.875rem;font-weight:700;color:#004754;"><?php echo esc_html( $impact['projected'] ?? $impact['after'] ?? '' ); ?></td>
+                        <td style="padding:1.25rem 0;">
+                            <span style="display:flex;align-items:center;gap:.25rem;color:#004754;font-size:.75rem;font-weight:700;">
+                                📈 <?php echo esc_html( $impact['change'] ?? $impact['delta'] ?? '' ); ?>
+                            </span>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php endif; ?>
+
+        <!-- Résumé narratif -->
+        <?php if ( $summary ) : ?>
+        <div class="pl-stitch-card" style="padding:2rem;margin-bottom:2rem;">
+            <h3 class="pl-stitch-headline" style="font-size:1.125rem;font-weight:700;color:#00236f;margin:0 0 1rem;">Résumé</h3>
+            <p style="font-size:.9375rem;color:#444651;line-height:1.7;margin:0;border-left:3px solid #712ae2;padding-left:1rem;font-style:italic;"><?php echo esc_html( $summary ); ?></p>
+        </div>
+        <?php endif; ?>
+
+        <!-- Action buttons -->
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+            <a href="<?php echo esc_url( $workbench_url ); ?>" class="pl-stitch-btn-primary">📝 Ouvrir dans l'atelier</a>
+            <button class="pl-stitch-btn-outline" disabled title="Fonctionnalité à venir">📄 Exporter PDF</button>
+        </div>
+
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers privés
+    // -------------------------------------------------------------------------
+
     /**
      * Retourne la dernière analyse d'un cours (pour le front).
      */
@@ -486,12 +889,10 @@ class PedagoLens_Teacher_Dashboard {
             'profile_scores'  => self::get_profile_scores( $id ),
             'recommendations' => self::get_recommendations( $id ),
             'summary'         => get_post_meta( $id, '_pl_summary', true ),
+            'impact_estimates' => json_decode( get_post_meta( $id, '_pl_impact_estimates', true ) ?: '[]', true ),
         ];
     }
 
-    /**
-     * Compte les analyses d'un cours.
-     */
     private static function count_analyses( int $course_id ): int {
         $q = new WP_Query( [
             'post_type'      => 'pl_analysis',
@@ -506,9 +907,6 @@ class PedagoLens_Teacher_Dashboard {
         return $q->found_posts;
     }
 
-    /**
-     * Compte toutes les analyses.
-     */
     private static function count_all_analyses(): int {
         $q = new WP_Query( [
             'post_type'      => 'pl_analysis',
@@ -518,9 +916,6 @@ class PedagoLens_Teacher_Dashboard {
         return $q->found_posts;
     }
 
-    /**
-     * Retourne les profils actifs via Profile_Manager si disponible.
-     */
     public static function get_active_profiles(): array {
         if ( class_exists( 'PedagoLens_Profile_Manager' ) ) {
             return PedagoLens_Profile_Manager::get_all( active_only: true );
@@ -528,9 +923,6 @@ class PedagoLens_Teacher_Dashboard {
         return [];
     }
 
-    /**
-     * S'assure que profile_scores contient exactement les slugs des profils actifs.
-     */
     private static function normalize_scores( array $result, array $profiles ): array {
         $scores      = $result['profile_scores'] ?? [];
         $normalized  = [];
@@ -542,6 +934,28 @@ class PedagoLens_Teacher_Dashboard {
 
         $result['profile_scores'] = $normalized;
         return $result;
+    }
+
+    /**
+     * Couleur Stitch pour un score (grille de scoring).
+     */
+    private static function stitch_score_color( int $score ): string {
+        if ( $score >= 80 ) return '#00236f';   // primary — excellent
+        if ( $score >= 60 ) return '#004754';   // tertiary-container — bon
+        if ( $score >= 40 ) return '#712ae2';   // secondary — moyen
+        return '#ba1a1a';                        // error — à améliorer
+    }
+
+    /**
+     * Résout le label lisible d'un profil à partir de son slug.
+     */
+    private static function profile_label( string $slug, array $profiles ): string {
+        foreach ( $profiles as $p ) {
+            if ( ( $p['slug'] ?? '' ) === $slug ) {
+                return $p['name'] ?? $p['label'] ?? $slug;
+            }
+        }
+        return ucfirst( str_replace( [ '-', '_' ], ' ', $slug ) );
     }
 
     private static function error( string $code, string $message, array $context = [] ): array {

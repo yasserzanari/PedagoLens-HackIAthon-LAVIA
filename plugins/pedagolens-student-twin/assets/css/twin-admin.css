@@ -728,3 +728,543 @@
 }
 .pl-follow-up-btn:hover { background: #2271b1 !important; color: #fff !important; border-color: #2271b1 !important; }
 .pl-twin-tab-content { margin-top: 20px; }
+
+/* ============================================================
+   STITCH DESIGN SYSTEM — Assistant Étudiant
+   Fonts: Manrope (titres), Inter (corps)
+   Couleurs: fond #0f172a, accents violet #8b5cf6 / bleu #3b82f6 / vert #10b981
+   Cards: backdrop-filter blur(20px) + bg rgba(255,255,255,0.05)
+   Border-radius: 1.5rem, Shadows: 0 25px 50px -12px rgba(0,0,0,0.25)
+   Préfixe: pl-stitch-*
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+/* --- Variables Stitch Twin --- */
+.pl-stitch-twin-page {
+    --stitch-bg: #0f172a;
+    --stitch-surface: rgba(255, 255, 255, 0.05);
+    --stitch-surface-hover: rgba(255, 255, 255, 0.08);
+    --stitch-border: rgba(255, 255, 255, 0.08);
+    --stitch-border-light: rgba(255, 255, 255, 0.12);
+    --stitch-text: #f1f5f9;
+    --stitch-text-muted: #94a3b8;
+    --stitch-text-dim: #64748b;
+    --stitch-violet: #8b5cf6;
+    --stitch-violet-glow: rgba(139, 92, 246, 0.15);
+    --stitch-blue: #3b82f6;
+    --stitch-blue-glow: rgba(59, 130, 246, 0.15);
+    --stitch-green: #10b981;
+    --stitch-green-glow: rgba(16, 185, 129, 0.15);
+    --stitch-red: #ef4444;
+    --stitch-orange: #f59e0b;
+    --stitch-radius: 1.5rem;
+    --stitch-radius-sm: 0.75rem;
+    --stitch-radius-xs: 0.5rem;
+    --stitch-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    --stitch-shadow-sm: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+    --stitch-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --stitch-font-heading: 'Manrope', sans-serif;
+    --stitch-font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --stitch-max-width: 1200px;
+}
+
+/* --- Page wrapper Stitch --- */
+.pl-stitch-twin-page {
+    font-family: var(--stitch-font-body);
+    background: var(--stitch-bg);
+    color: var(--stitch-text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+    background-image:
+        radial-gradient(ellipse 600px 400px at 30% 20%, rgba(139, 92, 246, 0.04), transparent),
+        radial-gradient(ellipse 500px 350px at 70% 80%, rgba(59, 130, 246, 0.03), transparent);
+}
+
+/* --- Nav Stitch --- */
+.pl-stitch-twin-nav {
+    position: sticky; top: 0; z-index: 1000;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(24px) saturate(1.8);
+    -webkit-backdrop-filter: blur(24px) saturate(1.8);
+    border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    padding: 0 24px;
+}
+.pl-stitch-twin-nav-inner {
+    max-width: var(--stitch-max-width);
+    margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+}
+.pl-stitch-twin-nav-logo {
+    font-family: var(--stitch-font-heading);
+    font-size: 1.35rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--stitch-violet), var(--stitch-blue));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+}
+.pl-stitch-twin-nav-links {
+    display: flex; gap: 4px; list-style: none; margin: 0; padding: 0;
+}
+.pl-stitch-twin-nav-links a {
+    display: inline-block; padding: 8px 16px;
+    font-size: 0.875rem; font-weight: 500;
+    color: var(--stitch-text-muted);
+    border-radius: 8px;
+    transition: color var(--stitch-transition), background var(--stitch-transition);
+    text-decoration: none;
+}
+.pl-stitch-twin-nav-links a:hover {
+    color: var(--stitch-text); background: var(--stitch-surface);
+}
+.pl-stitch-twin-nav-links a.pl-stitch-twin-nav-active {
+    color: var(--stitch-violet); background: var(--stitch-violet-glow);
+}
+
+.pl-stitch-twin-nav-user {
+    display: flex; align-items: center; gap: 10px;
+}
+.pl-stitch-twin-nav-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--stitch-violet), var(--stitch-blue));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; font-weight: 700; color: #fff; text-transform: uppercase;
+}
+.pl-stitch-twin-nav-username {
+    font-size: 0.85rem; color: var(--stitch-text-muted); font-weight: 500;
+}
+
+/* --- Page body --- */
+.pl-stitch-twin-page-body {
+    flex: 1;
+    max-width: var(--stitch-max-width);
+    width: 100%; margin: 0 auto;
+    padding: 32px 24px 48px;
+}
+
+/* --- Course selector bar --- */
+.pl-stitch-twin-course-bar { margin-bottom: 28px; }
+.pl-stitch-twin-course-bar-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 28px;
+    background: var(--stitch-surface);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--stitch-border);
+    border-radius: var(--stitch-radius);
+    box-shadow: var(--stitch-shadow);
+    flex-wrap: wrap; gap: 16px;
+}
+.pl-stitch-twin-course-bar-left { display: flex; align-items: center; gap: 16px; }
+.pl-stitch-twin-bot-avatar {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--stitch-violet), var(--stitch-blue));
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; flex-shrink: 0;
+    box-shadow: 0 0 20px var(--stitch-violet-glow);
+}
+.pl-stitch-twin-page-title {
+    font-family: var(--stitch-font-heading);
+    font-size: 1.25rem; font-weight: 700; color: var(--stitch-text);
+    margin: 0; line-height: 1.3; letter-spacing: -0.01em;
+}
+.pl-stitch-twin-subtitle {
+    font-size: 0.82rem; color: var(--stitch-violet); font-weight: 600;
+    letter-spacing: 0.02em; display: flex; align-items: center; gap: 4px;
+}
+
+.pl-stitch-twin-status-dot {
+    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--stitch-green);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+    animation: plt-pulse-glow 2s ease-in-out infinite;
+    margin-right: 2px;
+}
+.pl-stitch-twin-course-bar-right { display: flex; align-items: center; gap: 10px; }
+.pl-stitch-twin-course-label {
+    font-size: 0.85rem; font-weight: 600; color: var(--stitch-text-muted);
+}
+.pl-stitch-twin-course-select {
+    background: rgba(30, 41, 59, 0.8); color: var(--stitch-text);
+    border: 1px solid var(--stitch-border-light); border-radius: var(--stitch-radius-sm);
+    padding: 10px 18px; font-size: 0.88rem; font-family: var(--stitch-font-body);
+    cursor: pointer; transition: all var(--stitch-transition); min-width: 200px; appearance: auto;
+}
+.pl-stitch-twin-course-select:focus {
+    outline: none; border-color: var(--stitch-violet);
+    box-shadow: 0 0 0 3px var(--stitch-violet-glow);
+}
+
+/* --- Welcome state --- */
+.pl-stitch-twin-welcome {
+    display: flex; align-items: center; justify-content: center; min-height: 400px;
+}
+.pl-stitch-twin-welcome-card {
+    text-align: center; padding: 52px 44px;
+    background: var(--stitch-surface);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--stitch-border);
+    border-radius: var(--stitch-radius);
+    box-shadow: var(--stitch-shadow);
+    max-width: 520px;
+    animation: pl-stitch-fade-up 0.5s ease;
+}
+.pl-stitch-twin-welcome-icon { color: var(--stitch-violet); opacity: 0.5; margin-bottom: 18px; }
+.pl-stitch-twin-welcome-card h2 {
+    font-family: var(--stitch-font-heading);
+    color: var(--stitch-text); font-size: 1.5rem; margin: 0 0 12px; font-weight: 700;
+}
+.pl-stitch-twin-welcome-card p {
+    color: var(--stitch-text-muted); font-size: 0.95rem; margin: 0 0 8px; line-height: 1.6;
+}
+.pl-stitch-twin-welcome-hint {
+    color: var(--stitch-violet) !important; font-weight: 600; font-size: 0.9rem !important;
+    margin-top: 16px !important;
+}
+
+/* --- Logged-out state --- */
+.pl-stitch-twin-logged-out {
+    display: flex; align-items: center; justify-content: center; min-height: 480px;
+}
+.pl-stitch-twin-logged-out-card {
+    text-align: center; padding: 52px 44px;
+    background: var(--stitch-surface);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--stitch-border);
+    border-radius: var(--stitch-radius);
+    box-shadow: var(--stitch-shadow);
+    max-width: 440px;
+    animation: pl-stitch-fade-up 0.5s ease;
+}
+.pl-stitch-twin-lock-icon {
+    color: var(--stitch-violet); opacity: 0.5; margin-bottom: 18px;
+}
+.pl-stitch-twin-logged-out-card h2 {
+    font-family: var(--stitch-font-heading);
+    color: var(--stitch-text); font-size: 1.5rem; margin: 0 0 10px; font-weight: 700;
+}
+.pl-stitch-twin-logged-out-card p {
+    color: var(--stitch-text-muted); font-size: 0.95rem; margin: 0 0 28px; line-height: 1.5;
+}
+.pl-stitch-twin-login-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 13px 36px;
+    background: linear-gradient(135deg, var(--stitch-violet), var(--stitch-blue));
+    color: #fff; font-weight: 600; font-size: 0.95rem;
+    border-radius: 9999px; text-decoration: none;
+    transition: transform var(--stitch-transition), box-shadow var(--stitch-transition);
+    box-shadow: 0 4px 16px var(--stitch-violet-glow);
+}
+.pl-stitch-twin-login-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.3);
+    color: #fff;
+}
+
+/* --- Chat layout Stitch --- */
+.pl-stitch-twin-main { min-height: 0; }
+.pl-stitch-twin-chat-wrap {
+    display: flex; gap: 20px;
+    animation: pl-stitch-fade-up 0.4s ease;
+}
+.pl-stitch-twin-chat-container { flex: 1; min-width: 0; }
+
+/* --- Chat card Stitch --- */
+.pl-stitch-twin-chat-card {
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--stitch-border);
+    border-radius: var(--stitch-radius);
+    box-shadow: var(--stitch-shadow);
+    overflow: hidden;
+    display: flex; flex-direction: column;
+}
+.pl-stitch-twin-chat-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 24px;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid var(--stitch-border);
+    position: relative;
+}
+.pl-stitch-twin-chat-header::after {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--stitch-violet-glow), transparent);
+}
+.pl-stitch-twin-chat-header-left { display: flex; align-items: center; gap: 12px; }
+.pl-stitch-twin-chat-avatar-wrap {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--stitch-violet), var(--stitch-blue));
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; flex-shrink: 0;
+    box-shadow: 0 0 16px var(--stitch-violet-glow);
+}
+.pl-stitch-twin-chat-name {
+    font-family: var(--stitch-font-heading);
+    font-size: 0.95rem; color: var(--stitch-text); display: block; font-weight: 700;
+}
+.pl-stitch-twin-chat-status {
+    font-size: 0.75rem; color: var(--stitch-green); display: flex; align-items: center; gap: 4px;
+}
+.pl-stitch-twin-chat-header-right { display: flex; align-items: center; gap: 10px; }
+.pl-stitch-twin-course-badge {
+    font-size: 0.75rem; padding: 4px 12px;
+    background: var(--stitch-violet-glow); color: #c4b5fd;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 9999px; font-weight: 600;
+}
+.pl-stitch-twin-course-badge:empty { display: none; }
+.pl-stitch-twin-btn-end {
+    display: flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px;
+    border: 1px solid rgba(239, 68, 68, 0.25); border-radius: var(--stitch-radius-xs);
+    background: transparent; color: var(--stitch-red);
+    cursor: pointer; transition: all var(--stitch-transition);
+}
+.pl-stitch-twin-btn-end:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* --- Guardrail banner --- */
+.pl-stitch-twin-guardrail-banner {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 24px;
+    background: rgba(245, 158, 11, 0.1);
+    border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+    font-size: 0.82rem; font-weight: 500;
+    animation: pl-stitch-fade-up 0.3s ease;
+}
+.pl-stitch-twin-guardrail-banner svg { color: #f59e0b; flex-shrink: 0; }
+
+/* --- Messages area Stitch --- */
+.pl-stitch-twin-messages {
+    height: 500px; overflow-y: auto; padding: 28px 24px;
+    display: flex; flex-direction: column; gap: 16px;
+    scroll-behavior: smooth;
+    background: var(--stitch-bg);
+    background-image:
+        radial-gradient(ellipse 500px 300px at 20% 80%, rgba(139, 92, 246, 0.03), transparent),
+        radial-gradient(ellipse 400px 250px at 80% 20%, rgba(59, 130, 246, 0.02), transparent);
+}
+.pl-stitch-twin-messages::-webkit-scrollbar { width: 5px; }
+.pl-stitch-twin-messages::-webkit-scrollbar-track { background: transparent; }
+.pl-stitch-twin-messages::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.2); border-radius: 10px; }
+.pl-stitch-twin-messages { scrollbar-width: thin; scrollbar-color: rgba(148, 163, 184, 0.2) transparent; }
+
+/* --- Chat bubbles Stitch overrides --- */
+.pl-stitch-twin-page .pl-twin-bubble--ai {
+    background: var(--stitch-surface);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--stitch-border);
+    color: var(--stitch-text);
+    border-radius: var(--stitch-radius-sm);
+    border-bottom-left-radius: 4px;
+    box-shadow: var(--stitch-shadow-sm);
+}
+.pl-stitch-twin-page .pl-twin-bubble--user {
+    background: linear-gradient(135deg, var(--stitch-violet), var(--stitch-blue));
+    color: #fff;
+    border-radius: var(--stitch-radius-sm);
+    border-bottom-right-radius: 4px;
+    border: none;
+    box-shadow: 0 4px 16px var(--stitch-violet-glow);
+}
+.pl-stitch-twin-page .pl-twin-bubble--guardrail {
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+    border-radius: var(--stitch-radius-xs);
+}
+.pl-stitch-twin-page .pl-twin-bubble--guardrail::before { content: '⚠️ '; }
+
+.pl-stitch-twin-page .pl-twin-bubble--system {
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid var(--stitch-border);
+    color: var(--stitch-text-muted);
+    border-radius: 9999px;
+}
+.pl-stitch-twin-page .pl-twin-bubble--welcome {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(59, 130, 246, 0.06) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    color: var(--stitch-text);
+    border-radius: var(--stitch-radius-sm);
+    border-bottom-left-radius: 4px;
+    padding: 18px 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+.pl-stitch-twin-page .pl-twin-bubble--welcome .pl-twin-welcome-name {
+    color: var(--stitch-violet); font-weight: 700;
+    text-shadow: 0 0 20px var(--stitch-violet-glow);
+}
+
+/* --- Typing indicator Stitch --- */
+.pl-stitch-twin-page .pl-twin-typing {
+    background: var(--stitch-surface);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--stitch-border);
+    border-radius: var(--stitch-radius-sm);
+    border-bottom-left-radius: 4px;
+    box-shadow: var(--stitch-shadow-sm);
+}
+.pl-stitch-twin-page .pl-twin-typing-dots span {
+    background: var(--stitch-violet);
+    box-shadow: 0 0 6px var(--stitch-violet-glow);
+}
+
+/* --- Follow-up questions Stitch --- */
+.pl-stitch-twin-follow-ups {
+    display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 24px 14px; min-height: 0;
+}
+.pl-stitch-twin-follow-ups:empty { display: none; }
+.pl-stitch-twin-page .pl-twin-follow-btn {
+    color: #c4b5fd; background: rgba(30, 41, 59, 0.8);
+    border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 9999px;
+    font-family: var(--stitch-font-body);
+}
+.pl-stitch-twin-page .pl-twin-follow-btn:hover {
+    background: var(--stitch-violet); color: #fff; border-color: var(--stitch-violet);
+    box-shadow: 0 4px 20px var(--stitch-violet-glow);
+}
+
+/* --- Input bar Stitch --- */
+.pl-stitch-twin-input-bar {
+    display: flex; align-items: flex-end; gap: 12px; padding: 16px 24px;
+    background: rgba(30, 41, 59, 0.6);
+    border-top: 1px solid var(--stitch-border);
+    position: relative;
+}
+.pl-stitch-twin-input-bar::before {
+    content: ''; position: absolute; top: -1px; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--stitch-violet-glow), transparent);
+    pointer-events: none;
+}
+.pl-stitch-twin-input {
+    flex: 1; resize: none; font-size: 0.9rem; font-family: var(--stitch-font-body);
+    color: var(--stitch-text); background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--stitch-border-light); border-radius: var(--stitch-radius-sm);
+    padding: 12px 16px; line-height: 1.5; max-height: 120px; overflow-y: auto;
+    transition: border-color var(--stitch-transition), box-shadow var(--stitch-transition);
+}
+.pl-stitch-twin-input::placeholder { color: var(--stitch-text-dim); }
+.pl-stitch-twin-input:focus {
+    outline: none; border-color: var(--stitch-violet);
+    box-shadow: 0 0 0 3px var(--stitch-violet-glow);
+}
+.pl-stitch-twin-input:disabled { opacity: 0.4; cursor: not-allowed; }
+.pl-stitch-twin-send-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; border: none; border-radius: 50%;
+    background: linear-gradient(135deg, var(--stitch-violet), var(--stitch-blue));
+    color: #fff; cursor: pointer; flex-shrink: 0;
+    transition: transform var(--stitch-transition), box-shadow var(--stitch-transition);
+    box-shadow: 0 2px 12px var(--stitch-violet-glow);
+}
+.pl-stitch-twin-send-btn:hover:not(:disabled) {
+    transform: scale(1.1);
+    box-shadow: 0 4px 24px rgba(139, 92, 246, 0.3);
+}
+.pl-stitch-twin-send-btn:disabled { opacity: 0.25; cursor: not-allowed; box-shadow: none; }
+
+/* --- Sidebar Stitch --- */
+.pl-stitch-twin-sidebar {
+    width: 260px; flex-shrink: 0;
+    background: var(--stitch-surface);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--stitch-border);
+    border-radius: var(--stitch-radius);
+    box-shadow: var(--stitch-shadow-sm);
+    padding: 20px 16px; overflow-y: auto; max-height: 620px;
+}
+.pl-stitch-twin-sidebar::-webkit-scrollbar { width: 4px; }
+.pl-stitch-twin-sidebar::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.2); border-radius: 10px; }
+.pl-stitch-twin-sidebar-title {
+    font-family: var(--stitch-font-heading);
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--stitch-text-dim); margin: 0 0 14px; font-weight: 700;
+}
+
+.pl-stitch-twin-history-list {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-direction: column; gap: 4px;
+}
+.pl-stitch-twin-history-item {
+    display: flex; flex-direction: column; gap: 3px; padding: 11px 14px;
+    border-radius: var(--stitch-radius-xs); cursor: pointer;
+    transition: all 0.15s ease; border: 1px solid transparent;
+}
+.pl-stitch-twin-history-item:hover {
+    background: var(--stitch-surface-hover); border-color: var(--stitch-border);
+}
+.pl-stitch-twin-history-item.active {
+    background: rgba(139, 92, 246, 0.06); border-color: rgba(139, 92, 246, 0.15);
+    box-shadow: inset 3px 0 0 var(--stitch-violet);
+}
+.pl-stitch-twin-history-empty {
+    color: var(--stitch-text-dim); font-size: 0.82rem; font-style: italic; padding: 8px 0;
+}
+
+/* --- Footer Stitch --- */
+.pl-stitch-twin-footer {
+    background: rgba(15, 23, 42, 0.95);
+    border-top: 1px solid rgba(139, 92, 246, 0.08);
+    padding: 56px 24px 36px; position: relative; margin-top: auto;
+}
+.pl-stitch-twin-footer::before {
+    content: ''; position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.15), transparent);
+}
+.pl-stitch-twin-footer-inner {
+    max-width: var(--stitch-max-width); margin: 0 auto;
+    display: flex; flex-direction: column; align-items: center; gap: 24px;
+}
+.pl-stitch-twin-footer-logo {
+    font-family: var(--stitch-font-heading);
+    font-size: 1.25rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--stitch-violet), var(--stitch-blue));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.pl-stitch-twin-footer-nav {
+    display: flex; gap: 24px; flex-wrap: wrap; justify-content: center;
+    list-style: none; margin: 0; padding: 0;
+}
+.pl-stitch-twin-footer-nav a {
+    font-size: 0.875rem; color: var(--stitch-text-muted);
+    transition: color var(--stitch-transition); text-decoration: none;
+}
+.pl-stitch-twin-footer-nav a:hover { color: var(--stitch-violet); }
+.pl-stitch-twin-footer-copy {
+    font-size: 0.8rem; color: var(--stitch-text-muted); opacity: 0.5; text-align: center; margin: 0;
+}
+
+/* --- Animation --- */
+@keyframes pl-stitch-fade-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Responsive Stitch --- */
+@media (max-width: 900px) {
+    .pl-stitch-twin-chat-wrap { flex-direction: column; }
+    .pl-stitch-twin-sidebar { width: 100%; max-height: 220px; border-radius: var(--stitch-radius-sm); }
+}
+@media (max-width: 768px) {
+    .pl-stitch-twin-page-body { padding: 20px 16px 36px; }
+    .pl-stitch-twin-course-bar-inner { flex-direction: column; align-items: flex-start; }
+    .pl-stitch-twin-course-bar-right { width: 100%; }
+    .pl-stitch-twin-course-select { width: 100%; }
+    .pl-stitch-twin-nav-inner { height: 56px; }
+    .pl-stitch-twin-nav-links { gap: 0; }
+    .pl-stitch-twin-nav-links a { padding: 6px 10px; font-size: 0.8rem; }
+    .pl-stitch-twin-nav-username { display: none; }
+    .pl-stitch-twin-messages { height: 400px; padding: 18px 14px; }
+}
+@media (max-width: 480px) {
+    .pl-stitch-twin-nav-links { display: none; }
+    .pl-stitch-twin-messages { height: 350px; }
+    .pl-stitch-twin-welcome-card { padding: 36px 24px; }
+}

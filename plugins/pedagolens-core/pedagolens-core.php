@@ -21,6 +21,7 @@ spl_autoload_register( function ( string $class ): void {
         'PedagoLens_Core'            => 'includes/class-core.php',
         'PedagoLens_Profile_Manager' => 'includes/class-profile-manager.php',
         'PedagoLens_Admin_Profiles'  => 'admin/class-admin-profiles.php',
+        'PedagoLens_Core_Settings'   => 'admin/class-core-settings.php',
     ];
     if ( isset( $map[ $class ] ) ) {
         require_once PEDAGOLENS_PLUGIN_DIR . $map[ $class ];

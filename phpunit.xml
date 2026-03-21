@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache"
+         executionOrder="depends,defects"
+         beStrictAboutOutputDuringTests="true"
+         failOnRisky="true"
+         failOnWarning="true">
+    <testsuites>
+        <testsuite name="pedagolens-core">
+            <directory>plugins/pedagolens-core/tests</directory>
+        </testsuite>
+        <testsuite name="pedagolens-api-bridge">
+            <directory>plugins/pedagolens-api-bridge/tests</directory>
+        </testsuite>
+        <testsuite name="pedagolens-landing">
+            <directory>plugins/pedagolens-landing/tests</directory>
+        </testsuite>
+        <testsuite name="pedagolens-teacher-dashboard">
+            <directory>plugins/pedagolens-teacher-dashboard/tests</directory>
+        </testsuite>
+        <testsuite name="pedagolens-course-workbench">
+            <directory>plugins/pedagolens-course-workbench/tests</directory>
+        </testsuite>
+        <testsuite name="pedagolens-student-twin">
+            <directory>plugins/pedagolens-student-twin/tests</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>plugins/pedagolens-core/includes</directory>
+            <directory>plugins/pedagolens-api-bridge/includes</directory>
+            <directory>plugins/pedagolens-landing/includes</directory>
+            <directory>plugins/pedagolens-teacher-dashboard/includes</directory>
+            <directory>plugins/pedagolens-course-workbench/includes</directory>
+            <directory>plugins/pedagolens-student-twin/includes</directory>
+        </include>
+    </source>
+</phpunit>

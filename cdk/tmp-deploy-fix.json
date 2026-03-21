@@ -3,8 +3,12 @@
   "DocumentName": "AWS-RunShellScript",
   "Parameters": {
     "commands": [
-      "echo '=== WP DEBUG ===' && tail -50 /var/www/html/wp-content/debug.log 2>/dev/null || echo 'NO_DEBUG_LOG'",
-      "echo '=== APACHE ERROR ===' && tail -20 /var/log/apache2/error.log 2>/dev/null || echo 'NO_APACHE_LOG'"
+      "export HOME=/root && git config --global --add safe.directory /opt/pedagolens && cd /opt/pedagolens && git pull origin main 2>&1",
+      "echo '=== Syntaxe Landing ===' && php -l /opt/pedagolens/plugins/pedagolens-landing/includes/class-landing.php 2>&1",
+      "echo '=== Syntaxe Dashboard ===' && php -l /opt/pedagolens/plugins/pedagolens-teacher-dashboard/includes/class-teacher-dashboard.php 2>&1",
+      "echo '=== Syntaxe Twin ===' && php -l /opt/pedagolens/plugins/pedagolens-student-twin/pedagolens-student-twin.php 2>&1",
+      "echo '=== Syntaxe Bridge ===' && php -l /opt/pedagolens/plugins/pedagolens-api-bridge/includes/class-api-bridge.php 2>&1",
+      "systemctl restart apache2 && echo 'Apache restarted OK'"
     ]
   }
 }

@@ -18,6 +18,7 @@ class PedagoLens_Core {
         add_action( 'init', [ self::class, 'register_roles' ] );
 
         PedagoLens_Admin_Profiles::register();
+        PedagoLens_Core_Settings::register();
     }
 
     public static function activate(): void {
