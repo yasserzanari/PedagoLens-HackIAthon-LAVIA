@@ -901,7 +901,7 @@ function showAnalyzeSummary( totalSuggestions, totalSections, totalTime ) {
 
 $( '#pl-analyze-all' ).on( 'click', function() {
     var $btn = $( this );
-    if ( ! sections.length ) { alert( 'Aucune section.' ); return; }
+    if ( ! sections.length ) { return; }
 
     $btn.prop( 'disabled', true );
 
@@ -1157,10 +1157,10 @@ if ( sections.length > 0 ) {
 // =========================================================================
 // AUTO-ANALYZE — trigger when redirected from project creation with ?auto_analyze=1
 // =========================================================================
-if ( window.location.search.indexOf( 'auto_analyze=1' ) !== -1 ) {
+if ( window.location.search.indexOf( 'auto_analyze=1' ) !== -1 && sections.length > 0 ) {
     setTimeout( function() {
         var $btn = $( '#pl-analyze-all' );
-        if ( $btn.length && sections.length > 0 ) {
+        if ( $btn.length ) {
             $btn.trigger( 'click' );
         }
     }, 800 );
