@@ -175,6 +175,14 @@ class PedagoLens_Workbench_Admin {
     private static function render_workbench( WP_Post $project ): void {
         $project_type = get_post_meta( $project->ID, '_pl_project_type', true ) ?: 'magistral';
         $sections     = PedagoLens_Course_Workbench::get_content_sections( $project->ID );
+
+        // Decode broken Unicode escapes in section data
+        foreach ( $sections as &$s ) {
+            if ( isset( $s['title'] ) )   { $s['title']   = self::decode_unicode( $s['title'] ); }
+            if ( isset( $s['content'] ) ) { $s['content'] = self::decode_unicode( $s['content'] ); }
+        }
+        unset( $s );
+
         $profiles     = class_exists( 'PedagoLens_Profile_Manager' )
             ? PedagoLens_Profile_Manager::get_all( active_only: true )
             : [];
@@ -744,6 +752,13 @@ class PedagoLens_Workbench_Admin {
             : [];
 
         $total_slides = count( $sections );
+
+        // Decode broken Unicode escapes in section data
+        foreach ( $sections as &$s ) {
+            if ( isset( $s['title'] ) )   { $s['title']   = self::decode_unicode( $s['title'] ); }
+            if ( isset( $s['content'] ) ) { $s['content'] = self::decode_unicode( $s['content'] ); }
+        }
+        unset( $s );
 
         // Build sections JSON for JS slide navigation
         $sections_for_js = array_values( array_map( function( $s ) {
@@ -2020,6 +2035,17 @@ class PedagoLens_Workbench_Admin {
     /**
      * Convert PowerPoint preset color name to hex.
      */
+    /**
+     * Decode broken Unicode escape sequences stored as literal text.
+     * Converts patterns like "u00e9" → "é", "u00e8" → "è", etc.
+     */
+    private static function decode_unicode( string $text ): string {
+        // Match patterns like u00e9, u00c9, u2019, u00e0 etc. (4-hex-digit unicode escapes without backslash)
+        return preg_replace_callback( '/u([0-9a-fA-F]{4})/', function( $m ) {
+            return mb_convert_encoding( pack( 'H*', $m[1] ), 'UTF-8', 'UCS-2BE' );
+        }, $text );
+    }
+
     private static function pptx_preset_color( string $name ): string {
         $colors = [
             'black'   => '#000000', 'white'  => '#ffffff', 'red'    => '#ff0000',
