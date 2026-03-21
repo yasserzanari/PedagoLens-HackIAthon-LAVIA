@@ -518,11 +518,30 @@ class PedagoLens_Admin_Profiles {
     public static function ajax_import(): void {
         self::verify_ajax_nonce();
 
-        $json    = sanitize_textarea_field( $_POST['json'] ?? '' );
-        $profile = json_decode( $json, true );
+        // Accept raw JSON (not sanitized yet — save() handles sanitization)
+        $raw_json = wp_unslash( $_POST['json'] ?? '' );
+        $profile  = json_decode( $raw_json, true );
 
         if ( ! is_array( $profile ) || empty( $profile['slug'] ) ) {
             wp_send_json_error( [ 'message' => 'JSON invalide ou slug manquant.' ] );
+        }
+
+        // Map system_prompt_template → system_prompt if needed
+        if ( empty( $profile['system_prompt'] ) && ! empty( $profile['system_prompt_template'] ) ) {
+            $profile['system_prompt'] = $profile['system_prompt_template'];
+        }
+
+        // Map references array → resources text if needed
+        if ( empty( $profile['resources'] ) && ! empty( $profile['references'] ) && is_array( $profile['references'] ) ) {
+            $profile['resources'] = implode( "\n", $profile['references'] );
+        }
+
+        // Ensure defaults for fields the rich JSON may not have
+        if ( ! isset( $profile['is_active'] ) ) {
+            $profile['is_active'] = true;
+        }
+        if ( ! isset( $profile['scoring_grid'] ) ) {
+            $profile['scoring_grid'] = null; // save() will use default
         }
 
         $existing = PedagoLens_Profile_Manager::get( $profile['slug'] );
@@ -535,7 +554,7 @@ class PedagoLens_Admin_Profiles {
         }
 
         $result = PedagoLens_Profile_Manager::save( $profile );
-        $result ? wp_send_json_success() : wp_send_json_error( [ 'message' => 'Sauvegarde échouée.' ] );
+        $result ? wp_send_json_success() : wp_send_json_error( [ 'message' => 'Sauvegarde échouée — slug invalide ou conflit.' ] );
     }
 
     // -------------------------------------------------------------------------
