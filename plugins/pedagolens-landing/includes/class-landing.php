@@ -1979,6 +1979,377 @@ class PedagoLens_Landing {
     }
 
     // -------------------------------------------------------------------------
+    // [pedagolens_settings] — Page paramètres front (Stitch)
+    // -------------------------------------------------------------------------
+
+    public static function shortcode_settings( array $atts = [] ): string {
+        if ( ! is_user_logged_in() ) {
+            return self::render_login_notice( 'Vous devez être connecté pour accéder aux paramètres.' );
+        }
+
+        $user   = wp_get_current_user();
+        $roles  = (array) $user->roles;
+        $is_admin   = in_array( 'administrator', $roles, true );
+        $is_teacher = in_array( 'pedagolens_teacher', $roles, true );
+
+        if ( ! $is_admin && ! $is_teacher ) {
+            return '<div class="pl-notice pl-notice-error"><p>Accès réservé aux enseignants.</p></div>';
+        }
+
+        $first_name  = esc_html( $user->first_name ?: $user->display_name );
+        $email       = esc_html( $user->user_email );
+        $avatar_url  = esc_url( get_avatar_url( $user->ID, [ 'size' => 120 ] ) );
+        $logout_url  = esc_url( wp_logout_url( home_url( '/' ) ) );
+
+        // URLs sidebar
+        $dash_url      = esc_url( self::page_url( 'dashboard-enseignant', 'pl-teacher-dashboard' ) );
+        $courses_url   = esc_url( self::page_url( 'cours-projets', 'pl-course-workbench' ) );
+        $workbench_url = esc_url( self::page_url( 'workbench', 'pl-course-workbench' ) );
+        $twin_url      = esc_url( self::page_url( 'dashboard-etudiant', '' ) );
+        $account_url   = esc_url( self::page_url( 'compte', '' ) );
+        $settings_url  = esc_url( self::page_url( 'parametres', '' ) );
+
+        // User settings
+        $prefs = (array) get_user_meta( $user->ID, 'pl_teacher_prefs', true );
+        $notif_progress  = ! empty( $prefs['notif_progress'] );
+        $notif_weekly    = ! empty( $prefs['notif_weekly'] );
+        $notif_sms       = ! empty( $prefs['notif_sms'] );
+        $proactive_ai    = ! empty( $prefs['proactive_ai'] );
+        $dark_mode       = ! empty( $prefs['dark_mode'] );
+        $ai_model        = esc_attr( $prefs['ai_model'] ?? 'elite' );
+        $ai_tone         = esc_attr( $prefs['ai_tone'] ?? 'academic' );
+        $report_detail   = (int) ( $prefs['report_detail'] ?? 4 );
+        $institution     = esc_attr( $prefs['institution'] ?? '' );
+        $department      = esc_attr( $prefs['department'] ?? '' );
+        $language        = esc_attr( $prefs['language'] ?? 'fr' );
+
+        // Profiles (read-only for teachers)
+        $profiles = [];
+        if ( class_exists( 'PedagoLens_Profile_Manager' ) ) {
+            $profiles = PedagoLens_Profile_Manager::get_all_profiles();
+        }
+        if ( empty( $profiles ) ) {
+            $profiles = [
+                [ 'slug' => 'tdah',      'name' => 'TDAH',        'icon' => 'neurology',     'desc' => 'Focus sur la gestion de l\'attention et l\'organisation.' ],
+                [ 'slug' => 'allophone', 'name' => 'Allophone',   'icon' => 'translate',     'desc' => 'Adaptation linguistique et supports visuels accrus.' ],
+                [ 'slug' => 'hpi',       'name' => 'HPI / Avancé', 'icon' => 'rocket_launch', 'desc' => 'Approfondissement critique et défis complexes.' ],
+            ];
+        }
+
+        $settings_nonce = wp_create_nonce( 'pl_settings_nonce' );
+
+        ob_start();
+        ?>
+<div class="pl-st-dashboard pl-st-settings-page">
+
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="pl-st-sidebar">
+        <div class="pl-st-sidebar-logo">
+            <div class="pl-st-logo-icon">P</div>
+            <span class="pl-st-logo-text">PédagoLens AI</span>
+        </div>
+        <p class="pl-st-sidebar-subtitle">Portail Éducatif</p>
+        <nav class="pl-st-sidebar-nav">
+            <a href="<?php echo $dash_url; ?>" class="pl-st-sidebar-link">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span>Tableau de bord</span>
+            </a>
+            <a href="<?php echo $courses_url; ?>" class="pl-st-sidebar-link">
+                <span class="material-symbols-outlined">psychology</span>
+                <span>Analyses IA</span>
+            </a>
+            <a href="<?php echo $twin_url; ?>" class="pl-st-sidebar-link">
+                <span class="material-symbols-outlined">group</span>
+                <span>Élèves</span>
+            </a>
+            <a href="<?php echo $workbench_url; ?>" class="pl-st-sidebar-link">
+                <span class="material-symbols-outlined">description</span>
+                <span>Rapports</span>
+            </a>
+            <a href="<?php echo $settings_url; ?>" class="pl-st-sidebar-link pl-st-sidebar-link--active">
+                <span class="material-symbols-outlined">settings</span>
+                <span>Paramètres</span>
+            </a>
+        </nav>
+        <div class="pl-st-sidebar-footer">
+            <button class="pl-st-sidebar-cta" onclick="window.location.href='<?php echo $courses_url; ?>'">
+                <span>Nouvelle Analyse</span>
+            </button>
+            <a href="#" class="pl-st-sidebar-link">
+                <span class="material-symbols-outlined">help</span>
+                <span>Aide</span>
+            </a>
+            <a href="<?php echo $logout_url; ?>" class="pl-st-sidebar-link pl-st-sidebar-link--logout">
+                <span class="material-symbols-outlined">logout</span>
+                <span>Déconnexion</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="pl-st-dash-main pl-st-settings-main">
+
+        <!-- Header -->
+        <header class="pl-st-settings-header">
+            <h2 class="pl-st-settings-title">Paramètres du Système</h2>
+            <p class="pl-st-settings-subtitle">Gérez vos préférences pédagogiques et la configuration de votre intelligence artificielle.</p>
+        </header>
+
+        <div id="pl-settings-msg" class="pl-st-settings-msg" style="display:none;"></div>
+
+        <form id="pl-settings-form" class="pl-st-settings-grid" autocomplete="off">
+            <input type="hidden" name="_wpnonce" value="<?php echo $settings_nonce; ?>" />
+
+            <!-- ============ LEFT COLUMN ============ -->
+            <div class="pl-st-settings-col-left">
+
+                <!-- Profil Enseignant -->
+                <section class="pl-st-settings-card">
+                    <div class="pl-st-settings-profile-center">
+                        <div class="pl-st-settings-avatar-wrap">
+                            <img src="<?php echo $avatar_url; ?>" alt="Avatar" class="pl-st-settings-avatar" />
+                        </div>
+                        <h3 class="pl-st-settings-profile-name"><?php echo esc_html( $user->display_name ); ?></h3>
+                        <p class="pl-st-settings-profile-email"><?php echo $email; ?></p>
+                        <a href="<?php echo $account_url; ?>" class="pl-st-settings-btn-profile">Modifier le profil</a>
+                    </div>
+                </section>
+
+                <!-- Institution -->
+                <section class="pl-st-settings-card">
+                    <div class="pl-st-settings-card-header">
+                        <span class="material-symbols-outlined">account_balance</span>
+                        <h3>Institution</h3>
+                    </div>
+                    <div class="pl-st-settings-fields">
+                        <div class="pl-st-field-group">
+                            <label class="pl-st-field-label">Université / Établissement</label>
+                            <input type="text" name="institution" class="pl-st-field-input" value="<?php echo $institution; ?>" placeholder="Université de Paris-Sorbonne" />
+                        </div>
+                        <div class="pl-st-field-group">
+                            <label class="pl-st-field-label">Département</label>
+                            <input type="text" name="department" class="pl-st-field-input" value="<?php echo $department; ?>" placeholder="Sciences de l'Éducation" />
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- ============ RIGHT COLUMN ============ -->
+            <div class="pl-st-settings-col-right">
+
+                <!-- Modèles de Profils Élèves (lecture seule) -->
+                <section class="pl-st-settings-card pl-st-settings-card--profiles">
+                    <div class="pl-st-settings-card-header-row">
+                        <div>
+                            <h3>Modèles de Profils Élèves</h3>
+                            <p class="pl-st-settings-card-desc">Configurez les types d'analyses récurrents.</p>
+                        </div>
+                        <?php if ( $is_admin ) : ?>
+                            <a href="<?php echo esc_url( admin_url( 'admin.php?page=pl-profiles' ) ); ?>" class="pl-st-settings-link-add">
+                                <span class="material-symbols-outlined">add_circle</span>
+                                Nouveau modèle
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                    <div class="pl-st-profiles-grid">
+                        <?php foreach ( $profiles as $profile ) :
+                            $p_name = esc_html( $profile['name'] ?? '' );
+                            $p_icon = esc_attr( $profile['icon'] ?? 'school' );
+                            $p_desc = esc_html( $profile['desc'] ?? '' );
+                        ?>
+                            <div class="pl-st-profile-card">
+                                <div class="pl-st-profile-icon-wrap">
+                                    <span class="material-symbols-outlined"><?php echo $p_icon; ?></span>
+                                </div>
+                                <h4><?php echo $p_name; ?></h4>
+                                <p><?php echo $p_desc; ?></p>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </section>
+
+                <!-- Préférences de l'IA -->
+                <section class="pl-st-settings-card">
+                    <div class="pl-st-settings-card-header">
+                        <div class="pl-st-settings-icon-badge pl-st-icon-violet">
+                            <span class="material-symbols-outlined">psychology_alt</span>
+                        </div>
+                        <h3>Préférences de l'IA</h3>
+                    </div>
+                    <div class="pl-st-settings-ai-grid">
+                        <div class="pl-st-settings-ai-col">
+                            <div class="pl-st-field-group">
+                                <label class="pl-st-field-label">Modèle d'Analyse</label>
+                                <select name="ai_model" class="pl-st-field-select">
+                                    <option value="elite" <?php selected( $ai_model, 'elite' ); ?>>PédagoLens-4-Elite (Par défaut)</option>
+                                    <option value="flash" <?php selected( $ai_model, 'flash' ); ?>>PédagoLens-Flash (Vitesse)</option>
+                                    <option value="research" <?php selected( $ai_model, 'research' ); ?>>Modèle de Recherche Académique</option>
+                                </select>
+                            </div>
+                            <div class="pl-st-field-group">
+                                <label class="pl-st-field-label">Ton Épistémologique</label>
+                                <div class="pl-st-tone-btns">
+                                    <button type="button" class="pl-st-tone-btn <?php echo $ai_tone === 'academic' ? 'pl-st-tone-btn--active' : ''; ?>" data-tone="academic">Académique</button>
+                                    <button type="button" class="pl-st-tone-btn <?php echo $ai_tone === 'pragmatic' ? 'pl-st-tone-btn--active' : ''; ?>" data-tone="pragmatic">Pragmatique</button>
+                                    <button type="button" class="pl-st-tone-btn <?php echo $ai_tone === 'narrative' ? 'pl-st-tone-btn--active' : ''; ?>" data-tone="narrative">Narratif</button>
+                                </div>
+                                <input type="hidden" name="ai_tone" id="pl-ai-tone" value="<?php echo $ai_tone; ?>" />
+                            </div>
+                        </div>
+                        <div class="pl-st-settings-ai-col">
+                            <div class="pl-st-field-group">
+                                <label class="pl-st-field-label">Niveau de Détail des Rapports</label>
+                                <input type="range" name="report_detail" class="pl-st-field-range" min="1" max="5" value="<?php echo $report_detail; ?>" />
+                                <div class="pl-st-range-labels">
+                                    <span>SYNTHÉTIQUE</span>
+                                    <span>EXHAUSTIF</span>
+                                </div>
+                            </div>
+                            <div class="pl-st-toggle-card">
+                                <div class="pl-st-toggle-info">
+                                    <span class="pl-st-toggle-title">Suggestions Proactives</span>
+                                    <span class="pl-st-toggle-desc">L'IA propose des ajustements en temps réel</span>
+                                </div>
+                                <label class="pl-st-switch">
+                                    <input type="checkbox" name="proactive_ai" value="1" <?php checked( $proactive_ai ); ?> />
+                                    <span class="pl-st-switch-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Notifications & Affichage -->
+                <div class="pl-st-settings-row-2">
+                    <!-- Notifications -->
+                    <section class="pl-st-settings-card">
+                        <h3 class="pl-st-settings-card-title">Notifications</h3>
+                        <div class="pl-st-notif-list">
+                            <div class="pl-st-notif-row">
+                                <span>Alertes de progression élève</span>
+                                <label class="pl-st-switch">
+                                    <input type="checkbox" name="notif_progress" value="1" <?php checked( $notif_progress ); ?> />
+                                    <span class="pl-st-switch-slider"></span>
+                                </label>
+                            </div>
+                            <div class="pl-st-notif-row">
+                                <span>Rapports hebdomadaires</span>
+                                <label class="pl-st-switch">
+                                    <input type="checkbox" name="notif_weekly" value="1" <?php checked( $notif_weekly ); ?> />
+                                    <span class="pl-st-switch-slider"></span>
+                                </label>
+                            </div>
+                            <div class="pl-st-notif-row pl-st-notif-row--disabled">
+                                <span>Alertes système par SMS</span>
+                                <label class="pl-st-switch">
+                                    <input type="checkbox" name="notif_sms" value="1" <?php checked( $notif_sms ); ?> disabled />
+                                    <span class="pl-st-switch-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Préférences d'affichage -->
+                    <section class="pl-st-settings-card">
+                        <h3 class="pl-st-settings-card-title">Affichage &amp; Langue</h3>
+                        <div class="pl-st-settings-fields">
+                            <div class="pl-st-field-group">
+                                <label class="pl-st-field-label">Langue</label>
+                                <select name="language" class="pl-st-field-select">
+                                    <option value="fr" <?php selected( $language, 'fr' ); ?>>Français</option>
+                                    <option value="en" <?php selected( $language, 'en' ); ?>>English</option>
+                                </select>
+                            </div>
+                            <div class="pl-st-toggle-card">
+                                <div class="pl-st-toggle-info">
+                                    <span class="pl-st-toggle-title">Thème sombre</span>
+                                    <span class="pl-st-toggle-desc">Interface en mode nuit</span>
+                                </div>
+                                <label class="pl-st-switch">
+                                    <input type="checkbox" name="dark_mode" value="1" <?php checked( $dark_mode ); ?> />
+                                    <span class="pl-st-switch-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Action Footer -->
+                <footer class="pl-st-settings-actions">
+                    <button type="button" class="pl-st-settings-btn-cancel" id="pl-settings-cancel">Annuler les modifications</button>
+                    <button type="submit" class="pl-st-settings-btn-save">Sauvegarder les paramètres</button>
+                </footer>
+
+            </div>
+
+        </form>
+
+    </main>
+
+</div><!-- .pl-st-settings-page -->
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Alias francophone pour [pedagolens_parametres].
+     */
+    public static function shortcode_parametres( array $atts = [] ): string {
+        return self::shortcode_settings( $atts );
+    }
+
+    // -------------------------------------------------------------------------
+    // AJAX — Sauvegarde paramètres front (enseignant)
+    // -------------------------------------------------------------------------
+
+    public static function ajax_save_settings(): void {
+        check_ajax_referer( 'pl_settings_nonce' );
+
+        if ( ! is_user_logged_in() ) {
+            wp_send_json_error( [ 'message' => 'Non authentifié.' ] );
+        }
+
+        $user  = wp_get_current_user();
+        $roles = (array) $user->roles;
+
+        if ( ! in_array( 'administrator', $roles, true ) && ! in_array( 'pedagolens_teacher', $roles, true ) ) {
+            wp_send_json_error( [ 'message' => 'Accès refusé.' ] );
+        }
+
+        $prefs = (array) get_user_meta( $user->ID, 'pl_teacher_prefs', true );
+
+        // Checkboxes / toggles
+        $prefs['notif_progress'] = ! empty( $_POST['notif_progress'] );
+        $prefs['notif_weekly']   = ! empty( $_POST['notif_weekly'] );
+        $prefs['notif_sms']      = ! empty( $_POST['notif_sms'] );
+        $prefs['proactive_ai']   = ! empty( $_POST['proactive_ai'] );
+        $prefs['dark_mode']      = ! empty( $_POST['dark_mode'] );
+
+        // Text / select fields
+        $allowed_models = [ 'elite', 'flash', 'research' ];
+        $allowed_tones  = [ 'academic', 'pragmatic', 'narrative' ];
+        $allowed_langs  = [ 'fr', 'en' ];
+
+        $model = sanitize_key( $_POST['ai_model'] ?? 'elite' );
+        $prefs['ai_model'] = in_array( $model, $allowed_models, true ) ? $model : 'elite';
+
+        $tone = sanitize_key( $_POST['ai_tone'] ?? 'academic' );
+        $prefs['ai_tone'] = in_array( $tone, $allowed_tones, true ) ? $tone : 'academic';
+
+        $lang = sanitize_key( $_POST['language'] ?? 'fr' );
+        $prefs['language'] = in_array( $lang, $allowed_langs, true ) ? $lang : 'fr';
+
+        $prefs['report_detail'] = max( 1, min( 5, (int) ( $_POST['report_detail'] ?? 4 ) ) );
+        $prefs['institution']   = sanitize_text_field( wp_unslash( $_POST['institution'] ?? '' ) );
+        $prefs['department']    = sanitize_text_field( wp_unslash( $_POST['department'] ?? '' ) );
+
+        update_user_meta( $user->ID, 'pl_teacher_prefs', $prefs );
+
+        wp_send_json_success( [ 'message' => 'Paramètres enregistrés.' ] );
+    }
+
+    // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
 
