@@ -673,11 +673,7 @@ class PedagoLens_Workbench_Admin {
                         Sauvegarder la version
                     </button>
                 </div>
-            </header>="pl-wb-btn pl-wb-btn-outline">
-                        + Ajouter une section
-                    </button>
-                </div>
-            </div>
+            </header>
 
             <!-- ===== UPLOAD ZONE (hidden by default) ===== -->
             <div id="pl-upload-zone" class="pl-stitch-upload-zone" style="display:none;">
