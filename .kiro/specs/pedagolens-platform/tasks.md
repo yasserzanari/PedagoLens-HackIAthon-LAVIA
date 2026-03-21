@@ -433,7 +433,7 @@ Le bouton "Suggestions IA" sur chaque section doit appeler l'API Bridge pour obt
 
 - [x] 34.1 Bump PL_LANDING_VERSION de 2.8.0 vers 2.9.0 (header PHP + constante define)
 - [x] 34.2 Bump PL_WORKBENCH_VERSION si modifié (header PHP + constante define)
-- [ ] 34.3 Commit + push + déploiement SSM
+- [x] 34.3 Commit + push + déploiement SSM
 - [ ] 34.4 Vérification post-déploiement via Chrome MCP — page cours, workbench, upload
 
 
@@ -656,7 +656,7 @@ Le bouton "Demander de nouvelles suggestions" dans la sidebar doit lancer une an
 - [x] 44.1 Bump `PL_WORKBENCH_VERSION` de `1.5.0` → `2.0.0` (header PHP + constante define) — version majeure car refonte complète du pipeline
 - [x] 44.2 Bump `PL_BRIDGE_VERSION` si modifié (header PHP + constante define)
 - [x] 44.3 Bump `PL_LANDING_VERSION` de `3.0.0` → `3.1.0` si modifié (header PHP + constante define)
-- [ ] 44.4 Commit + push + déploiement SSM
+- [x] 44.4 Commit + push + déploiement SSM
 - [ ] 44.5 Test end-to-end via Chrome MCP :
   - Aller sur /cours-projets/, créer un cours, créer une séance magistrale
   - Aller sur le workbench de cette séance

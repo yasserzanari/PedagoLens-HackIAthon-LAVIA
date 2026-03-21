@@ -196,10 +196,19 @@ class PedagoLens_Course_Workbench {
     }
 
     private static function validate_suggestion( array $sug ): bool {
-        foreach ( [ 'id', 'section', 'original', 'proposed', 'rationale' ] as $field ) {
+        // id, section, rationale sont toujours requis
+        foreach ( [ 'id', 'section', 'rationale' ] as $field ) {
             if ( empty( $sug[ $field ] ) ) {
                 return false;
             }
+        }
+        // Pour un ajout, original peut être vide ; pour une suppression, proposed peut être vide
+        if ( ! isset( $sug['original'] ) || ! isset( $sug['proposed'] ) ) {
+            return false;
+        }
+        // Au moins l'un des deux doit être non-vide
+        if ( $sug['original'] === '' && $sug['proposed'] === '' ) {
+            return false;
         }
         return true;
     }
