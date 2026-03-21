@@ -2117,15 +2117,15 @@ class PedagoLens_Landing {
     public static function ajax_login(): void {
         check_ajax_referer( 'pl_login_nonce' );
 
-        $email    = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
+        $login    = sanitize_text_field( wp_unslash( $_POST['email'] ?? '' ) );
         $password = $_POST['password'] ?? '';
 
-        if ( ! $email || ! $password ) {
+        if ( ! $login || ! $password ) {
             wp_send_json_error( [ 'message' => 'Courriel et mot de passe requis.' ] );
         }
 
-        // Trouver le user par email
-        $user_obj = get_user_by( 'email', $email );
+        // Trouver le user par email OU par username
+        $user_obj = is_email( $login ) ? get_user_by( 'email', $login ) : get_user_by( 'login', $login );
         if ( ! $user_obj ) {
             wp_send_json_error( [ 'message' => 'Identifiants invalides.' ] );
         }
