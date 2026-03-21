@@ -35,6 +35,7 @@ class PedagoLens_Landing {
         add_shortcode( 'pedagolens_historique',        [ self::class, 'shortcode_historique' ] );
         add_shortcode( 'pedagolens_parametres',        [ self::class, 'shortcode_parametres' ] );
         add_shortcode( 'pedagolens_institutionnel',    [ self::class, 'shortcode_institutionnel' ] );
+        add_shortcode( 'pedagolens_jumeau_ia',         [ self::class, 'shortcode_jumeau_ia' ] );
 
         add_action( 'wp_enqueue_scripts', [ self::class, 'enqueue_front_assets' ] );
 
@@ -111,6 +112,27 @@ class PedagoLens_Landing {
         if ( ! has_action( 'wp_ajax_pl_create_project_front' ) ) {
             add_action( 'wp_ajax_pl_create_project_front', [ self::class, 'ajax_create_project_front' ] );
         }
+
+        // Hide WP admin bar for students and teachers
+        add_action( 'after_setup_theme', function() {
+            if ( ! is_user_logged_in() ) return;
+            $user = wp_get_current_user();
+            $roles = (array) $user->roles;
+            if ( in_array( 'pedagolens_student', $roles, true ) || in_array( 'pedagolens_teacher', $roles, true ) ) {
+                show_admin_bar( false );
+            }
+        } );
+
+        // Add body class when admin bar is hidden
+        add_filter( 'body_class', function( $classes ) {
+            if ( ! is_user_logged_in() ) return $classes;
+            $user = wp_get_current_user();
+            $roles = (array) $user->roles;
+            if ( in_array( 'pedagolens_student', $roles, true ) || in_array( 'pedagolens_teacher', $roles, true ) ) {
+                $classes[] = 'pedagolens-no-adminbar';
+            }
+            return $classes;
+        } );
     }
 
     // -------------------------------------------------------------------------
@@ -990,7 +1012,7 @@ class PedagoLens_Landing {
             $logout_url  = esc_url( wp_logout_url( home_url( '/' ) ) );
             $dash_url    = esc_url( self::page_url( 'dashboard-etudiant', '' ) );
             $courses_url = esc_url( self::page_url( 'cours-projets', 'pl-course-workbench' ) );
-            $twin_url    = esc_url( self::page_url( 'dashboard-etudiant', '' ) );
+            $twin_url    = esc_url( self::page_url( 'jumeau-ia', '' ) );
             $account_url = esc_url( self::page_url( 'compte', '' ) );
 
             $nb_courses      = (int) ( wp_count_posts( 'pl_course' )->publish ?? 0 );
@@ -1040,35 +1062,20 @@ class PedagoLens_Landing {
                     </div>
                 </div>
             </div>
-            <!-- Chat Léa pour étudiant -->
-            <section class="pl-stu-lea-chat" style="margin-bottom:2rem;">
-                <div class="pl-lea-chat-area" style="border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;background:#fff;">
-                    <div class="pl-lea-chat-header">
-                        <div class="pl-lea-chat-header-left">
-                            <div class="pl-lea-chat-avatar">
-                                <span class="material-symbols-outlined">psychology</span>
-                            </div>
-                            <div class="pl-lea-chat-info">
-                                <h3>Agent IA L&eacute;a</h3>
-                                <p>Votre assistante d'apprentissage</p>
-                            </div>
-                        </div>
+            <!-- CTA vers Jumeau IA Léa -->
+            <section class="pl-stu-lea-cta" style="margin-bottom:2rem;">
+                <div class="pl-stu-lea-cta-card" style="border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,#f0f4ff 0%,#faf5ff 100%);padding:2rem;display:flex;align-items:center;gap:1.5rem;">
+                    <div class="pl-stu-lea-cta-icon" style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <span class="material-symbols-outlined" style="color:#fff;font-size:32px;">psychology</span>
                     </div>
-
-                    <div class="pl-lea-chat-messages" id="pl-lea-messages">
-                        <div class="pl-lea-msg pl-lea-msg--bot">
-                            Bonjour <?php echo $first_name; ?> ! Je suis L&eacute;a, ton assistante IA. Je suis l&agrave; pour t'aider &agrave; comprendre tes cours. Pose-moi une question sur n'importe quel sujet de tes cours !
-                        </div>
+                    <div class="pl-stu-lea-cta-content" style="flex:1;">
+                        <h3 style="margin:0 0 .25rem;font-size:1.15rem;font-weight:700;color:#1e293b;">Discuter avec L&eacute;a</h3>
+                        <p style="margin:0;color:#64748b;font-size:.9rem;">Ta tutrice IA est pr&ecirc;te &agrave; t'aider &agrave; comprendre tes cours. Pose-lui tes questions !</p>
                     </div>
-
-                    <div class="pl-lea-chat-input-area">
-                        <div class="pl-lea-chat-input-wrap">
-                            <textarea class="pl-lea-chat-input" id="pl-lea-input" placeholder="Pose ta question &agrave; L&eacute;a..." rows="1"></textarea>
-                            <button class="pl-lea-chat-send" id="pl-lea-send" title="Envoyer">
-                                <span class="material-symbols-outlined">send</span>
-                            </button>
-                        </div>
-                    </div>
+                    <a href="<?php echo $twin_url; ?>" class="pl-stu-lea-cta-btn" style="display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.5rem;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-radius:12px;font-weight:600;text-decoration:none;white-space:nowrap;font-size:.9rem;">
+                        <span class="material-symbols-outlined" style="font-size:20px;">chat</span>
+                        Ouvrir le chat
+                    </a>
                 </div>
             </section>
 
@@ -1107,6 +1114,93 @@ class PedagoLens_Landing {
         }
 
 
+
+    // -------------------------------------------------------------------------
+    // [pedagolens_jumeau_ia] — Page dédiée Jumeau IA étudiant (chat Léa)
+    // -------------------------------------------------------------------------
+
+    public static function shortcode_jumeau_ia( array $atts ): string {
+        if ( ! is_user_logged_in() ) {
+            return self::render_login_notice( 'Vous devez &ecirc;tre connect&eacute; pour acc&eacute;der au Jumeau IA.' );
+        }
+
+        $user       = wp_get_current_user();
+        $first_name = esc_html( $user->first_name ?: $user->display_name );
+
+        // Localize twin script
+        wp_localize_script( 'pl-landing-front', 'plLea', [
+            'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+            'nonce'   => wp_create_nonce( 'pl_twin_ajax' ),
+        ] );
+
+        // Get student courses for the dropdown
+        $courses = get_posts( [
+            'post_type'      => 'pl_course',
+            'posts_per_page' => -1,
+            'post_status'    => 'publish',
+            'orderby'        => 'title',
+            'order'          => 'ASC',
+        ] );
+
+        $dash_url = esc_url( self::page_url( 'dashboard-etudiant', '' ) );
+
+        ob_start();
+        ?>
+<!DOCTYPE html>
+<html <?php language_attributes(); ?>>
+<head>
+    <meta charset="<?php bloginfo( 'charset' ); ?>">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <?php wp_head(); ?>
+</head>
+<body class="pl-twin-body pedagolens-no-adminbar">
+<div class="pl-twin-page">
+    <!-- Header compact -->
+    <header class="pl-twin-header">
+        <div class="pl-twin-header-left">
+            <img src="http://pedagolens.34.199.149.247.nip.io/wp-content/uploads/2026/03/logo.png" alt="P&eacute;dagoLens" class="pl-logo-img pl-logo-img--twin" />
+            <h1 class="pl-twin-header-title">Jumeau IA &mdash; L&eacute;a</h1>
+        </div>
+        <div class="pl-twin-header-center">
+            <select class="pl-twin-course-select" id="pl-twin-course-select">
+                <option value="0">G&eacute;n&eacute;ral (tous les cours)</option>
+                <?php foreach ( $courses as $c ) : ?>
+                <option value="<?php echo esc_attr( $c->ID ); ?>"><?php echo esc_html( $c->post_title ); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="pl-twin-header-right">
+            <a href="<?php echo $dash_url; ?>" class="pl-twin-back-btn">
+                <span class="material-symbols-outlined">arrow_back</span>
+                Retour au Dashboard
+            </a>
+        </div>
+    </header>
+
+    <!-- Zone de chat plein écran -->
+    <div class="pl-twin-chat-area">
+        <div class="pl-twin-messages" id="pl-lea-messages">
+            <div class="pl-lea-msg pl-lea-msg--bot">
+                Bonjour <?php echo $first_name; ?> ! &#128075; Je suis L&eacute;a, ta tutrice IA. Je suis l&agrave; pour t'aider &agrave; comprendre tes cours, pas pour te donner les r&eacute;ponses ! Pose-moi une question et je te guiderai vers la compr&eacute;hension. Tu peux s&eacute;lectionner un cours sp&eacute;cifique en haut pour que je me concentre sur ce sujet.
+            </div>
+        </div>
+
+        <div class="pl-twin-input-area">
+            <div class="pl-twin-input-wrap">
+                <textarea class="pl-twin-input" id="pl-lea-input" placeholder="Pose ta question &agrave; L&eacute;a..." rows="1"></textarea>
+                <button class="pl-twin-send-btn" id="pl-lea-send" title="Envoyer">
+                    <span class="material-symbols-outlined">send</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<?php wp_footer(); ?>
+</body>
+</html>
+        <?php
+        return ob_get_clean();
+    }
 
     // -------------------------------------------------------------------------
     // [pedagolens_courses] — Liste des cours et projets (front-end complet)
@@ -2171,6 +2265,7 @@ class PedagoLens_Landing {
         $url_settings      = esc_url( self::page_url( 'parametres', '' ) );
         $url_institutional = esc_url( self::page_url( 'institutionnel', '' ) );
         $url_account       = esc_url( self::page_url( 'compte', '' ) );
+        $url_twin          = esc_url( self::page_url( 'jumeau-ia', '' ) );
 
         // Navigation items per role
         if ( $is_admin || $is_teacher ) {
@@ -2187,7 +2282,7 @@ class PedagoLens_Landing {
         } else {
             $nav = [
                 [ 'slug' => 'dashboard', 'icon' => 'dashboard',   'label' => 'Dashboard',   'url' => $url_dash_student ],
-                [ 'slug' => 'twin',      'icon' => 'psychology',  'label' => 'Jumeau IA',   'url' => $url_dash_student ],
+                [ 'slug' => 'twin',      'icon' => 'psychology',  'label' => 'Jumeau IA',   'url' => $url_twin ],
                 [ 'slug' => 'history',   'icon' => 'history',     'label' => 'Historique',  'url' => $url_history ],
                 [ 'slug' => 'account',   'icon' => 'person',      'label' => 'Compte',      'url' => $url_account ],
             ];
