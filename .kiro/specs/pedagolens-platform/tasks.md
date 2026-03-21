@@ -431,7 +431,7 @@ Le bouton "Suggestions IA" sur chaque section doit appeler l'API Bridge pour obt
 
 ## 34. Version bump et déploiement final v2.9.0
 
-- [ ] 34.1 Bump PL_LANDING_VERSION de 2.8.0 vers 2.9.0 (header PHP + constante define)
-- [ ] 34.2 Bump PL_WORKBENCH_VERSION si modifié (header PHP + constante define)
+- [x] 34.1 Bump PL_LANDING_VERSION de 2.8.0 vers 2.9.0 (header PHP + constante define)
+- [x] 34.2 Bump PL_WORKBENCH_VERSION si modifié (header PHP + constante define)
 - [ ] 34.3 Commit + push + déploiement SSM
 - [ ] 34.4 Vérification post-déploiement via Chrome MCP — page cours, workbench, upload
