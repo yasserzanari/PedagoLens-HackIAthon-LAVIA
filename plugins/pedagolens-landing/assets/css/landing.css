@@ -4927,8 +4927,8 @@ select.pl-form-input { cursor: pointer; appearance: none; background-image: url(
   flex-direction: column;
   justify-content: center;
   padding: 3rem 4rem;
-  background: linear-gradient(160deg, #0a1628 0%, #00236f 40%, #1e3a8a 70%, #312e81 100%);
-  color: #fff;
+  background: linear-gradient(160deg, #e8eaf6 0%, #c5cae9 30%, #9fa8da 60%, #7986cb 100%);
+  color: var(--pl-text);
   overflow: hidden;
 }
 
@@ -4956,6 +4956,7 @@ select.pl-form-input { cursor: pointer; appearance: none; background-image: url(
   font-size: 1.5rem;
   font-weight: 800;
   letter-spacing: -0.02em;
+  color: var(--pl-primary);
 }
 
 .pl-st-login-brand-title {
@@ -4965,10 +4966,11 @@ select.pl-form-input { cursor: pointer; appearance: none; background-image: url(
   line-height: 1.15;
   margin: 0 0 1.25rem;
   letter-spacing: -0.03em;
+  color: var(--pl-primary);
 }
 
 .pl-st-login-brand-accent {
-  background: linear-gradient(90deg, #a78bfa, #67e8f9);
+  background: linear-gradient(90deg, var(--pl-secondary), #0d9488);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -4977,9 +4979,10 @@ select.pl-form-input { cursor: pointer; appearance: none; background-image: url(
 .pl-st-login-brand-desc {
   font-size: 1.1rem;
   line-height: 1.6;
-  opacity: 0.85;
+  opacity: 0.7;
   margin-bottom: 2.5rem;
   max-width: 480px;
+  color: var(--pl-text);
 }
 
 /* ── Branding widgets ─────────────────────────────────────── */
@@ -4993,16 +4996,17 @@ select.pl-form-input { cursor: pointer; appearance: none; background-image: url(
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.8);
   border-radius: var(--pl-radius-md);
   padding: 1rem 1.25rem;
+  color: var(--pl-text);
 }
 
 .pl-st-login-widget .material-symbols-outlined {
   font-size: 1.75rem;
-  color: #a78bfa;
+  color: var(--pl-secondary);
 }
 
 .pl-st-login-widget div {
@@ -5018,7 +5022,8 @@ select.pl-form-input { cursor: pointer; appearance: none; background-image: url(
 
 .pl-st-login-widget span:not(.material-symbols-outlined) {
   font-size: 0.85rem;
-  opacity: 0.75;
+  opacity: 0.6;
+  color: var(--pl-text-muted);
 }
 
 /* ── Branding blur orbs ───────────────────────────────────── */
@@ -5032,8 +5037,8 @@ select.pl-form-input { cursor: pointer; appearance: none; background-image: url(
 .pl-st-login-branding-blur--violet {
   width: 400px;
   height: 400px;
-  background: #7c3aed;
-  opacity: 0.25;
+  background: var(--pl-secondary);
+  opacity: 0.12;
   filter: blur(120px);
   top: -100px;
   right: -100px;
@@ -5042,8 +5047,8 @@ select.pl-form-input { cursor: pointer; appearance: none; background-image: url(
 .pl-st-login-branding-blur--teal {
   width: 350px;
   height: 350px;
-  background: #14b8a6;
-  opacity: 0.2;
+  background: var(--pl-tertiary);
+  opacity: 0.1;
   filter: blur(100px);
   bottom: -80px;
   left: -80px;
@@ -5059,8 +5064,9 @@ select.pl-form-input { cursor: pointer; appearance: none; background-image: url(
   justify-content: space-between;
   align-items: center;
   font-size: 0.8rem;
-  opacity: 0.5;
+  opacity: 0.4;
   z-index: 2;
+  color: var(--pl-text-muted);
 }
 
 .pl-st-login-branding-footer div {
