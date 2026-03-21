@@ -2139,20 +2139,102 @@ body.pl-has-editor #wpadminbar { display: none !important; }
     min-height: 0;
 }
 
-/* --- LEFT COLUMN: Filmstrip (slide thumbnails) --- */
-.pl-editor-filmstrip {
+/* --- LEFT COLUMN WRAPPER: Score panel + Filmstrip --- */
+.pl-editor-left-col {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 100%;
+    min-height: 0;
     background: #1a1a2e;
     border-right: 1px solid rgba(255,255,255,0.06);
+}
+
+/* --- Score panel (top-left, above filmstrip) --- */
+.pl-editor-score-panel {
+    padding: 14px 14px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+    max-height: 320px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+.pl-editor-score-panel::-webkit-scrollbar { width: 4px; }
+.pl-editor-score-panel::-webkit-scrollbar-track { background: transparent; }
+.pl-editor-score-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+
+.pl-score-panel-header {
+    margin-bottom: 10px;
+}
+.pl-score-panel-header h3 {
+    margin: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #94a3b8;
+}
+.pl-score-panel-empty {
+    font-size: 0.78rem;
+    color: #64748b;
+    margin: 0;
+}
+
+/* Score panel dark theme overrides */
+.pl-editor-score-panel .pl-score-global {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 8px;
+}
+.pl-editor-score-panel .pl-score-circle {
+    width: 80px;
+    height: 80px;
+}
+.pl-editor-score-panel .pl-score-global-num {
+    font-size: 1.2rem;
+    color: #f1f5f9;
+}
+.pl-editor-score-panel .pl-score-global-label {
+    font-size: 0.58rem;
+    color: #64748b;
+}
+.pl-editor-score-panel .pl-score-circle-bg {
+    stroke: rgba(255,255,255,0.08);
+}
+.pl-editor-score-panel .pl-score-profile-name {
+    color: #94a3b8;
+    font-size: 0.72rem;
+}
+.pl-editor-score-panel .pl-score-profile-num {
+    color: #f1f5f9;
+    font-size: 0.72rem;
+}
+.pl-editor-score-panel .pl-score-profile-bar-track {
+    background: rgba(255,255,255,0.06);
+    height: 6px;
+}
+.pl-editor-score-panel .pl-score-profile-icon {
+    font-size: 0.8rem;
+}
+.pl-editor-score-panel .pl-score-profiles {
+    gap: 6px;
+}
+
+/* --- LEFT: Filmstrip (slide thumbnails) --- */
+.pl-editor-filmstrip {
+    background: transparent;
+    border-right: none;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     transition: width 0.3s ease, min-width 0.3s ease;
-    width: 220px;
-    min-width: 220px;
+    flex: 1;
+    min-height: 0;
 }
-.pl-editor-filmstrip.pl-filmstrip-collapsed {
-    width: 52px;
-    min-width: 52px;
+.pl-editor-filmstrip.pl-filmstrip-collapsed .pl-filmstrip-list,
+.pl-editor-filmstrip.pl-filmstrip-collapsed .pl-filmstrip-title {
+    display: none;
 }
 
 .pl-filmstrip-header {
@@ -2540,7 +2622,7 @@ body.pl-has-editor #wpadminbar { display: none !important; }
     .pl-editor-body {
         grid-template-columns: 1fr;
     }
-    .pl-editor-filmstrip,
+    .pl-editor-left-col,
     .pl-editor-panel {
         display: none;
     }

@@ -549,7 +549,7 @@ $( document ).on( 'click', '.pl-btn-suggestions, #pl-canvas-suggestions-btn', fu
             if ( res.success ) {
                 $panel.html( res.data.html );
                 if ( res.data.scores_html ) {
-                    $( '#pl-sidebar-scores' ).html( res.data.scores_html );
+                    $( '#pl-topleft-scores' ).html( res.data.scores_html );
                 }
             } else {
                 $panel.html( '<p class="pl-panel-error">✗ ' + ( res.data?.message || 'Erreur.' ) + '</p>' );
@@ -959,7 +959,7 @@ $( '#pl-analyze-all' ).on( 'click', function() {
                 }
             }
             if ( latestScoresHtml ) {
-                $( '#pl-sidebar-scores' ).html( latestScoresHtml );
+                $( '#pl-topleft-scores' ).html( latestScoresHtml );
             }
 
             showAnalyzeSummary( totalSuggestions, total, Date.now() - startAll );
@@ -985,7 +985,7 @@ $( '#pl-analyze-all' ).on( 'click', function() {
                     if ( res.data.scores_html ) {
                         latestScoresHtml = res.data.scores_html;
                         // Update scores in real-time during analysis
-                        $( '#pl-sidebar-scores' ).html( latestScoresHtml );
+                        $( '#pl-topleft-scores' ).html( latestScoresHtml );
                     }
                 }
             } )

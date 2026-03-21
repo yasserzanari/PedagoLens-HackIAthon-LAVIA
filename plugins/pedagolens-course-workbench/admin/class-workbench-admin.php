@@ -541,7 +541,11 @@ class PedagoLens_Workbench_Admin {
 
         $project_id    = (int) ( $_POST['project_id']   ?? 0 );
         $section_id    = sanitize_text_field( $_POST['section_id']   ?? '' );
-        $suggestion_id = sanitize_text_field( $_POST['suggestion_id'] ?? '' );
+        $suggestion_id = sanitize_text_field( (string) ( $_POST['suggestion_id'] ?? '' ) );
+
+        if ( ! $project_id || ! $section_id || ! $suggestion_id ) {
+            wp_send_json_error( [ 'message' => 'Paramètres manquants.' ] );
+        }
 
         $ok = PedagoLens_Course_Workbench::apply_suggestion( $project_id, $section_id, $suggestion_id );
 
@@ -828,8 +832,25 @@ class PedagoLens_Workbench_Admin {
             <!-- BODY: 3 columns -->
             <div class="pl-editor-body">
 
-                <!-- LEFT: Filmstrip (slide thumbnails) -->
-                <aside class="pl-editor-filmstrip" id="pl-filmstrip">
+                <!-- LEFT COLUMN: Score panel + Filmstrip -->
+                <div class="pl-editor-left-col">
+
+                    <!-- Score panel (top-left, above filmstrip) -->
+                    <div class="pl-editor-score-panel" id="pl-editor-score-panel">
+                        <div class="pl-score-panel-header">
+                            <h3>Scores par profil</h3>
+                        </div>
+                        <div id="pl-topleft-scores">
+                            <?php if ( ! empty( $scores ) ) : ?>
+                                <?php self::render_front_score_bars( $scores ); ?>
+                            <?php else : ?>
+                                <p class="pl-panel-empty pl-score-panel-empty">Analysez pour voir les scores.</p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <!-- Filmstrip (slide thumbnails) -->
+                    <aside class="pl-editor-filmstrip" id="pl-filmstrip">
                     <div class="pl-filmstrip-header">
                         <span class="pl-filmstrip-title">Diapositives</span>
                         <button type="button" class="pl-filmstrip-toggle" id="pl-filmstrip-toggle" title="Réduire">
@@ -857,6 +878,8 @@ class PedagoLens_Workbench_Admin {
                         <?php endforeach; ?>
                     </div>
                 </aside>
+
+                </div><!-- .pl-editor-left-col -->
 
                 <!-- CENTER: Canvas (single slide editor) -->
                 <main class="pl-editor-canvas" id="pl-editor-canvas">
@@ -918,20 +941,6 @@ class PedagoLens_Workbench_Admin {
                         <button type="button" id="pl-analyze-all" class="pl-editor-btn pl-editor-btn-glow pl-editor-btn-full" style="margin-top:12px;">
                             Analyser toutes les diapositives
                         </button>
-                    </div>
-
-                    <!-- Scores par profil -->
-                    <div class="pl-panel-section">
-                        <div class="pl-panel-section-header">
-                            <h3>Scores par profil</h3>
-                        </div>
-                        <div id="pl-sidebar-scores">
-                            <?php if ( ! empty( $scores ) ) : ?>
-                                <?php self::render_front_score_bars( $scores ); ?>
-                            <?php else : ?>
-                                <p class="pl-panel-empty">Analysez pour voir les scores.</p>
-                            <?php endif; ?>
-                        </div>
                     </div>
 
                     <?php if ( $summary ) : ?>

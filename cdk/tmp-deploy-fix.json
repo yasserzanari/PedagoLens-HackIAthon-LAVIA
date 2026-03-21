@@ -3,7 +3,11 @@
   "DocumentName": "AWS-RunShellScript",
   "Parameters": {
     "commands": [
-      "export HOME=/root && cd /var/www/html && php -r \"define('ABSPATH','/var/www/html/'); define('WPINC','wp-includes'); require_once('wp-load.php'); \\$p = get_page_by_path('workbench'); echo 'workbench page: ' . (\\$p ? \\$p->ID . ' status=' . \\$p->post_status : 'NOT FOUND') . PHP_EOL; \\$p2 = get_page_by_path('cours-projets'); echo 'cours-projets page: ' . (\\$p2 ? \\$p2->ID . ' status=' . \\$p2->post_status : 'NOT FOUND') . PHP_EOL; echo '=== max_tokens option ===' . PHP_EOL; echo get_option('pl_bedrock_max_tokens', 'NOT SET') . PHP_EOL; echo '=== Project 56 workbench URL ===' . PHP_EOL; if(\\$p) { echo get_permalink(\\$p) . '?project_id=56' . PHP_EOL; } else { echo 'N/A' . PHP_EOL; }\" 2>&1"
+      "export HOME=/root && git config --global --add safe.directory /opt/pedagolens && cd /opt/pedagolens && git pull origin main 2>&1",
+      "echo '=== Syntaxe API Bridge ===' && php -l /opt/pedagolens/plugins/pedagolens-api-bridge/includes/class-api-bridge.php 2>&1",
+      "echo '=== Syntaxe Landing ===' && php -l /opt/pedagolens/plugins/pedagolens-landing/includes/class-landing.php 2>&1",
+      "echo '=== Update max_tokens ===' && cd /var/www/html && php -r \"define('ABSPATH','/var/www/html/'); define('WPINC','wp-includes'); require_once('wp-load.php'); update_option('pl_bedrock_max_tokens', 4096); echo 'max_tokens updated to: ' . get_option('pl_bedrock_max_tokens') . PHP_EOL;\" 2>&1",
+      "systemctl restart apache2 && echo 'Apache restarted OK'"
     ]
   }
 }

@@ -76,10 +76,21 @@ class PedagoLens_Course_Workbench {
      */
     public static function apply_suggestion( int $project_id, string $section, string $suggestion_id ): bool {
         $suggestions_cache = self::get_cached_suggestions( $project_id, $section );
-        $suggestion        = self::find_suggestion( $suggestions_cache, $suggestion_id );
+        $suggestion        = self::find_suggestion( $suggestions_cache, (string) $suggestion_id );
 
         if ( ! $suggestion ) {
-            PedagoLens_Core::log( 'warning', "apply_suggestion — suggestion introuvable : {$suggestion_id}" );
+            // Fallback: search ALL sections in the cache (suggestion may have been stored under a different section key)
+            $raw_all = get_post_meta( $project_id, '_pl_last_suggestions', true );
+            $all_cache = is_string( $raw_all ) ? (array) json_decode( $raw_all, true ) : [];
+            foreach ( $all_cache as $sec_id => $sec_suggestions ) {
+                if ( ! is_array( $sec_suggestions ) ) continue;
+                $suggestion = self::find_suggestion( $sec_suggestions, (string) $suggestion_id );
+                if ( $suggestion ) break;
+            }
+        }
+
+        if ( ! $suggestion ) {
+            PedagoLens_Core::log( 'warning', "apply_suggestion — suggestion introuvable : {$suggestion_id} (section: {$section}, project: {$project_id})" );
             return false;
         }
 
@@ -240,7 +251,8 @@ class PedagoLens_Course_Workbench {
 
     private static function find_suggestion( array $suggestions, string $id ): ?array {
         foreach ( $suggestions as $sug ) {
-            if ( ( $sug['id'] ?? '' ) === $id ) {
+            // Compare as strings to handle jQuery numeric coercion (e.g. "1" vs 1)
+            if ( (string) ( $sug['id'] ?? '' ) === (string) $id ) {
                 return $sug;
             }
         }
