@@ -668,7 +668,7 @@ class PedagoLens_Landing {
                 <div class="pl-dash-kpi-icon pl-dash-icon-green"><span class="material-symbols-outlined">folder_open</span></div>
                 <div class="pl-dash-kpi-info">
                     <span class="pl-dash-kpi-value"><?php echo $nb_projects; ?></span>
-                    <span class="pl-dash-kpi-label">Projets en cours</span>
+                    <span class="pl-dash-kpi-label">Séances en cours</span>
                 </div>
             </div>
         </div>
@@ -1933,17 +1933,21 @@ class PedagoLens_Landing {
                     <img src="http://pedagolens.34.199.149.247.nip.io/wp-content/uploads/2026/03/logo.png" alt="PédagoLens" class="pl-logo-img pl-logo-img--login-hero" />
                 </div>
                 <h1 class="pl-st-login-brand-title">
-                    Votre assistant <span class="pl-st-login-brand-accent">p&eacute;dagogique</span> propuls&eacute; par l'IA.
+                    Transformez chaque <span class="pl-st-login-brand-accent">s&eacute;ance de cours</span> gr&acirc;ce &agrave; l'IA.
                 </h1>
-                <p class="pl-st-login-brand-desc">Optimisez vos cours, identifiez les difficult&eacute;s &eacute;tudiantes et g&eacute;n&eacute;rez des analyses personnalis&eacute;es en quelques clics.</p>
+                <p class="pl-st-login-brand-desc">Analysez vos plans de cours, d&eacute;tectez les zones &agrave; risque et personnalisez l'apprentissage pour chaque &eacute;tudiant — en quelques clics.</p>
                 <div class="pl-st-login-brand-widgets">
                     <div class="pl-st-login-widget">
                         <span class="material-symbols-outlined">auto_awesome</span>
-                        <div><strong>Analyse de contenu</strong><span>D&eacute;tection automatique des lacunes p&eacute;dagogiques.</span></div>
+                        <div><strong>Analyse intelligente</strong><span>Identifiez les lacunes p&eacute;dagogiques dans vos PowerPoint et PDF.</span></div>
                     </div>
                     <div class="pl-st-login-widget">
                         <span class="material-symbols-outlined">psychology</span>
-                        <div><strong>Jumeau num&eacute;rique</strong><span>Un agent IA qui simule le profil de chaque &eacute;tudiant.</span></div>
+                        <div><strong>Agent IA L&eacute;a</strong><span>Un jumeau num&eacute;rique qui simule la compr&eacute;hension de vos &eacute;tudiants.</span></div>
+                    </div>
+                    <div class="pl-st-login-widget">
+                        <span class="material-symbols-outlined">trending_up</span>
+                        <div><strong>Suivi en temps r&eacute;el</strong><span>Tableaux de bord et rapports d'engagement par s&eacute;ance.</span></div>
                     </div>
                 </div>
             </div>
@@ -2706,7 +2710,7 @@ class PedagoLens_Landing {
         $desc  = sanitize_textarea_field( $_POST['description'] ?? '' );
 
         if ( empty( $title ) ) {
-            wp_send_json_error( [ 'message' => 'Le titre du projet est requis.' ] );
+            wp_send_json_error( [ 'message' => 'Le titre de la séance est requis.' ] );
         }
 
         $post_id = wp_insert_post( [
@@ -2757,7 +2761,7 @@ class PedagoLens_Landing {
         }
 
         wp_send_json_success( [
-            'message'    => 'Projet créé avec succès !',
+            'message'    => 'Séance créée avec succès !',
             'project_id' => $post_id,
         ] );
     }

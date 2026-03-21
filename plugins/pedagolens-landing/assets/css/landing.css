@@ -5593,7 +5593,7 @@ select.pl-form-input { cursor: pointer; appearance: none; background-image: url(
 
 /* ── Login hero logo (larger, no brand name) ──────────────── */
 .pl-logo-img--login-hero {
-  height: 96px;
+  height: 120px;
   width: auto;
   object-fit: contain;
   border-radius: 12px;
