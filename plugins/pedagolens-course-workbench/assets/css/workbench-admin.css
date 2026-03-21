@@ -2613,3 +2613,43 @@ body:has(.pl-editor) .pl-app-content {
 body:has(.pl-editor) .pl-app-header {
     display: none !important;
 }
+
+/* --- EDITOR MODE: hide all surrounding chrome --- */
+body.pl-editor-mode #wpadminbar,
+body.pl-editor-mode .pl-sidebar,
+body.pl-editor-mode .pl-app-header,
+body.pl-editor-mode > header,
+body.pl-editor-mode .wp-site-blocks > header {
+    display: none !important;
+}
+body.pl-editor-mode {
+    padding-top: 0 !important;
+    overflow: hidden !important;
+}
+body.pl-editor-mode html {
+    padding-top: 0 !important;
+}
+body.pl-editor-mode .pl-app-main {
+    margin-left: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+}
+body.pl-editor-mode .pl-app-content {
+    padding: 0 !important;
+    max-width: 100% !important;
+}
+/* The editor should fill the entire viewport */
+body.pl-editor-mode .pl-editor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+}
+/* Hide the footer too */
+body.pl-editor-mode .pl-app-footer,
+body.pl-editor-mode footer,
+body.pl-editor-mode .wp-site-blocks > footer {
+    display: none !important;
+}

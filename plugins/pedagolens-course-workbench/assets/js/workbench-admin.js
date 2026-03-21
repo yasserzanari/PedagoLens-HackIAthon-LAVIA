@@ -18,6 +18,13 @@ var slideImages = plWorkbench.slideImages || [];
 var currentSlideIndex = 0;
 var autoSaveTimers = {};
 
+// Add editor mode class to body — hides sidebar, header, WP admin bar
+$( 'body' ).addClass( 'pl-editor-mode' );
+// Also hide WP admin bar immediately
+$( '#wpadminbar' ).hide();
+// Remove padding-top WP adds for admin bar
+$( 'html' ).css( 'padding-top', '0' );
+
 // =========================================================================
 // AJAX helper
 // =========================================================================
