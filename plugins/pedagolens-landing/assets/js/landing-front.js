@@ -1854,19 +1854,30 @@
                     if (btnText) btnText.style.display = '';
                     if (btnLoader) btnLoader.style.display = 'none';
                     if (res.success) {
-                        if (window.PlToast) PlToast.success(res.data.message);
+                        // Close the modal immediately
+                        var modal = form.closest('.pl-modal');
+                        if (modal) {
+                            modal.classList.remove('pl-modal--open');
+                            document.body.style.overflow = '';
+                        }
+                        // Also close seances modal if open
+                        var seancesModal = document.querySelector('[data-pl-modal="view-seances"]');
+                        if (seancesModal) seancesModal.classList.remove('pl-modal--open');
+
+                        if (window.PlToast) PlToast.success(res.data.message || 'Séance créée !');
+
                         // Redirect to workbench with auto-analyze if sections were extracted
                         var url = res.data.workbench_url || '';
                         if (url && res.data.sections_count > 0) {
                             var sep = url.indexOf('?') !== -1 ? '&' : '?';
-                            setTimeout(function() { window.location.href = url + sep + 'auto_analyze=1'; }, 600);
+                            setTimeout(function() { window.location.href = url + sep + 'auto_analyze=1'; }, 500);
                         } else if (url) {
-                            setTimeout(function() { window.location.href = url; }, 600);
+                            setTimeout(function() { window.location.href = url; }, 500);
                         } else {
-                            setTimeout(function() { location.reload(); }, 800);
+                            setTimeout(function() { location.reload(); }, 600);
                         }
                     } else {
-                        if (window.PlToast) PlToast.error(res.data.message || 'Erreur');
+                        if (window.PlToast) PlToast.error(res.data.message || 'Erreur lors de la création');
                     }
                 })
                 .catch(function() {

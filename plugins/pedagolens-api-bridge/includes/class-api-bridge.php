@@ -142,7 +142,7 @@ class PedagoLens_API_Bridge {
         return [
             'region'      => get_option( 'pl_bedrock_region',      'us-east-1' ),
             'model_id'    => get_option( 'pl_bedrock_model_id',    'us.anthropic.claude-sonnet-4-20250514-v1:0' ),
-            'max_tokens'  => (int) get_option( 'pl_bedrock_max_tokens',  1500 ),
+            'max_tokens'  => (int) get_option( 'pl_bedrock_max_tokens',  4096 ),
             'temperature' => (float) get_option( 'pl_bedrock_temperature', 0.3 ),
             'timeout'     => (int) get_option( 'pl_bedrock_timeout',     30 ),
         ];
@@ -338,12 +338,29 @@ class PedagoLens_API_Bridge {
         $text = $decoded['content'][0]['text'] ?? '';
 
         // Claude may wrap JSON in markdown code fences — strip them.
+        // Also handle truncated responses where closing ``` is missing.
         $clean_text = trim( $text );
+
+        // Case 1: Complete fences ```json ... ```
         if ( preg_match( '/^```(?:json)?\s*\n?(.*?)\n?\s*```$/s', $clean_text, $m ) ) {
             $clean_text = trim( $m[1] );
         }
+        // Case 2: Opening fence but no closing (truncated response)
+        elseif ( preg_match( '/^```(?:json)?\s*\n?(.*)/s', $clean_text, $m ) ) {
+            $clean_text = trim( $m[1] );
+            // Remove trailing incomplete ``` if partially present
+            $clean_text = rtrim( $clean_text, '`' );
+        }
 
         $result = json_decode( $clean_text, true );
+
+        // If JSON is truncated (incomplete), try to repair it
+        if ( ! is_array( $result ) && str_starts_with( $clean_text, '{' ) ) {
+            $repaired = self::repair_truncated_json( $clean_text );
+            if ( $repaired ) {
+                $result = json_decode( $repaired, true );
+            }
+        }
 
         if ( ! is_array( $result ) ) {
             self::log_error( 'pl_bedrock_invalid_response', 'Contenu Claude non JSON.', [ 'text_preview' => mb_substr( $text, 0, 300 ) ] );
@@ -370,6 +387,87 @@ class PedagoLens_API_Bridge {
         if ( class_exists( 'PedagoLens_Core' ) ) {
             PedagoLens_Core::log( 'error', "[API Bridge] {$code}: {$message}", $context );
         }
+    }
+
+    /**
+     * Attempt to repair truncated JSON from Claude (max_tokens hit).
+     * Closes open strings, arrays, and objects to make it parseable.
+     */
+    private static function repair_truncated_json( string $json ): ?string {
+        // Track nesting
+        $in_string = false;
+        $escape    = false;
+        $stack     = [];
+
+        for ( $i = 0, $len = strlen( $json ); $i < $len; $i++ ) {
+            $ch = $json[ $i ];
+
+            if ( $escape ) {
+                $escape = false;
+                continue;
+            }
+
+            if ( $ch === '\\' && $in_string ) {
+                $escape = true;
+                continue;
+            }
+
+            if ( $ch === '"' ) {
+                $in_string = ! $in_string;
+                continue;
+            }
+
+            if ( $in_string ) {
+                continue;
+            }
+
+            if ( $ch === '{' ) {
+                $stack[] = '}';
+            } elseif ( $ch === '[' ) {
+                $stack[] = ']';
+            } elseif ( $ch === '}' || $ch === ']' ) {
+                array_pop( $stack );
+            }
+        }
+
+        // If we're inside a string, close it
+        $suffix = '';
+        if ( $in_string ) {
+            // Truncate back to last complete key-value or array element
+            // Find last comma or opening bracket before the unclosed string
+            $last_good = strrpos( $json, ',' );
+            $last_open_brace = strrpos( $json, '{' );
+            $last_open_bracket = strrpos( $json, '[' );
+            $cutpoint = max( $last_good ?: 0, $last_open_brace ?: 0, $last_open_bracket ?: 0 );
+
+            if ( $cutpoint > 0 ) {
+                $json = substr( $json, 0, $cutpoint + 1 );
+                // Recount stack after truncation
+                $in_string = false;
+                $escape    = false;
+                $stack     = [];
+                for ( $i = 0, $len = strlen( $json ); $i < $len; $i++ ) {
+                    $ch = $json[ $i ];
+                    if ( $escape ) { $escape = false; continue; }
+                    if ( $ch === '\\' && $in_string ) { $escape = true; continue; }
+                    if ( $ch === '"' ) { $in_string = ! $in_string; continue; }
+                    if ( $in_string ) continue;
+                    if ( $ch === '{' ) $stack[] = '}';
+                    elseif ( $ch === '[' ) $stack[] = ']';
+                    elseif ( $ch === '}' || $ch === ']' ) array_pop( $stack );
+                }
+            } else {
+                $suffix .= '"';
+            }
+        }
+
+        // Close all open brackets/braces
+        $suffix .= implode( '', array_reverse( $stack ) );
+
+        $repaired = $json . $suffix;
+        $test = json_decode( $repaired, true );
+
+        return is_array( $test ) ? $repaired : null;
     }
 
     // -------------------------------------------------------------------------
