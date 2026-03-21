@@ -3347,8 +3347,8 @@ class PedagoLens_Landing {
         update_post_meta( $post_id, '_pl_project_type', $type );
         update_post_meta( $post_id, '_pl_created_at', current_time( 'mysql' ) );
 
-        // Handle file upload
-        $files_urls = [];
+        // Handle file upload + extract sections from PPTX/DOCX/PDF
+        $sections_count = 0;
         if ( ! empty( $_FILES['project_files'] ) ) {
             require_once ABSPATH . 'wp-admin/includes/file.php';
             require_once ABSPATH . 'wp-admin/includes/media.php';
@@ -3366,21 +3366,90 @@ class PedagoLens_Landing {
                     'error'    => is_array( $_FILES['project_files']['error'] ) ? $_FILES['project_files']['error'][ $i ] : $_FILES['project_files']['error'],
                     'size'     => is_array( $_FILES['project_files']['size'] ) ? $_FILES['project_files']['size'][ $i ] : $_FILES['project_files']['size'],
                 ];
-                $_FILES['upload_file'] = $file;
+
                 $upload = wp_handle_upload( $file, [ 'test_form' => false ] );
-                if ( ! empty( $upload['url'] ) ) {
-                    $files_urls[] = $upload['url'];
+                if ( empty( $upload['url'] ) || ! empty( $upload['error'] ) ) {
+                    continue;
+                }
+
+                $filepath = $upload['file'];
+                $ext      = strtolower( pathinfo( $file['name'], PATHINFO_EXTENSION ) );
+
+                // Create WP attachment
+                $attachment_id = wp_insert_attachment( [
+                    'post_title'     => sanitize_file_name( $file['name'] ),
+                    'post_mime_type' => $upload['type'],
+                    'post_status'    => 'inherit',
+                    'post_parent'    => $post_id,
+                ], $filepath );
+
+                // Delegate extraction to workbench admin (reuse existing logic)
+                if ( class_exists( 'PedagoLens_Workbench_Admin' ) ) {
+                    // Use the workbench upload_file logic via a simulated request
+                    $_FILES['file'] = $file;
+                    $_POST['project_id'] = $post_id;
+
+                    // Direct extraction using reflection or public method
+                    // Since extract methods are private, we call ajax_upload_file indirectly
+                    // Instead, replicate the essential extraction here:
+                    $extracted = [];
+                    if ( $ext === 'pptx' && class_exists( 'ZipArchive' ) ) {
+                        $zip = new \ZipArchive();
+                        if ( $zip->open( $filepath ) === true ) {
+                            $slide_num = 1;
+                            while ( true ) {
+                                $xml_content = $zip->getFromName( "ppt/slides/slide{$slide_num}.xml" );
+                                if ( $xml_content === false ) break;
+                                $text = '';
+                                if ( preg_match_all( '/<a:t[^>]*>(.*?)<\/a:t>/s', $xml_content, $matches ) ) {
+                                    foreach ( $matches[1] as $t ) {
+                                        $text .= html_entity_decode( $t, ENT_QUOTES | ENT_XML1, 'UTF-8' ) . ' ';
+                                    }
+                                }
+                                if ( trim( $text ) !== '' ) {
+                                    $extracted[] = [
+                                        'id'        => 'section_' . uniqid(),
+                                        'title'     => "Diapositive {$slide_num}",
+                                        'content'   => trim( $text ),
+                                        'slide_num' => $slide_num,
+                                    ];
+                                }
+                                $slide_num++;
+                            }
+                            $zip->close();
+                        }
+                    }
+
+                    if ( ! empty( $extracted ) ) {
+                        PedagoLens_Course_Workbench::save_content_sections( $post_id, $extracted );
+                        $sections_count = count( $extracted );
+                    }
+
+                    // Track uploaded files
+                    $files_meta = [];
+                    $files_meta[] = [
+                        'name'          => $file['name'],
+                        'attachment_id' => $attachment_id,
+                        'ext'           => $ext,
+                        'uploaded_at'   => gmdate( 'c' ),
+                    ];
+                    update_post_meta( $post_id, '_pl_uploaded_files', wp_json_encode( $files_meta ) );
                 }
             }
         }
 
-        if ( ! empty( $files_urls ) ) {
-            update_post_meta( $post_id, '_pl_files', wp_json_encode( $files_urls ) );
-        }
+        // Build workbench URL
+        $wb_page = get_page_by_path( 'workbench' );
+        $wb_url  = $wb_page
+            ? get_permalink( $wb_page ) . '?project_id=' . $post_id
+            : admin_url( 'admin.php?page=pl-course-workbench&project_id=' . $post_id );
 
         wp_send_json_success( [
-            'message'    => 'Séance créée avec succès !',
-            'project_id' => $post_id,
+            'message'        => 'Séance créée avec succès !',
+            'project_id'     => $post_id,
+            'workbench_url'  => $wb_url,
+            'sections_count' => $sections_count,
+            'auto_analyze'   => $sections_count > 0,
         ] );
     }
 

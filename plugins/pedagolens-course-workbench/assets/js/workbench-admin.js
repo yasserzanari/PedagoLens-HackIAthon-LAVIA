@@ -1154,4 +1154,16 @@ if ( sections.length > 0 ) {
     showSlide( 0 );
 }
 
+// =========================================================================
+// AUTO-ANALYZE — trigger when redirected from project creation with ?auto_analyze=1
+// =========================================================================
+if ( window.location.search.indexOf( 'auto_analyze=1' ) !== -1 ) {
+    setTimeout( function() {
+        var $btn = $( '#pl-analyze-all' );
+        if ( $btn.length && sections.length > 0 ) {
+            $btn.trigger( 'click' );
+        }
+    }, 800 );
+}
+
 } )( jQuery );

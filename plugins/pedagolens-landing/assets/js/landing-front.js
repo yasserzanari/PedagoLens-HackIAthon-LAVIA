@@ -1855,7 +1855,16 @@
                     if (btnLoader) btnLoader.style.display = 'none';
                     if (res.success) {
                         if (window.PlToast) PlToast.success(res.data.message);
-                        setTimeout(function() { location.reload(); }, 800);
+                        // Redirect to workbench with auto-analyze if sections were extracted
+                        var url = res.data.workbench_url || '';
+                        if (url && res.data.sections_count > 0) {
+                            var sep = url.indexOf('?') !== -1 ? '&' : '?';
+                            setTimeout(function() { window.location.href = url + sep + 'auto_analyze=1'; }, 600);
+                        } else if (url) {
+                            setTimeout(function() { window.location.href = url; }, 600);
+                        } else {
+                            setTimeout(function() { location.reload(); }, 800);
+                        }
                     } else {
                         if (window.PlToast) PlToast.error(res.data.message || 'Erreur');
                     }
