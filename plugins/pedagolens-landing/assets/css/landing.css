@@ -4665,7 +4665,7 @@ img {
    ============================================================ */
 body.admin-bar .pl-app-sidebar  { top: 32px; height: calc(100vh - 32px); }
 body.admin-bar .pl-header-app   { top: 32px; }
-body.admin-bar .pl-app-main     { padding-top: calc(4.5rem + 32px); }
+body.admin-bar .pl-app-main     { padding-top: calc(4.5rem + 32px); height: calc(100vh - 64px - 32px); }
 
 .pl-app-main-content { padding: 2rem 3rem 3rem; }
 
@@ -8735,4 +8735,203 @@ html { margin-top: 0 !important; }
     .pl-twin-course-overlay--visible {
         display: block;
     }
+}
+
+
+/* ============================================================
+   FIX NO-SCROLL — All dashboard pages must fit in viewport
+   ============================================================ */
+
+/* All page containers inside pl-app-main: fill available space, no overflow */
+.pl-app-main > .pl-stu-page,
+.pl-app-main > .pl-dash-page,
+.pl-app-main > .pl-hi-page,
+.pl-app-main > .pl-account-page,
+.pl-app-main > .pl-st-settings-page,
+.pl-app-main > .pl-inst {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  padding: 1.5rem 2rem 2rem;
+}
+
+/* Historique page: remove its own min-height:100vh since it's inside pl-app-main */
+.pl-app-main > .pl-hi-page {
+  min-height: 0;
+}
+
+/* Student dashboard: scrollable content area */
+.pl-app-main > .pl-stu-page {
+  gap: 1.5rem;
+}
+
+/* ============================================================
+   ACCOUNT PAGE REFONTE — 2-column modern layout
+   ============================================================ */
+.pl-account-page {
+  display: grid !important;
+  grid-template-columns: 1fr 2fr;
+  grid-template-rows: auto 1fr;
+  gap: 1.5rem;
+  max-width: 100% !important;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1.5rem 2rem 2rem;
+  align-content: start;
+}
+
+/* Profile card: left column, spans 1 row */
+.pl-account-page > .pl-account-profile-card {
+  grid-column: 1;
+  grid-row: 1;
+  border-radius: 20px !important;
+  box-shadow: 0 4px 24px rgba(0,35,111,.06) !important;
+  padding: 2rem 1.5rem !important;
+  background: rgba(255,255,255,.85) !important;
+  border: 1px solid rgba(0,35,111,.06) !important;
+  align-self: start;
+}
+.pl-account-page > .pl-account-profile-card::before {
+  border-radius: 20px 20px 0 0 !important;
+  height: 5rem;
+  background: linear-gradient(135deg, var(--pl-primary), var(--pl-secondary)) !important;
+  opacity: .10;
+}
+.pl-account-page > .pl-account-profile-card .pl-account-avatar-img {
+  width: 5rem;
+  height: 5rem;
+}
+.pl-account-page > .pl-account-profile-card .pl-account-name {
+  font-size: 1.15rem;
+  margin: .4rem 0 .25rem;
+}
+.pl-account-page > .pl-account-profile-card .pl-account-email-display {
+  font-size: .8rem;
+  margin-bottom: .75rem;
+}
+
+/* Edit profile form: right column, spans 1 row */
+.pl-account-page > .pl-account-section:first-of-type {
+  grid-column: 2;
+  grid-row: 1;
+  border-radius: 20px !important;
+  box-shadow: 0 4px 24px rgba(0,35,111,.06) !important;
+  padding: 1.75rem 2rem !important;
+  background: rgba(255,255,255,.85) !important;
+  border: 1px solid rgba(0,35,111,.06) !important;
+  align-self: start;
+}
+.pl-account-page > .pl-account-section:first-of-type h3 {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: .75rem;
+  border-bottom: 1px solid rgba(0,35,111,.06);
+}
+.pl-account-page > .pl-account-section:first-of-type .pl-form-group {
+  margin-bottom: .85rem;
+}
+.pl-account-page > .pl-account-section:first-of-type .pl-form-group label {
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--pl-text-muted);
+  margin-bottom: .3rem;
+  display: block;
+}
+.pl-account-page > .pl-account-section:first-of-type .pl-form-group input {
+  padding: .6rem .85rem;
+  font-size: .875rem;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  width: 100%;
+  transition: border-color .2s, box-shadow .2s;
+}
+.pl-account-page > .pl-account-section:first-of-type .pl-form-group input:focus {
+  border-color: var(--pl-primary);
+  box-shadow: 0 0 0 3px rgba(0,35,111,.08);
+  outline: none;
+}
+
+/* Remaining sections: full width below */
+.pl-account-page > .pl-account-section:not(:first-of-type) {
+  grid-column: 1 / -1;
+  border-radius: 20px !important;
+  box-shadow: 0 4px 24px rgba(0,35,111,.06) !important;
+  padding: 1.25rem 1.75rem !important;
+  background: rgba(255,255,255,.85) !important;
+  border: 1px solid rgba(0,35,111,.06) !important;
+}
+.pl-account-page > .pl-account-section:not(:first-of-type) h3 {
+  font-size: .95rem;
+  margin-bottom: .75rem;
+}
+
+/* Stats grid inside account: compact */
+.pl-account-page .pl-account-stats-grid {
+  grid-template-columns: repeat(3, 1fr);
+  gap: .75rem;
+}
+.pl-account-page .pl-stat-card {
+  padding: .85rem;
+  border-radius: 14px;
+}
+.pl-account-page .pl-stat-number {
+  font-size: 1.35rem;
+}
+.pl-account-page .pl-stat-label {
+  font-size: .7rem;
+}
+
+/* Quick links inside account: compact */
+.pl-account-page .pl-quick-links {
+  gap: .75rem;
+}
+.pl-account-page .pl-quick-link-card {
+  padding: .85rem .75rem;
+  border-radius: 14px;
+  font-size: .75rem;
+}
+.pl-account-page .pl-ql-icon {
+  font-size: 1.25rem;
+}
+
+/* Difficulties list: compact for students */
+.pl-account-page .pl-difficulties-list {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+.pl-account-page .pl-difficulty-checkbox {
+  padding: .5rem .75rem;
+  font-size: .825rem;
+}
+
+/* Preferences: compact */
+.pl-account-page .pl-prefs-grid {
+  gap: .5rem;
+}
+.pl-account-page .pl-toggle-row {
+  padding: .65rem 1rem;
+  font-size: .825rem;
+}
+
+/* Glass card hover: disable lift on account page to avoid layout shift */
+.pl-account-page .pl-glass-card:hover {
+  transform: none;
+}
+
+/* Responsive: stack on smaller screens */
+@media (max-width: 900px) {
+  .pl-account-page {
+    grid-template-columns: 1fr !important;
+  }
+  .pl-account-page > .pl-account-profile-card,
+  .pl-account-page > .pl-account-section:first-of-type,
+  .pl-account-page > .pl-account-section:not(:first-of-type) {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+  }
 }
