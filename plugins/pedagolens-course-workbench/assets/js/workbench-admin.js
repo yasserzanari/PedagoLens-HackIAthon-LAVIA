@@ -55,16 +55,53 @@ function showSlide( index ) {
         // Fit the visual slide to the available canvas space
         fitVisualSlide();
     } else {
-        // TEXT MODE — classic textarea editor
+        // TEXT MODE — rich contenteditable editor styled like a real slide
         var imgHtml = '';
         if ( sec.slide_image_url ) {
             imgHtml = '<div class="pl-canvas-slide-image"><img src="' + sec.slide_image_url + '" alt="Diapositive ' + ( sec.slide_num || index + 1 ) + '" /></div>';
         }
+
+        // Build a mini toolbar for text formatting
+        var toolbarHtml =
+            '<div class="pl-text-toolbar">' +
+                '<button type="button" class="pl-text-toolbar-btn" data-cmd="bold" title="Gras (Ctrl+B)">' +
+                    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg>' +
+                '</button>' +
+                '<button type="button" class="pl-text-toolbar-btn" data-cmd="italic" title="Italique (Ctrl+I)">' +
+                    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>' +
+                '</button>' +
+                '<span class="pl-text-toolbar-sep"></span>' +
+                '<button type="button" class="pl-text-toolbar-btn" data-cmd="formatBlock" data-value="h2" title="Titre">' +
+                    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="M17 12l4-4v8"/></svg>' +
+                '</button>' +
+                '<button type="button" class="pl-text-toolbar-btn" data-cmd="formatBlock" data-value="p" title="Paragraphe">' +
+                    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>' +
+                '</button>' +
+            '</div>';
+
+        // Convert plain text content to HTML paragraphs for the contenteditable
+        var contentHtml = '';
+        if ( sec.content ) {
+            var lines = sec.content.split( /\n/ );
+            for ( var li = 0; li < lines.length; li++ ) {
+                var line = lines[li].trim();
+                if ( line ) {
+                    contentHtml += '<p>' + escHtml( line ) + '</p>';
+                }
+            }
+        }
+        if ( ! contentHtml ) contentHtml = '<p><br></p>';
+
         $slide.html(
-            '<div class="pl-canvas-slide-inner" data-section-id="' + sec.id + '" data-slide-num="' + ( sec.slide_num || 0 ) + '">' +
+            '<div class="pl-canvas-slide-inner pl-text-mode-slide" data-section-id="' + sec.id + '" data-slide-num="' + ( sec.slide_num || 0 ) + '">' +
             imgHtml +
             '<h2 class="pl-canvas-slide-title">' + escHtml( sec.title ) + '</h2>' +
-            '<textarea class="pl-section-content pl-canvas-textarea" data-section-id="' + sec.id + '" rows="12">' + escHtml( sec.content ) + '</textarea>' +
+            toolbarHtml +
+            '<div class="pl-section-content pl-canvas-richtext" contenteditable="true" data-section-id="' + sec.id + '" spellcheck="true">' +
+                contentHtml +
+            '</div>' +
+            // Hidden textarea for backward compat with save logic
+            '<textarea class="pl-section-content pl-canvas-textarea pl-hidden-textarea" data-section-id="' + sec.id + '" rows="12" style="display:none;">' + escHtml( sec.content ) + '</textarea>' +
             '</div>'
         );
     }
@@ -106,18 +143,26 @@ function showSlide( index ) {
 function renderVisualSlide( index, sec, slideVisual ) {
     var sw = slideVisual.width || 960;
     var sh = slideVisual.height || 540;
-    var bgColor = slideVisual.bg_color || '#ffffff';
+    var bgColor = slideVisual.bg_color || '';
+
+    // Build background style: use provided color, or a subtle gradient default
+    var bgStyle = '';
+    if ( bgColor ) {
+        bgStyle = 'background:' + bgColor + ';';
+    } else {
+        bgStyle = 'background:linear-gradient(135deg, #ffffff 0%, #f8f9fc 100%);';
+    }
 
     var html = '<div class="pl-visual-slide" data-section-id="' + sec.id + '" ' +
         'data-slide-num="' + ( sec.slide_num || index + 1 ) + '" ' +
-        'style="width:' + sw + 'px;height:' + sh + 'px;background:' + bgColor + ';">';
+        'style="width:' + sw + 'px;height:' + sh + 'px;' + bgStyle + '">';
 
     // Render each element
     var elements = slideVisual.elements || [];
     for ( var i = 0; i < elements.length; i++ ) {
         var el = elements[i];
         if ( el.type === 'image' ) {
-            html += renderVisualImage( el );
+            html += renderVisualImage( el, i );
         } else if ( el.type === 'text' ) {
             html += renderVisualText( el, i );
         }
@@ -130,8 +175,9 @@ function renderVisualSlide( index, sec, slideVisual ) {
     return html;
 }
 
-function renderVisualImage( el ) {
+function renderVisualImage( el, elIndex ) {
     return '<img class="pl-visual-element pl-visual-image" ' +
+        'data-el-index="' + elIndex + '" ' +
         'src="' + el.src + '" ' +
         'style="left:' + el.x + 'px;top:' + el.y + 'px;width:' + el.w + 'px;height:' + el.h + 'px;" ' +
         'alt="Image" draggable="false" />';
@@ -143,20 +189,41 @@ function renderVisualText( el, elIndex ) {
         style += 'background:' + el.fill + ';';
     }
 
-    var html = '<div class="pl-visual-element pl-visual-text" data-el-index="' + elIndex + '" style="' + style + '">';
+    // Inline contenteditable for direct editing (no double-click needed)
+    var html = '<div class="pl-visual-element pl-visual-text" ' +
+        'contenteditable="true" ' +
+        'data-el-index="' + elIndex + '" ' +
+        'style="' + style + '" ' +
+        'spellcheck="false">';
 
     var paragraphs = el.paragraphs || [];
     for ( var p = 0; p < paragraphs.length; p++ ) {
         var para = paragraphs[p];
         var align = para.align || 'left';
-        html += '<p class="pl-visual-para" style="text-align:' + align + ';">';
+        var paraStyle = 'text-align:' + align + ';';
+        if ( para.line_spacing ) {
+            paraStyle += 'line-height:' + para.line_spacing + ';';
+        }
+        if ( para.space_before ) {
+            paraStyle += 'margin-top:' + para.space_before + 'px;';
+        }
+        if ( para.space_after ) {
+            paraStyle += 'margin-bottom:' + para.space_after + 'px;';
+        }
+        html += '<p class="pl-visual-para" style="' + paraStyle + '">';
 
         var runs = para.runs || [];
+        if ( runs.length === 0 ) {
+            // Empty paragraph — keep a non-breaking space for editing
+            html += '<span class="pl-visual-run">&nbsp;</span>';
+        }
         for ( var r = 0; r < runs.length; r++ ) {
             var run = runs[r];
             var spanStyle = 'font-size:' + ( run.size || 18 ) + 'pt;color:' + ( run.color || '#000000' ) + ';';
             if ( run.bold ) spanStyle += 'font-weight:700;';
             if ( run.italic ) spanStyle += 'font-style:italic;';
+            if ( run.underline ) spanStyle += 'text-decoration:underline;';
+            if ( run.font ) spanStyle += "font-family:'" + run.font + "',sans-serif;";
             html += '<span class="pl-visual-run" style="' + spanStyle + '">' + escHtml( run.text ) + '</span>';
         }
 
@@ -168,15 +235,15 @@ function renderVisualText( el, elIndex ) {
 }
 
 // =========================================================================
-// FIT VISUAL SLIDE — scale to fit the canvas area
+// FIT VISUAL SLIDE — scale to fit the canvas area, centered
 // =========================================================================
 function fitVisualSlide() {
     var $canvas = $( '#pl-editor-canvas' );
     var $slide = $( '.pl-visual-slide' );
     if ( ! $slide.length ) return;
 
-    var canvasW = $canvas.width() - 48; // padding
-    var canvasH = $canvas.height() - 120; // nav + toolbar
+    var canvasW = $canvas.width() - 64; // padding
+    var canvasH = $canvas.height() - 140; // nav + toolbar + margins
     var slideW = parseInt( $slide.css( 'width' ) );
     var slideH = parseInt( $slide.css( 'height' ) );
 
@@ -184,10 +251,19 @@ function fitVisualSlide() {
 
     var scaleX = canvasW / slideW;
     var scaleY = canvasH / slideH;
-    var scale = Math.min( scaleX, scaleY, 1.2 ); // Don't scale up beyond 1.2x
+    var scale = Math.min( scaleX, scaleY, 1.0 ); // Don't scale up beyond 1x
 
-    $slide.css( 'transform', 'scale(' + scale + ')' );
-    $slide.css( 'transform-origin', 'top center' );
+    $slide.css( {
+        'transform': 'scale(' + scale + ')',
+        'transform-origin': 'top center',
+        'margin': '0 auto'
+    } );
+
+    // Set the wrapper height to match scaled slide so layout doesn't collapse
+    var $slideWrap = $slide.parent();
+    if ( $slideWrap.is( '#pl-canvas-slide' ) ) {
+        $slideWrap.css( 'min-height', ( slideH * scale ) + 'px' );
+    }
 }
 
 // Refit on window resize
@@ -226,20 +302,29 @@ function updateViewToggleBtn() {
 updateViewToggleBtn();
 
 // =========================================================================
-// INLINE EDITING on visual text elements
+// INLINE EDITING on visual text elements (always contenteditable)
 // =========================================================================
-$( document ).on( 'dblclick', '.pl-visual-text', function() {
-    var $el = $( this );
-    if ( $el.attr( 'contenteditable' ) === 'true' ) return;
-    $el.attr( 'contenteditable', 'true' ).addClass( 'pl-visual-text--editing' ).focus();
+
+// Track which element is being edited for visual feedback
+$( document ).on( 'focus', '.pl-visual-text[contenteditable="true"]', function() {
+    $( '.pl-visual-text' ).removeClass( 'pl-visual-text--editing' );
+    $( this ).addClass( 'pl-visual-text--editing' );
 } );
 
 $( document ).on( 'blur', '.pl-visual-text[contenteditable="true"]', function() {
-    var $el = $( this );
-    $el.removeAttr( 'contenteditable' ).removeClass( 'pl-visual-text--editing' );
-
-    // Sync edited text back to sections array
+    $( this ).removeClass( 'pl-visual-text--editing' );
+    // Sync on blur
     syncVisualToText();
+} );
+
+// Debounced auto-save on visual text input
+var visualSaveTimer = null;
+$( document ).on( 'input', '.pl-visual-text[contenteditable="true"]', function() {
+    clearTimeout( visualSaveTimer );
+    showCanvasStatus( '⏳ Sauvegarde...' );
+    visualSaveTimer = setTimeout( function() {
+        syncVisualToText();
+    }, 1500 );
 } );
 
 function syncVisualToText() {
@@ -257,11 +342,88 @@ function syncVisualToText() {
     if ( newContent !== sec.content ) {
         sec.content = newContent;
         // Auto-save
-        ajax( 'pl_save_section', { section_id: sec.id, content: newContent } );
-        showCanvasStatus( '✓ Sauvegardé' );
+        ajax( 'pl_save_section', { section_id: sec.id, content: newContent } )
+            .done( function( res ) {
+                if ( res.success ) {
+                    showCanvasStatus( '✓ Sauvegardé' );
+                } else {
+                    showCanvasStatus( '✗ Erreur', true );
+                }
+            } )
+            .fail( function() {
+                showCanvasStatus( '✗ Erreur réseau', true );
+            } );
         // Update filmstrip preview
         $( '.pl-filmstrip-item[data-slide-index="' + currentSlideIndex + '"] .pl-filmstrip-item-preview' )
             .text( newContent.substring( 0, 40 ) );
+    }
+}
+
+// =========================================================================
+// TEXT MODE — toolbar commands + contenteditable sync
+// =========================================================================
+$( document ).on( 'click', '.pl-text-toolbar-btn', function( e ) {
+    e.preventDefault();
+    var cmd = $( this ).data( 'cmd' );
+    var val = $( this ).data( 'value' ) || null;
+    if ( cmd === 'formatBlock' && val ) {
+        document.execCommand( 'formatBlock', false, '<' + val + '>' );
+    } else {
+        document.execCommand( cmd, false, val );
+    }
+    // Sync to hidden textarea
+    syncRichtextToTextarea();
+} );
+
+// Sync contenteditable richtext → hidden textarea on input
+var richtextSaveTimer = null;
+$( document ).on( 'input', '.pl-canvas-richtext[contenteditable="true"]', function() {
+    clearTimeout( richtextSaveTimer );
+    showCanvasStatus( '⏳ Sauvegarde...' );
+    richtextSaveTimer = setTimeout( function() {
+        syncRichtextToTextarea();
+    }, 1500 );
+} );
+
+$( document ).on( 'blur', '.pl-canvas-richtext[contenteditable="true"]', function() {
+    syncRichtextToTextarea();
+} );
+
+function syncRichtextToTextarea() {
+    var $richtext = $( '.pl-canvas-richtext[contenteditable="true"]' );
+    if ( ! $richtext.length ) return;
+
+    var sectionId = $richtext.data( 'section-id' );
+    // Extract plain text from the contenteditable
+    var newContent = $richtext.text().trim();
+    // Also update the hidden textarea for backward compat
+    var $textarea = $( '.pl-canvas-textarea[data-section-id="' + sectionId + '"]' );
+    if ( $textarea.length ) {
+        $textarea.val( newContent );
+    }
+
+    // Update sections array
+    for ( var i = 0; i < sections.length; i++ ) {
+        if ( sections[i].id === sectionId ) {
+            if ( sections[i].content !== newContent ) {
+                sections[i].content = newContent;
+                ajax( 'pl_save_section', { section_id: sectionId, content: newContent } )
+                    .done( function( res ) {
+                        if ( res.success ) {
+                            showCanvasStatus( '✓ Sauvegardé' );
+                        } else {
+                            showCanvasStatus( '✗ Erreur', true );
+                        }
+                    } )
+                    .fail( function() {
+                        showCanvasStatus( '✗ Erreur réseau', true );
+                    } );
+                // Update filmstrip preview
+                $( '.pl-filmstrip-item[data-slide-index="' + currentSlideIndex + '"] .pl-filmstrip-item-preview' )
+                    .text( newContent.substring( 0, 40 ) );
+            }
+            break;
+        }
     }
 }
 
@@ -272,6 +434,13 @@ function saveCurrentSlide() {
     if ( viewMode === 'visual' ) {
         // In visual mode, sync text from visual elements
         syncVisualToText();
+        return;
+    }
+
+    // Text mode: check for richtext contenteditable first
+    var $richtext = $( '.pl-canvas-richtext[data-section-id="' + sec.id + '"]' );
+    if ( $richtext.length ) {
+        syncRichtextToTextarea();
         return;
     }
 
@@ -357,7 +526,7 @@ $( document ).on( 'click', '.pl-btn-suggestions, #pl-canvas-suggestions-btn', fu
     var $panel = $( '#pl-panel-suggestions' );
     $panel.html( '<div class="pl-panel-loading"><div class="pl-skeleton-loader"><div class="pl-skeleton-line pl-skeleton-line-lg"></div><div class="pl-skeleton-line pl-skeleton-line-md"></div><div class="pl-skeleton-line pl-skeleton-line-sm"></div></div></div>' );
 
-    ajax( 'pl_get_suggestions', { section_id: sectionId } )
+    ajax( 'pl_get_suggestions', { section_id: sectionId, context: 'front' } )
         .done( function( res ) {
             if ( res.success ) {
                 $panel.html( res.data.html );
@@ -655,46 +824,179 @@ function showUploadResult( msg, isError ) {
 
 
 // =========================================================================
-// ANALYZE ALL SECTIONS
+// ANALYZE ALL SECTIONS — Progressive analysis section by section
 // =========================================================================
+function buildAnalyzeOverlayHTML() {
+    return '<div class="pl-analyze-overlay" id="pl-analyze-overlay">' +
+        '<div class="pl-analyze-progress">' +
+            '<div class="pl-analyze-circle-wrap">' +
+                '<svg class="pl-analyze-circle" viewBox="0 0 120 120">' +
+                    '<circle class="pl-analyze-circle-bg" cx="60" cy="60" r="52" />' +
+                    '<circle class="pl-analyze-circle-fg" id="pl-analyze-arc" cx="60" cy="60" r="52" ' +
+                        'stroke-dasharray="326.73" stroke-dashoffset="326.73" />' +
+                '</svg>' +
+                '<span class="pl-analyze-pct" id="pl-analyze-pct">0%</span>' +
+            '</div>' +
+            '<div class="pl-analyze-info">' +
+                '<p class="pl-analyze-section-name" id="pl-analyze-section-name">Préparation…</p>' +
+                '<p class="pl-analyze-counter" id="pl-analyze-counter">0 / ' + sections.length + ' sections</p>' +
+                '<p class="pl-analyze-eta" id="pl-analyze-eta"></p>' +
+            '</div>' +
+            '<div class="pl-analyze-dots"><span></span><span></span><span></span></div>' +
+        '</div>' +
+    '</div>';
+}
+
+function updateAnalyzeProgress( done, total, sectionName, avgTime ) {
+    var pct = Math.round( ( done / total ) * 100 );
+    var circumference = 2 * Math.PI * 52; // 326.73
+    var offset = circumference - ( circumference * pct / 100 );
+
+    $( '#pl-analyze-arc' ).css( 'stroke-dashoffset', offset );
+    $( '#pl-analyze-pct' ).text( pct + '%' );
+    $( '#pl-analyze-counter' ).text( done + ' / ' + total + ' sections analysées' );
+    $( '#pl-analyze-section-name' ).text( sectionName );
+
+    if ( done > 0 && done < total && avgTime > 0 ) {
+        var remaining = Math.ceil( ( total - done ) * avgTime / 1000 );
+        var etaText = remaining >= 60
+            ? Math.floor( remaining / 60 ) + ' min ' + ( remaining % 60 ) + ' s restantes'
+            : remaining + ' s restantes';
+        $( '#pl-analyze-eta' ).text( '⏱ ' + etaText );
+    } else if ( done >= total ) {
+        $( '#pl-analyze-eta' ).text( '' );
+    }
+}
+
+function showAnalyzeSummary( totalSuggestions, totalSections, totalTime ) {
+    var seconds = Math.round( totalTime / 1000 );
+    var timeText = seconds >= 60
+        ? Math.floor( seconds / 60 ) + ' min ' + ( seconds % 60 ) + ' s'
+        : seconds + ' s';
+
+    var $overlay = $( '#pl-analyze-overlay' );
+    $overlay.find( '.pl-analyze-progress' ).addClass( 'pl-analyze-done' );
+    $overlay.find( '.pl-analyze-progress' ).html(
+        '<div class="pl-analyze-summary">' +
+            '<div class="pl-analyze-summary-icon">✅</div>' +
+            '<h3 class="pl-analyze-summary-title">Analyse terminée</h3>' +
+            '<div class="pl-analyze-summary-stats">' +
+                '<div class="pl-analyze-stat">' +
+                    '<span class="pl-analyze-stat-value">' + totalSuggestions + '</span>' +
+                    '<span class="pl-analyze-stat-label">suggestions</span>' +
+                '</div>' +
+                '<div class="pl-analyze-stat">' +
+                    '<span class="pl-analyze-stat-value">' + totalSections + '</span>' +
+                    '<span class="pl-analyze-stat-label">sections</span>' +
+                '</div>' +
+                '<div class="pl-analyze-stat">' +
+                    '<span class="pl-analyze-stat-value">' + timeText + '</span>' +
+                    '<span class="pl-analyze-stat-label">durée</span>' +
+                '</div>' +
+            '</div>' +
+            '<button class="pl-stitch-btn pl-stitch-btn-primary pl-analyze-close-btn" id="pl-analyze-close">Fermer</button>' +
+        '</div>'
+    );
+}
+
 $( '#pl-analyze-all' ).on( 'click', function() {
     var $btn = $( this );
     if ( ! sections.length ) { alert( 'Aucune section.' ); return; }
 
-    $btn.prop( 'disabled', true ).html( '⏳ Analyse globale…' );
-    $( '#pl-panel-suggestions' ).html(
-        '<div class="pl-skeleton-loader"><div class="pl-skeleton-line pl-skeleton-line-lg"></div><div class="pl-skeleton-line pl-skeleton-line-md"></div><div class="pl-skeleton-line pl-skeleton-line-sm"></div></div>'
-    );
+    $btn.prop( 'disabled', true );
 
-    ajax( 'pl_analyze_all_sections', {} )
-        .done( function( res ) {
-            if ( res.success ) {
-                // Show suggestions for current slide in panel
-                var curId = sections[ currentSlideIndex ]?.id;
-                var secs = res.data.sections || {};
-                if ( curId && secs[ curId ] ) {
-                    $( '#pl-panel-suggestions' ).html( secs[ curId ].html );
-                } else {
-                    // Show first available
-                    var shown = false;
-                    for ( var sid in secs ) {
-                        if ( secs.hasOwnProperty( sid ) ) {
-                            $( '#pl-panel-suggestions' ).html( secs[ sid ].html );
-                            shown = true;
-                            break;
-                        }
-                    }
-                    if ( ! shown ) $( '#pl-panel-suggestions' ).html( '<p class="pl-panel-empty">Aucune suggestion générée.</p>' );
-                }
-                if ( res.data.scores_html ) {
-                    $( '#pl-sidebar-scores' ).html( res.data.scores_html );
-                }
+    // Inject overlay
+    $( 'body' ).append( buildAnalyzeOverlayHTML() );
+    // Force reflow then show
+    setTimeout( function() { $( '#pl-analyze-overlay' ).addClass( 'pl-analyze-overlay--visible' ); }, 20 );
+
+    var total = sections.length;
+    var done = 0;
+    var totalSuggestions = 0;
+    var allResults = {};
+    var latestScoresHtml = '';
+    var times = [];
+    var startAll = Date.now();
+
+    function analyzeNext( index ) {
+        if ( index >= total ) {
+            // All done — show summary
+            updateAnalyzeProgress( total, total, 'Terminé !', 0 );
+
+            // Update panel with current slide suggestions
+            var curId = sections[ currentSlideIndex ]?.id;
+            if ( curId && allResults[ curId ] ) {
+                $( '#pl-panel-suggestions' ).html( allResults[ curId ] );
             } else {
-                $( '#pl-panel-suggestions' ).html( '<p class="pl-panel-error">' + ( res.data?.message || 'Erreur.' ) + '</p>' );
+                var shown = false;
+                for ( var sid in allResults ) {
+                    if ( allResults.hasOwnProperty( sid ) ) {
+                        $( '#pl-panel-suggestions' ).html( allResults[ sid ] );
+                        shown = true;
+                        break;
+                    }
+                }
+                if ( ! shown ) {
+                    $( '#pl-panel-suggestions' ).html( '<p class="pl-panel-empty">Aucune suggestion générée.</p>' );
+                }
             }
-        } )
-        .fail( function() { $( '#pl-panel-suggestions' ).html( '<p class="pl-panel-error">Erreur réseau.</p>' ); } )
-        .always( function() { $btn.prop( 'disabled', false ).html( 'Analyser toutes les diapositives' ); } );
+            if ( latestScoresHtml ) {
+                $( '#pl-sidebar-scores' ).html( latestScoresHtml );
+            }
+
+            showAnalyzeSummary( totalSuggestions, total, Date.now() - startAll );
+            $btn.prop( 'disabled', false ).html( 'Analyser toutes les diapositives' );
+            return;
+        }
+
+        var sec = sections[ index ];
+        var sectionTitle = sec.title || ( 'Section ' + ( index + 1 ) );
+        updateAnalyzeProgress( done, total, '🔍 ' + sectionTitle, times.length ? ( times.reduce( function(a,b){return a+b;}, 0 ) / times.length ) : 0 );
+
+        var t0 = Date.now();
+
+        ajax( 'pl_get_suggestions', { section_id: sec.id, context: 'front' } )
+            .done( function( res ) {
+                if ( res.success ) {
+                    allResults[ sec.id ] = res.data.html || '';
+                    // Count suggestions from the HTML (each .pl-suggestion-card)
+                    var tempDiv = document.createElement( 'div' );
+                    tempDiv.innerHTML = res.data.html || '';
+                    totalSuggestions += tempDiv.querySelectorAll( '.pl-suggestion-card' ).length;
+
+                    if ( res.data.scores_html ) {
+                        latestScoresHtml = res.data.scores_html;
+                    }
+                }
+            } )
+            .fail( function() {
+                // Continue even on failure
+            } )
+            .always( function() {
+                var elapsed = Date.now() - t0;
+                times.push( elapsed );
+                done++;
+                var avgTime = times.reduce( function(a,b){return a+b;}, 0 ) / times.length;
+                updateAnalyzeProgress( done, total, '✓ ' + sectionTitle, avgTime );
+
+                // Small delay for visual feedback before next
+                setTimeout( function() { analyzeNext( index + 1 ); }, 150 );
+            } );
+    }
+
+    analyzeNext( 0 );
+} );
+
+// Close analyze overlay
+$( document ).on( 'click', '#pl-analyze-close', function() {
+    $( '#pl-analyze-overlay' ).removeClass( 'pl-analyze-overlay--visible' );
+    setTimeout( function() { $( '#pl-analyze-overlay' ).remove(); }, 400 );
+} );
+// Also close on Escape when summary is shown
+$( document ).on( 'keydown', function( e ) {
+    if ( e.key === 'Escape' && $( '#pl-analyze-close' ).length ) {
+        $( '#pl-analyze-close' ).trigger( 'click' );
+    }
 } );
 
 // =========================================================================
@@ -845,11 +1147,11 @@ $( document ).on( 'mouseleave', '.pl-suggestion-card[data-section-id]', function
 } );
 
 // =========================================================================
-// INIT — show first slide
+// INIT — show first slide with the new visual renderer
 // =========================================================================
 if ( sections.length > 0 ) {
-    // Already rendered by PHP, just ensure filmstrip is correct
-    $( '#pl-slide-counter' ).text( 'Diapositive 1 / ' + sections.length );
+    // Re-render the first slide through JS to apply the new visual/richtext editor
+    showSlide( 0 );
 }
 
 } )( jQuery );

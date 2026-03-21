@@ -3,7 +3,11 @@
   "DocumentName": "AWS-RunShellScript",
   "Parameters": {
     "commands": [
-      "echo '=== WP DEBUG LOG ===' && cat /var/www/html/wp-content/debug.log 2>/dev/null || echo 'NO_DEBUG_LOG'"
+      "export HOME=/root && git config --global --add safe.directory /opt/pedagolens && cd /opt/pedagolens && git pull origin main 2>&1",
+      "echo '=== Syntaxe ===' && php -l /opt/pedagolens/plugins/pedagolens-api-bridge/includes/class-api-bridge.php 2>&1",
+      "echo '=== Fix WP option ===' && php -r \"define('ABSPATH','/var/www/html/'); require_once('/var/www/html/wp-load.php'); update_option('pl_bedrock_model_id','us.anthropic.claude-sonnet-4-20250514-v1:0'); echo 'Model ID updated to: ' . get_option('pl_bedrock_model_id');\" 2>&1",
+      "echo '=== Clear debug log ===' && > /var/www/html/wp-content/debug.log && echo 'Log cleared'",
+      "systemctl restart apache2 && echo 'Apache restarted OK'"
     ]
   }
 }

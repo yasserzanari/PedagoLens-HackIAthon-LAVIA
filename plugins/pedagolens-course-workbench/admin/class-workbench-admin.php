@@ -296,13 +296,41 @@ class PedagoLens_Workbench_Admin {
     // -------------------------------------------------------------------------
 
     public static function render_score_bars( array $scores ): void {
+        if ( empty( $scores ) ) {
+            return;
+        }
+
+        $profile_labels = self::get_profile_labels();
+
+        // Global average circle
+        $valid_scores = array_map( 'intval', array_values( $scores ) );
+        $global_score = (int) round( array_sum( $valid_scores ) / max( 1, count( $valid_scores ) ) );
+        $global_score = max( 0, min( 100, $global_score ) );
+        $circumference = 283;
+        $offset        = $circumference - ( $circumference * $global_score / 100 );
+        $global_color  = $global_score >= 80 ? '#00a32a' : ( $global_score >= 60 ? '#2271b1' : ( $global_score >= 40 ? '#dba617' : '#d63638' ) );
+        ?>
+        <div class="pl-score-global pl-score-global--admin">
+            <svg class="pl-score-circle" viewBox="0 0 100 100" width="90" height="90">
+                <circle class="pl-score-circle-bg" cx="50" cy="50" r="45" />
+                <circle class="pl-score-circle-fill" cx="50" cy="50" r="45"
+                    stroke="<?php echo esc_attr( $global_color ); ?>"
+                    style="--score-offset:<?php echo esc_attr( $offset ); ?>;" />
+            </svg>
+            <div class="pl-score-global-value">
+                <span class="pl-score-global-num"><?php echo $global_score; ?></span>
+                <span class="pl-score-global-label">Global</span>
+            </div>
+        </div>
+        <?php
         foreach ( $scores as $slug => $score ) :
             $score = max( 0, min( 100, (int) $score ) );
             $color = self::score_color( $score );
+            $info  = $profile_labels[ $slug ] ?? [ 'label' => ucfirst( str_replace( '_', ' ', $slug ) ), 'icon' => '📊' ];
             ?>
             <div class="pl-score-row">
                 <span class="pl-score-label" title="<?php echo esc_attr( $slug ); ?>">
-                    <?php echo esc_html( $slug ); ?>
+                    <?php echo $info['icon']; ?> <?php echo esc_html( $info['label'] ); ?>
                 </span>
                 <div class="pl-score-bar-wrap">
                     <div class="pl-score-bar" style="width:<?php echo $score; ?>%;background:<?php echo esc_attr( $color ); ?>;"></div>
@@ -341,13 +369,23 @@ class PedagoLens_Workbench_Admin {
         // Mettre à jour les scores dans le sidebar si présents
         $scores_html = '';
         if ( ! empty( $result['profile_scores'] ) ) {
+            $context = sanitize_text_field( $_POST['context'] ?? '' );
             ob_start();
-            self::render_score_bars( $result['profile_scores'] );
+            if ( 'front' === $context ) {
+                self::render_front_score_bars( $result['profile_scores'] );
+            } else {
+                self::render_score_bars( $result['profile_scores'] );
+            }
             $scores_html = ob_get_clean();
             update_post_meta( $project_id, '_pl_profile_scores', wp_json_encode( $result['profile_scores'] ) );
         }
 
-        wp_send_json_success( [ 'html' => $html, 'scores_html' => $scores_html ] );
+        wp_send_json_success( [
+            'html'           => $html,
+            'scores_html'    => $scores_html,
+            'profile_scores' => $result['profile_scores'] ?? [],
+            'count'          => count( $result['suggestions'] ?? [] ),
+        ] );
     }
 
     private static function render_suggestions_html( array $suggestions, string $section_id ): void {
@@ -363,92 +401,115 @@ class PedagoLens_Workbench_Admin {
             'restructuration' => 'Restructuration',
         ];
         $type_icons = [
-            'reformulation'   => '✏️',
-            'ajout'           => '➕',
-            'suppression'     => '🗑️',
+            'reformulation'   => '💡',
+            'ajout'           => '✨',
+            'suppression'     => '⚠️',
             'restructuration' => '🔄',
         ];
+        $type_css = [
+            'reformulation'   => 'improve',
+            'ajout'           => 'enrich',
+            'suppression'     => 'problem',
+            'restructuration' => 'restructure',
+        ];
+
+        $profile_labels = self::get_profile_labels();
         ?>
         <div class="pl-suggestions-list">
-            <h4><?php esc_html_e( 'Suggestions IA', 'pedagolens-course-workbench' ); ?></h4>
+            <div class="pl-suggestions-header-bar">
+                <h4><?php esc_html_e( 'Suggestions IA', 'pedagolens-course-workbench' ); ?></h4>
+                <span class="pl-suggestions-count"><?php echo count( $suggestions ); ?></span>
+            </div>
+            <div class="pl-suggestions-scroll">
             <?php foreach ( $suggestions as $idx => $sug ) :
-                $sug_id   = esc_attr( $sug['id'] ?? '' );
-                $mod_type = $sug['modification_type'] ?? 'reformulation';
-                $impact   = max( 0, min( 100, (int) ( $sug['impact_score'] ?? 50 ) ) );
-                $slide    = (int) ( $sug['slide_num'] ?? 0 );
+                $sug_id    = esc_attr( $sug['id'] ?? '' );
+                $mod_type  = $sug['modification_type'] ?? 'reformulation';
+                $impact    = max( 0, min( 100, (int) ( $sug['impact_score'] ?? 50 ) ) );
+                $slide     = (int) ( $sug['slide_num'] ?? 0 );
+                $css_type  = $type_css[ $mod_type ] ?? 'improve';
                 ?>
-                <div class="pl-suggestion-card" id="pl-sug-<?php echo $sug_id; ?>"
+                <div class="pl-sug-card pl-suggestion-card pl-sug-card--<?php echo esc_attr( $css_type ); ?>" id="pl-sug-<?php echo $sug_id; ?>"
                      data-type="<?php echo esc_attr( $mod_type ); ?>"
                      data-section-id="<?php echo esc_attr( $section_id ); ?>"
-                     style="animation-delay:<?php echo $idx * 100; ?>ms;">
+                     style="animation-delay:<?php echo $idx * 80; ?>ms;">
 
-                    <div class="pl-sug-meta" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-                        <span class="pl-suggestion-badge pl-suggestion-badge--<?php echo esc_attr( $mod_type ); ?>">
-                            <?php echo esc_html( ( $type_icons[ $mod_type ] ?? '📝' ) . ' ' . ( $type_labels[ $mod_type ] ?? ucfirst( $mod_type ) ) ); ?>
-                        </span>
-                        <?php if ( $slide > 0 ) : ?>
-                            <span style="font-size:0.72rem;color:var(--stitch-text-dim);">Diapo <?php echo $slide; ?></span>
-                        <?php endif; ?>
-                        <?php if ( ! empty( $sug['profile_target'] ) ) : ?>
-                            <span class="pl-suggestion-profile">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                                <?php echo esc_html( $sug['profile_target'] ); ?>
+                    <!-- Card header: type badge + meta -->
+                    <div class="pl-sug-card-header">
+                        <span class="pl-sug-type-icon"><?php echo esc_html( $type_icons[ $mod_type ] ?? '📝' ); ?></span>
+                        <div class="pl-sug-card-meta">
+                            <span class="pl-sug-type-label pl-sug-type-label--<?php echo esc_attr( $css_type ); ?>">
+                                <?php echo esc_html( $type_labels[ $mod_type ] ?? ucfirst( $mod_type ) ); ?>
                             </span>
-                        <?php endif; ?>
-                    </div>
-
-                    <!-- Impact score bar -->
-                    <div class="pl-suggestion-impact">
-                        <span style="font-size:0.72rem;color:var(--stitch-text-dim);white-space:nowrap;">Impact</span>
-                        <div class="pl-suggestion-impact-bar">
-                            <div class="pl-suggestion-impact-fill" style="width:<?php echo $impact; ?>%;"></div>
+                            <?php if ( $slide > 0 ) : ?>
+                                <span class="pl-sug-slide-num">Diapo <?php echo $slide; ?></span>
+                            <?php endif; ?>
+                            <?php if ( ! empty( $sug['profile_target'] ) ) :
+                                $pt_info = $profile_labels[ $sug['profile_target'] ] ?? null;
+                                ?>
+                                <span class="pl-sug-profile-tag">
+                                    <?php echo $pt_info ? $pt_info['icon'] . ' ' : ''; ?><?php echo esc_html( $pt_info ? $pt_info['label'] : $sug['profile_target'] ); ?>
+                                </span>
+                            <?php endif; ?>
                         </div>
-                        <span style="font-size:0.72rem;font-weight:700;color:var(--stitch-text);"><?php echo $impact; ?>%</span>
+                        <span class="pl-sug-impact-badge" title="Impact: <?php echo $impact; ?>%"><?php echo $impact; ?>%</span>
                     </div>
 
-                    <!-- Diff visuel -->
-                    <div class="pl-suggestion-diff">
-                        <?php if ( ! empty( $sug['original'] ) ) : ?>
-                            <span class="pl-suggestion-diff-remove"><?php echo esc_html( mb_substr( $sug['original'], 0, 200 ) ); ?></span>
-                        <?php endif; ?>
-                        <?php if ( ! empty( $sug['proposed'] ) ) : ?>
-                            <span class="pl-suggestion-diff-add"><?php echo esc_html( mb_substr( $sug['proposed'], 0, 200 ) ); ?></span>
-                        <?php endif; ?>
-                    </div>
-
+                    <!-- Rationale (full text, not truncated) -->
                     <?php if ( ! empty( $sug['rationale'] ) ) : ?>
-                        <p class="pl-sug-rationale"><em><?php echo esc_html( $sug['rationale'] ); ?></em></p>
+                        <p class="pl-sug-card-rationale"><?php echo esc_html( $sug['rationale'] ); ?></p>
                     <?php endif; ?>
 
+                    <!-- Diff visuel: original barré rouge → proposé vert -->
+                    <?php if ( ! empty( $sug['original'] ) || ! empty( $sug['proposed'] ) ) : ?>
+                    <div class="pl-sug-card-diff">
+                        <?php if ( ! empty( $sug['original'] ) ) : ?>
+                            <div class="pl-sug-diff-old">
+                                <span class="pl-sug-diff-label">Avant</span>
+                                <span class="pl-sug-diff-text"><?php echo esc_html( $sug['original'] ); ?></span>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ( ! empty( $sug['proposed'] ) ) : ?>
+                            <div class="pl-sug-diff-new">
+                                <span class="pl-sug-diff-label">Après</span>
+                                <span class="pl-sug-diff-text"><?php echo esc_html( $sug['proposed'] ); ?></span>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    <?php endif; ?>
+
+                    <!-- Impact deltas -->
                     <?php if ( ! empty( $sug['impact_delta'] ) ) : ?>
-                        <div class="pl-sug-deltas">
+                        <div class="pl-sug-card-deltas">
                             <?php foreach ( $sug['impact_delta'] as $slug => $delta ) :
                                 $sign  = $delta >= 0 ? '+' : '';
                                 $class = $delta >= 0 ? 'pl-delta-pos' : 'pl-delta-neg';
+                                $d_info = $profile_labels[ $slug ] ?? null;
+                                $d_label = $d_info ? $d_info['icon'] . ' ' . $d_info['label'] : $slug;
                                 ?>
                                 <span class="pl-delta <?php echo $class; ?>">
-                                    <?php echo esc_html( "{$sign}{$delta} pts {$slug}" ); ?>
+                                    <?php echo esc_html( "{$sign}{$delta} " ); ?><?php echo $d_label; ?>
                                 </span>
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
 
-                    <div class="pl-sug-actions">
+                    <!-- Action buttons -->
+                    <div class="pl-sug-card-actions">
                         <button type="button"
-                            class="button button-primary pl-btn-apply"
+                            class="pl-sug-btn pl-sug-btn--apply pl-btn-apply"
                             data-project-id="<?php echo esc_attr( $_POST['project_id'] ?? '' ); ?>"
                             data-section-id="<?php echo esc_attr( $section_id ); ?>"
                             data-suggestion-id="<?php echo $sug_id; ?>">
                             ✓ <?php esc_html_e( 'Appliquer', 'pedagolens-course-workbench' ); ?>
                         </button>
                         <button type="button"
-                            class="button pl-btn-preview"
+                            class="pl-sug-btn pl-sug-btn--preview pl-btn-preview"
                             data-section-id="<?php echo esc_attr( $section_id ); ?>"
                             data-suggestion-id="<?php echo $sug_id; ?>">
                             👁 <?php esc_html_e( 'Prévisualiser', 'pedagolens-course-workbench' ); ?>
                         </button>
                         <button type="button"
-                            class="button pl-btn-reject"
+                            class="pl-sug-btn pl-sug-btn--reject pl-btn-reject"
                             data-project-id="<?php echo esc_attr( $_POST['project_id'] ?? '' ); ?>"
                             data-section-id="<?php echo esc_attr( $section_id ); ?>"
                             data-suggestion-id="<?php echo $sug_id; ?>">
@@ -458,6 +519,7 @@ class PedagoLens_Workbench_Admin {
 
                 </div>
             <?php endforeach; ?>
+            </div>
         </div>
         <?php
     }
@@ -1040,26 +1102,73 @@ class PedagoLens_Workbench_Admin {
     }
 
     /**
+     * Profile labels mapping: slug → human-readable name + emoji.
+     */
+    private static function get_profile_labels(): array {
+        return [
+            'concentration_tdah' => [ 'label' => 'Concentration TDAH',   'icon' => '🧠' ],
+            'anxieux_consignes'  => [ 'label' => 'Anxieux (consignes)',  'icon' => '😰' ],
+            'avance_rapide'      => [ 'label' => 'Avancé rapide',        'icon' => '🚀' ],
+            'faible_autonomie'   => [ 'label' => 'Faible autonomie',     'icon' => '🤝' ],
+            'langue_seconde'     => [ 'label' => 'Langue seconde',       'icon' => '🌍' ],
+            'surcharge_cognitive'=> [ 'label' => 'Surcharge cognitive',   'icon' => '🧩' ],
+            'usage_passif_ia'    => [ 'label' => 'Usage passif IA',      'icon' => '🤖' ],
+        ];
+    }
+
+    /**
      * Render animated score bars for front-end Stitch sidebar.
+     * Includes SVG circle for global score + per-profile bars with labels.
      */
     public static function render_front_score_bars( array $scores ): void {
-        foreach ( $scores as $slug => $score ) :
-            $score = max( 0, min( 100, (int) $score ) );
-            $color_class = $score >= 80 ? 'pl-stitch-score-high' : ( $score >= 60 ? 'pl-stitch-score-mid' : ( $score >= 40 ? 'pl-stitch-score-warn' : 'pl-stitch-score-low' ) );
-            $delta = $score >= 60 ? '+' . rand(2, 8) : '-' . rand(1, 5);
-            $delta_class = str_starts_with( $delta, '+' ) ? 'pl-stitch-delta-pos' : 'pl-stitch-delta-neg';
-            ?>
-            <div class="pl-stitch-score-row">
-                <div class="pl-stitch-score-info">
-                    <span class="pl-stitch-score-label"><?php echo esc_html( $slug ); ?></span>
-                    <span class="pl-stitch-score-delta <?php echo $delta_class; ?>"><?php echo esc_html( $delta ); ?> pts</span>
-                </div>
-                <div class="pl-stitch-score-bar-wrap">
-                    <div class="pl-stitch-score-bar <?php echo $color_class; ?>" style="--score-w:<?php echo $score; ?>%;"></div>
-                </div>
-                <span class="pl-stitch-score-value"><?php echo $score; ?><small>/100</small></span>
+        if ( empty( $scores ) ) {
+            return;
+        }
+
+        $profile_labels = self::get_profile_labels();
+
+        // Compute global average score
+        $valid_scores = array_map( 'intval', array_values( $scores ) );
+        $global_score = (int) round( array_sum( $valid_scores ) / max( 1, count( $valid_scores ) ) );
+        $global_score = max( 0, min( 100, $global_score ) );
+
+        // SVG circle parameters (radius=45, circumference≈283)
+        $circumference = 283;
+        $offset        = $circumference - ( $circumference * $global_score / 100 );
+        $global_color  = $global_score >= 80 ? '#10b981' : ( $global_score >= 60 ? '#3b82f6' : ( $global_score >= 40 ? '#f59e0b' : '#ef4444' ) );
+        ?>
+        <div class="pl-score-global">
+            <svg class="pl-score-circle" viewBox="0 0 100 100" width="110" height="110">
+                <circle class="pl-score-circle-bg" cx="50" cy="50" r="45" />
+                <circle class="pl-score-circle-fill" cx="50" cy="50" r="45"
+                    stroke="<?php echo esc_attr( $global_color ); ?>"
+                    style="--score-offset:<?php echo esc_attr( $offset ); ?>;" />
+            </svg>
+            <div class="pl-score-global-value">
+                <span class="pl-score-global-num"><?php echo $global_score; ?></span>
+                <span class="pl-score-global-label">Score global</span>
             </div>
-        <?php endforeach;
+        </div>
+
+        <div class="pl-score-profiles">
+        <?php foreach ( $scores as $slug => $score ) :
+            $score       = max( 0, min( 100, (int) $score ) );
+            $color_class = $score >= 80 ? 'pl-bar-high' : ( $score >= 60 ? 'pl-bar-mid' : ( $score >= 40 ? 'pl-bar-warn' : 'pl-bar-low' ) );
+            $info        = $profile_labels[ $slug ] ?? [ 'label' => ucfirst( str_replace( '_', ' ', $slug ) ), 'icon' => '📊' ];
+            ?>
+            <div class="pl-score-profile-row">
+                <div class="pl-score-profile-header">
+                    <span class="pl-score-profile-icon"><?php echo $info['icon']; ?></span>
+                    <span class="pl-score-profile-name"><?php echo esc_html( $info['label'] ); ?></span>
+                    <span class="pl-score-profile-num"><?php echo $score; ?></span>
+                </div>
+                <div class="pl-score-profile-bar-track">
+                    <div class="pl-score-profile-bar-fill <?php echo $color_class; ?>" style="--score-w:<?php echo $score; ?>%;"></div>
+                </div>
+            </div>
+        <?php endforeach; ?>
+        </div>
+        <?php
     }
 
     // -------------------------------------------------------------------------
