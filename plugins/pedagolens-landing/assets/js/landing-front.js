@@ -1970,3 +1970,97 @@
     }
 
 })(window.jQuery || window.$ || null);
+
+
+// =========================================================================
+// SETTINGS PAGE — AJAX save + tone buttons + cancel
+// =========================================================================
+
+( function () {
+    'use strict';
+
+    function initSettingsPage() {
+        var form = document.getElementById( 'pl-settings-form' );
+        if ( ! form ) return;
+
+        var msgEl     = document.getElementById( 'pl-settings-msg' );
+        var cancelBtn = document.getElementById( 'pl-settings-cancel' );
+        var saveBtn   = form.querySelector( '.pl-st-settings-btn-save' );
+
+        // Store initial form state for cancel
+        var initialState = new FormData( form );
+
+        // ── Tone buttons ──
+        var toneBtns  = form.querySelectorAll( '.pl-st-tone-btn' );
+        var toneInput = document.getElementById( 'pl-ai-tone' );
+
+        toneBtns.forEach( function ( btn ) {
+            btn.addEventListener( 'click', function () {
+                toneBtns.forEach( function ( b ) { b.classList.remove( 'pl-st-tone-btn--active' ); } );
+                this.classList.add( 'pl-st-tone-btn--active' );
+                if ( toneInput ) toneInput.value = this.getAttribute( 'data-tone' );
+            } );
+        } );
+
+        // ── Show message helper ──
+        function showMsg( text, type ) {
+            if ( ! msgEl ) return;
+            msgEl.className = 'pl-st-settings-msg ' + ( type === 'ok' ? 'pl-msg-ok' : 'pl-msg-err' );
+            msgEl.textContent = text;
+            msgEl.style.display = 'block';
+            msgEl.scrollIntoView( { behavior: 'smooth', block: 'nearest' } );
+            if ( type === 'ok' ) {
+                setTimeout( function () { msgEl.style.display = 'none'; }, 4000 );
+            }
+        }
+
+        // ── Cancel button ──
+        if ( cancelBtn ) {
+            cancelBtn.addEventListener( 'click', function () {
+                window.location.reload();
+            } );
+        }
+
+        // ── Form submit via AJAX ──
+        form.addEventListener( 'submit', function ( e ) {
+            e.preventDefault();
+
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Enregistrement…';
+            if ( msgEl ) msgEl.style.display = 'none';
+
+            var data = new FormData( form );
+            data.append( 'action', 'pl_save_settings' );
+
+            var ajaxUrl = ( window.plFront && plFront.ajaxUrl ) || '/wp-admin/admin-ajax.php';
+
+            fetch( ajaxUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                body: data
+            } )
+            .then( function ( r ) { return r.json(); } )
+            .then( function ( res ) {
+                if ( res.success ) {
+                    showMsg( res.data.message || 'Paramètres enregistrés.', 'ok' );
+                } else {
+                    showMsg( ( res.data && res.data.message ) || 'Erreur lors de la sauvegarde.', 'err' );
+                }
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Sauvegarder les paramètres';
+            } )
+            .catch( function () {
+                showMsg( 'Erreur réseau.', 'err' );
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Sauvegarder les paramètres';
+            } );
+        } );
+    }
+
+    if ( document.readyState === 'loading' ) {
+        document.addEventListener( 'DOMContentLoaded', initSettingsPage );
+    } else {
+        initSettingsPage();
+    }
+
+} )();
