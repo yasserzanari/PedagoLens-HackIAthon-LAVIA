@@ -214,8 +214,7 @@ class PedagoLens_Landing {
                 ?>
                     <a href="<?php echo esc_url( $dash_link ); ?>" class="plx-btn-pill">Mon Dashboard</a>
                 <?php else : ?>
-                    <a href="<?php echo esc_url( $login_url ); ?>" class="plx-btn-ghost">Connexion</a>
-                    <a href="<?php echo esc_url( $cta_url ); ?>" class="plx-btn-pill"><?php echo $cta_text; ?></a>
+                    <a href="<?php echo esc_url( $login_url ); ?>" class="plx-btn-pill">Connexion</a>
                 <?php endif; ?>
             </div>
         </nav>
