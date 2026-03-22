@@ -234,4 +234,7 @@ Projet développé dans le cadre du HackIAthon par une équipe de 3 personnes, a
 
 ## Licence
 
-À définir.cé
+Copyright © 2026 Techno Boost INC. All rights reserved.
+
+This project and its contents may not be copied, modified, distributed, or used
+without prior written permission from the author.
