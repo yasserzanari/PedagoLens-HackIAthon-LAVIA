@@ -63,6 +63,13 @@ class PedagoLens_Git_Preconfig {
                         <td><input type="text" class="regular-text" id="deploy_path" name="deploy_path" value="<?php echo esc_attr( $s['deploy_path'] ); ?>"></td>
                     </tr>
                     <tr>
+                        <th scope="row"><label for="git_binary">Git binary path</label></th>
+                        <td>
+                            <input type="text" class="regular-text" id="git_binary" name="git_binary" value="<?php echo esc_attr( $s['git_binary'] ); ?>" placeholder="/usr/bin/git">
+                            <p class="description">Example: <code>/usr/bin/git</code>. Leave default for auto-detection.</p>
+                        </td>
+                    </tr>
+                    <tr>
                         <th scope="row"><label for="n8n_webhook_url">n8n webhook</label></th>
                         <td><input type="url" class="regular-text" id="n8n_webhook_url" name="n8n_webhook_url" value="<?php echo esc_attr( $s['n8n_webhook_url'] ); ?>"></td>
                     </tr>
@@ -101,6 +108,7 @@ class PedagoLens_Git_Preconfig {
         $s['repo_url'] = esc_url_raw( $_POST['repo_url'] ?? $s['repo_url'] );
         $s['branch'] = sanitize_text_field( $_POST['branch'] ?? $s['branch'] );
         $s['deploy_path'] = sanitize_text_field( $_POST['deploy_path'] ?? $s['deploy_path'] );
+        $s['git_binary'] = sanitize_text_field( $_POST['git_binary'] ?? $s['git_binary'] );
         $s['n8n_webhook_url'] = esc_url_raw( $_POST['n8n_webhook_url'] ?? $s['n8n_webhook_url'] );
 
         update_option( self::OPT_KEY, wp_json_encode( $s ) );
@@ -119,6 +127,17 @@ class PedagoLens_Git_Preconfig {
             'success' => true,
         ];
 
+        $git = self::find_git_binary( $s['git_binary'] );
+        if ( $git === '' ) {
+            $report['success'] = false;
+            $report['error'] = 'Git binary not found in container.';
+            $report['hint'] = [
+                'docker exec -u root -it <wordpress_container> sh -lc "apt-get update && apt-get install -y git"',
+                'Then set Git binary path to /usr/bin/git in this plugin settings.',
+            ];
+            self::save_report_and_redirect( $report );
+        }
+
         if ( ! is_dir( $s['deploy_path'] ) ) {
             $report['success'] = false;
             $report['error'] = 'Deploy path not found: ' . $s['deploy_path'];
@@ -126,11 +145,11 @@ class PedagoLens_Git_Preconfig {
         }
 
         $cmds = [
-            [ 'git', '-C', $s['deploy_path'], 'rev-parse', '--is-inside-work-tree' ],
-            [ 'git', '-C', $s['deploy_path'], 'remote', 'set-url', 'origin', $s['repo_url'] ],
-            [ 'git', '-C', $s['deploy_path'], 'fetch', '--all', '--prune' ],
-            [ 'git', '-C', $s['deploy_path'], 'checkout', $s['branch'] ],
-            [ 'git', '-C', $s['deploy_path'], 'pull', 'origin', $s['branch'] ],
+            [ $git, '-C', $s['deploy_path'], 'rev-parse', '--is-inside-work-tree' ],
+            [ $git, '-C', $s['deploy_path'], 'remote', 'set-url', 'origin', $s['repo_url'] ],
+            [ $git, '-C', $s['deploy_path'], 'fetch', '--all', '--prune' ],
+            [ $git, '-C', $s['deploy_path'], 'checkout', $s['branch'] ],
+            [ $git, '-C', $s['deploy_path'], 'pull', 'origin', $s['branch'] ],
         ];
 
         foreach ( $cmds as $cmd ) {
@@ -188,8 +207,32 @@ class PedagoLens_Git_Preconfig {
             'repo_url' => 'https://github.com/yasserzanari/HackIaThon-Quarter.zip.git',
             'branch' => 'main',
             'deploy_path' => $default_path,
+            'git_binary' => '/usr/bin/git',
             'n8n_webhook_url' => home_url( '/webhook/pedagolens-ai' ),
         ] );
+    }
+
+    private static function find_git_binary( string $preferred ): string {
+        $preferred = trim( $preferred );
+        if ( $preferred !== '' && is_file( $preferred ) && is_executable( $preferred ) ) {
+            return $preferred;
+        }
+
+        foreach ( [ '/usr/bin/git', '/bin/git', 'git' ] as $candidate ) {
+            if ( $candidate === 'git' ) {
+                $path = @shell_exec( 'command -v git 2>/dev/null' );
+                $path = is_string( $path ) ? trim( $path ) : '';
+                if ( $path !== '' && is_executable( $path ) ) {
+                    return $path;
+                }
+                continue;
+            }
+            if ( is_file( $candidate ) && is_executable( $candidate ) ) {
+                return $candidate;
+            }
+        }
+
+        return '';
     }
 
     private static function assert_admin(): void {
