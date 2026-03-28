@@ -105,6 +105,7 @@ class PedagoLens_API_Bridge_Settings {
         }
 
         $cfg = PedagoLens_API_Bridge::get_bedrock_config();
+        $n8n = PedagoLens_API_Bridge::get_n8n_config();
         $creds = PedagoLens_API_Bridge::get_aws_credentials();
         $mode  = PedagoLens_API_Bridge::get_ai_mode();
         ?>
@@ -126,6 +127,7 @@ class PedagoLens_API_Bridge_Settings {
                 <?php self::render_section_ai_mode( $mode ); ?>
                 <?php self::render_section_credentials( $creds ); ?>
                 <?php self::render_section_bedrock_config( $cfg ); ?>
+                <?php self::render_section_n8n_config( $n8n ); ?>
                 <?php self::render_section_prompts(); ?>
 
                 <?php submit_button( __( 'Enregistrer les paramètres', 'pedagolens-api-bridge' ) ); ?>
@@ -169,9 +171,12 @@ class PedagoLens_API_Bridge_Settings {
                         <option value="bedrock" <?php selected( $current_mode, 'bedrock' ); ?>>
                             <?php esc_html_e( 'Bedrock (appels AWS réels)', 'pedagolens-api-bridge' ); ?>
                         </option>
+                        <option value="n8n" <?php selected( $current_mode, 'n8n' ); ?>>
+                            <?php esc_html_e( 'n8n (webhook self-hosted)', 'pedagolens-api-bridge' ); ?>
+                        </option>
                     </select>
                     <p class="description">
-                        <?php esc_html_e( 'En mode mock, aucun appel AWS n\'est effectué.', 'pedagolens-api-bridge' ); ?>
+                        <?php esc_html_e( 'Mock = demo locale, Bedrock = AWS, n8n = webhook self-hosted.', 'pedagolens-api-bridge' ); ?>
                     </p>
                 </td>
             </tr>
@@ -351,6 +356,54 @@ class PedagoLens_API_Bridge_Settings {
         <?php
     }
 
+    private static function render_section_n8n_config( array $n8n ): void {
+        ?>
+        <h2><?php esc_html_e( 'Configuration n8n', 'pedagolens-api-bridge' ); ?></h2>
+        <table class="form-table" role="presentation">
+            <tr>
+                <th scope="row">
+                    <label for="pl_n8n_webhook_url"><?php esc_html_e( 'Webhook URL', 'pedagolens-api-bridge' ); ?></label>
+                </th>
+                <td>
+                    <input
+                        type="url"
+                        id="pl_n8n_webhook_url"
+                        name="pl_n8n_webhook_url"
+                        value="<?php echo esc_attr( $n8n['webhook_url'] ); ?>"
+                        class="regular-text"
+                        placeholder="https://n8n.example.com/webhook/pedagolens-ai"
+                    >
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">
+                    <label for="pl_n8n_api_key"><?php esc_html_e( 'API Key (optionnel)', 'pedagolens-api-bridge' ); ?></label>
+                </th>
+                <td>
+                    <?php self::render_password_field( 'pl_n8n_api_key', $n8n['api_key'] ); ?>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">
+                    <label for="pl_n8n_timeout"><?php esc_html_e( 'Timeout (secondes)', 'pedagolens-api-bridge' ); ?></label>
+                </th>
+                <td>
+                    <input
+                        type="number"
+                        id="pl_n8n_timeout"
+                        name="pl_n8n_timeout"
+                        value="<?php echo esc_attr( $n8n['timeout'] ); ?>"
+                        min="5"
+                        max="120"
+                        class="small-text"
+                    >
+                </td>
+            </tr>
+        </table>
+        <hr>
+        <?php
+    }
+
     private static function render_section_prompts(): void {
         ?>
         <h2><?php esc_html_e( 'Templates de prompts', 'pedagolens-api-bridge' ); ?></h2>
@@ -413,7 +466,7 @@ class PedagoLens_API_Bridge_Settings {
 
         // Mode IA
         $mode = sanitize_text_field( $_POST['pl_ai_mode'] ?? 'mock' );
-        update_option( 'pl_ai_mode', in_array( $mode, [ 'mock', 'bedrock' ], true ) ? $mode : 'mock' );
+        update_option( 'pl_ai_mode', in_array( $mode, [ 'mock', 'bedrock', 'n8n' ], true ) ? $mode : 'mock' );
 
         // Credentials AWS — sanitisés, jamais loggés en clair
         self::save_credential( 'pl_aws_access_key_id',     sanitize_text_field( $_POST['pl_aws_access_key_id'] ?? '' ) );
@@ -426,6 +479,9 @@ class PedagoLens_API_Bridge_Settings {
         update_option( 'pl_bedrock_max_tokens',  (int) ( $_POST['pl_bedrock_max_tokens'] ?? 1500 ) );
         update_option( 'pl_bedrock_temperature', (float) ( $_POST['pl_bedrock_temperature'] ?? 0.3 ) );
         update_option( 'pl_bedrock_timeout',     (int) ( $_POST['pl_bedrock_timeout'] ?? 30 ) );
+        update_option( 'pl_n8n_webhook_url',     esc_url_raw( $_POST['pl_n8n_webhook_url'] ?? '' ) );
+        update_option( 'pl_n8n_timeout',         (int) ( $_POST['pl_n8n_timeout'] ?? 30 ) );
+        self::save_credential( 'pl_n8n_api_key', sanitize_text_field( $_POST['pl_n8n_api_key'] ?? '' ) );
 
         // Prompt templates
         foreach ( PedagoLens_API_Bridge::PROMPT_KEYS as $key ) {

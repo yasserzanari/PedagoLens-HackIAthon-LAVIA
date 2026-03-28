@@ -139,6 +139,7 @@ class PedagoLens_Core_Settings {
         $mode   = PedagoLens_API_Bridge::get_ai_mode();
         $creds  = PedagoLens_API_Bridge::get_aws_credentials();
         $config = PedagoLens_API_Bridge::get_bedrock_config();
+        $n8n    = PedagoLens_API_Bridge::get_n8n_config();
         $models = PedagoLens_API_Bridge::get_available_models();
         ?>
         <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
@@ -154,8 +155,9 @@ class PedagoLens_Core_Settings {
                         <select name="pl_ai_mode" id="pl_ai_mode">
                             <option value="mock" <?php selected( $mode, 'mock' ); ?>><?php esc_html_e( 'Mock (démo sans AWS)', 'pedagolens-core' ); ?></option>
                             <option value="bedrock" <?php selected( $mode, 'bedrock' ); ?>><?php esc_html_e( 'Bedrock (appels AWS réels)', 'pedagolens-core' ); ?></option>
+                            <option value="n8n" <?php selected( $mode, 'n8n' ); ?>><?php esc_html_e( 'n8n (webhook self-hosted)', 'pedagolens-core' ); ?></option>
                         </select>
-                        <p class="description"><?php esc_html_e( 'En mode mock, aucun appel AWS n\'est effectué.', 'pedagolens-core' ); ?></p>
+                        <p class="description"><?php esc_html_e( 'Mock = demo locale, Bedrock = AWS, n8n = webhook self-hosted.', 'pedagolens-core' ); ?></p>
                     </td>
                 </tr>
             </table>
@@ -233,6 +235,30 @@ class PedagoLens_Core_Settings {
                 <tr>
                     <th scope="row"><label for="pl_bedrock_timeout"><?php esc_html_e( 'Timeout (secondes)', 'pedagolens-core' ); ?></label></th>
                     <td><input type="number" name="pl_bedrock_timeout" id="pl_bedrock_timeout" value="<?php echo esc_attr( $config['timeout'] ); ?>" min="5" max="120" step="5" class="small-text"></td>
+                </tr>
+            </table>
+
+            <hr>
+            <h3><?php esc_html_e( 'Configuration n8n', 'pedagolens-core' ); ?></h3>
+            <table class="form-table">
+                <tr>
+                    <th scope="row"><label for="pl_n8n_webhook_url"><?php esc_html_e( 'Webhook URL', 'pedagolens-core' ); ?></label></th>
+                    <td><input type="url" name="pl_n8n_webhook_url" id="pl_n8n_webhook_url" value="<?php echo esc_attr( $n8n['webhook_url'] ); ?>" class="regular-text" placeholder="https://n8n.example.com/webhook/pedagolens-ai"></td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="pl_n8n_api_key"><?php esc_html_e( 'API Key (optionnel)', 'pedagolens-core' ); ?></label></th>
+                    <td>
+                        <div class="pl-password-field">
+                            <input type="password" name="pl_n8n_api_key" id="pl_n8n_api_key" value="<?php echo esc_attr( $n8n['api_key'] ); ?>" class="regular-text pl-secret-input" autocomplete="new-password">
+                            <button type="button" class="button button-small pl-toggle-password" data-target="pl_n8n_api_key" aria-label="<?php esc_attr_e( 'Afficher / Masquer', 'pedagolens-core' ); ?>">
+                                <span class="dashicons dashicons-visibility"></span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="pl_n8n_timeout"><?php esc_html_e( 'Timeout (secondes)', 'pedagolens-core' ); ?></label></th>
+                    <td><input type="number" name="pl_n8n_timeout" id="pl_n8n_timeout" value="<?php echo esc_attr( $n8n['timeout'] ); ?>" min="5" max="120" step="5" class="small-text"></td>
                 </tr>
             </table>
 
@@ -438,7 +464,7 @@ class PedagoLens_Core_Settings {
             <tr>
                 <th scope="row"><?php esc_html_e( 'Mode IA actuel', 'pedagolens-core' ); ?></th>
                 <td>
-                    <span class="pl-status-badge <?php echo $ai_mode === 'bedrock' ? 'pl-status-active' : 'pl-status-inactive'; ?>">
+                    <span class="pl-status-badge <?php echo $ai_mode !== 'mock' ? 'pl-status-active' : 'pl-status-inactive'; ?>">
                         <?php echo esc_html( strtoupper( $ai_mode ) ); ?>
                     </span>
                 </td>
@@ -476,7 +502,7 @@ class PedagoLens_Core_Settings {
             case 'ia':
                 // Mode IA
                 $mode = sanitize_text_field( $_POST['pl_ai_mode'] ?? 'mock' );
-                update_option( 'pl_ai_mode', in_array( $mode, [ 'mock', 'bedrock' ], true ) ? $mode : 'mock' );
+                update_option( 'pl_ai_mode', in_array( $mode, [ 'mock', 'bedrock', 'n8n' ], true ) ? $mode : 'mock' );
 
                 // AWS Credentials — don't overwrite with empty values
                 $access_key = sanitize_text_field( $_POST['pl_aws_access_key_id'] ?? '' );
@@ -499,6 +525,12 @@ class PedagoLens_Core_Settings {
                 update_option( 'pl_bedrock_max_tokens',  absint( $_POST['pl_bedrock_max_tokens'] ?? 1500 ) );
                 update_option( 'pl_bedrock_temperature', floatval( $_POST['pl_bedrock_temperature'] ?? 0.3 ) );
                 update_option( 'pl_bedrock_timeout',     absint( $_POST['pl_bedrock_timeout'] ?? 30 ) );
+                update_option( 'pl_n8n_webhook_url', esc_url_raw( $_POST['pl_n8n_webhook_url'] ?? '' ) );
+                update_option( 'pl_n8n_timeout', absint( $_POST['pl_n8n_timeout'] ?? 30 ) );
+                $n8n_api_key = sanitize_text_field( $_POST['pl_n8n_api_key'] ?? '' );
+                if ( $n8n_api_key !== '' ) {
+                    update_option( 'pl_n8n_api_key', $n8n_api_key );
+                }
                 break;
 
             case 'behavior':
@@ -636,6 +668,9 @@ class PedagoLens_Core_Settings {
             'pl_bedrock_max_tokens',
             'pl_bedrock_temperature',
             'pl_bedrock_timeout',
+            'pl_n8n_webhook_url',
+            'pl_n8n_timeout',
+            'pl_n8n_api_key',
             'pl_guardrail_level',
             'pl_twin_max_messages',
             'pl_autosave_interval',
@@ -683,6 +718,9 @@ class PedagoLens_Core_Settings {
             'pl_bedrock_max_tokens',
             'pl_bedrock_temperature',
             'pl_bedrock_timeout',
+            'pl_n8n_webhook_url',
+            'pl_n8n_timeout',
+            'pl_n8n_api_key',
             'pl_guardrail_level',
             'pl_twin_max_messages',
             'pl_autosave_interval',

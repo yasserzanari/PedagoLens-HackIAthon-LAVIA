@@ -1,0 +1,358 @@
+<?php
+
+defined( 'ABSPATH' ) || exit;
+
+class PedagoLens_Git_Preconfig {
+
+    private const PAGE_SLUG = 'pl-git-preconfig';
+    private const OPT_KEY   = 'pl_git_preconfig_settings';
+
+    private const ACT_SAVE  = 'pl_git_preconfig_save';
+    private const ACT_SYNC  = 'pl_git_preconfig_sync';
+    private const ACT_SETUP = 'pl_git_preconfig_setup';
+
+    public static function init(): void {
+        add_action( 'admin_menu', [ self::class, 'add_menu' ] );
+        add_action( 'admin_post_' . self::ACT_SAVE, [ self::class, 'handle_save' ] );
+        add_action( 'admin_post_' . self::ACT_SYNC, [ self::class, 'handle_sync' ] );
+        add_action( 'admin_post_' . self::ACT_SETUP, [ self::class, 'handle_setup' ] );
+    }
+
+    public static function add_menu(): void {
+        add_submenu_page(
+            'tools.php',
+            __( 'PedagoLens Git Preconfig', 'pedagolens-git-preconfig' ),
+            __( 'PedagoLens Git', 'pedagolens-git-preconfig' ),
+            'manage_options',
+            self::PAGE_SLUG,
+            [ self::class, 'render_page' ]
+        );
+    }
+
+    public static function render_page(): void {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Acces refuse.', 'pedagolens-git-preconfig' ) );
+        }
+
+        $s = self::settings();
+        $report = get_transient( 'pl_git_preconfig_report' );
+        if ( $report ) {
+            delete_transient( 'pl_git_preconfig_report' );
+        }
+
+        ?>
+        <div class="wrap">
+            <h1><?php esc_html_e( 'PedagoLens Git Preconfig', 'pedagolens-git-preconfig' ); ?></h1>
+            <p><?php esc_html_e( 'Configure Git deployment and run one-click setup for PedagoLens.', 'pedagolens-git-preconfig' ); ?></p>
+
+            <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+                <?php wp_nonce_field( self::ACT_SAVE, '_pl_nonce' ); ?>
+                <input type="hidden" name="action" value="<?php echo esc_attr( self::ACT_SAVE ); ?>">
+
+                <table class="form-table" role="presentation">
+                    <tr>
+                        <th scope="row"><label for="repo_url">Repo URL</label></th>
+                        <td><input type="url" class="regular-text" id="repo_url" name="repo_url" value="<?php echo esc_attr( $s['repo_url'] ); ?>"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="branch">Branch</label></th>
+                        <td><input type="text" class="regular-text" id="branch" name="branch" value="<?php echo esc_attr( $s['branch'] ); ?>"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="deploy_path">Deploy path</label></th>
+                        <td><input type="text" class="regular-text" id="deploy_path" name="deploy_path" value="<?php echo esc_attr( $s['deploy_path'] ); ?>"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="n8n_webhook_url">n8n webhook</label></th>
+                        <td><input type="url" class="regular-text" id="n8n_webhook_url" name="n8n_webhook_url" value="<?php echo esc_attr( $s['n8n_webhook_url'] ); ?>"></td>
+                    </tr>
+                </table>
+
+                <?php submit_button( __( 'Save Settings', 'pedagolens-git-preconfig' ), 'secondary' ); ?>
+            </form>
+
+            <hr>
+
+            <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline-block; margin-right:12px;">
+                <?php wp_nonce_field( self::ACT_SYNC, '_pl_nonce' ); ?>
+                <input type="hidden" name="action" value="<?php echo esc_attr( self::ACT_SYNC ); ?>">
+                <?php submit_button( __( 'Run Git Sync', 'pedagolens-git-preconfig' ), 'primary', 'submit', false ); ?>
+            </form>
+
+            <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline-block;" onsubmit="return confirm('Apply full PedagoLens setup now?');">
+                <?php wp_nonce_field( self::ACT_SETUP, '_pl_nonce' ); ?>
+                <input type="hidden" name="action" value="<?php echo esc_attr( self::ACT_SETUP ); ?>">
+                <?php submit_button( __( 'Run Full Setup', 'pedagolens-git-preconfig' ), 'primary', 'submit', false ); ?>
+            </form>
+
+            <?php if ( is_array( $report ) ) : ?>
+                <h2><?php esc_html_e( 'Last Report', 'pedagolens-git-preconfig' ); ?></h2>
+                <pre><?php echo esc_html( wp_json_encode( $report, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE ) ); ?></pre>
+            <?php endif; ?>
+        </div>
+        <?php
+    }
+
+    public static function handle_save(): void {
+        self::assert_admin();
+        check_admin_referer( self::ACT_SAVE, '_pl_nonce' );
+
+        $s = self::settings();
+        $s['repo_url'] = esc_url_raw( $_POST['repo_url'] ?? $s['repo_url'] );
+        $s['branch'] = sanitize_text_field( $_POST['branch'] ?? $s['branch'] );
+        $s['deploy_path'] = sanitize_text_field( $_POST['deploy_path'] ?? $s['deploy_path'] );
+        $s['n8n_webhook_url'] = esc_url_raw( $_POST['n8n_webhook_url'] ?? $s['n8n_webhook_url'] );
+
+        update_option( self::OPT_KEY, wp_json_encode( $s ) );
+        self::redirect();
+    }
+
+    public static function handle_sync(): void {
+        self::assert_admin();
+        check_admin_referer( self::ACT_SYNC, '_pl_nonce' );
+
+        $s = self::settings();
+        $report = [
+            'action' => 'git_sync',
+            'started_at' => gmdate( 'c' ),
+            'commands' => [],
+            'success' => true,
+        ];
+
+        if ( ! is_dir( $s['deploy_path'] ) ) {
+            $report['success'] = false;
+            $report['error'] = 'Deploy path not found: ' . $s['deploy_path'];
+            self::save_report_and_redirect( $report );
+        }
+
+        $cmds = [
+            [ 'git', '-C', $s['deploy_path'], 'rev-parse', '--is-inside-work-tree' ],
+            [ 'git', '-C', $s['deploy_path'], 'remote', 'set-url', 'origin', $s['repo_url'] ],
+            [ 'git', '-C', $s['deploy_path'], 'fetch', '--all', '--prune' ],
+            [ 'git', '-C', $s['deploy_path'], 'checkout', $s['branch'] ],
+            [ 'git', '-C', $s['deploy_path'], 'pull', 'origin', $s['branch'] ],
+        ];
+
+        foreach ( $cmds as $cmd ) {
+            $r = self::run_cmd( $cmd );
+            $report['commands'][] = $r;
+            if ( $r['exit_code'] !== 0 ) {
+                $report['success'] = false;
+                break;
+            }
+        }
+
+        $report['finished_at'] = gmdate( 'c' );
+        self::save_report_and_redirect( $report );
+    }
+
+    public static function handle_setup(): void {
+        self::assert_admin();
+        check_admin_referer( self::ACT_SETUP, '_pl_nonce' );
+
+        $s = self::settings();
+        $report = [
+            'action' => 'full_setup',
+            'started_at' => gmdate( 'c' ),
+            'steps' => [],
+            'success' => true,
+        ];
+
+        $report['steps'][] = [ 'activate_plugins' => self::activate_required_plugins() ];
+
+        update_option( 'pl_ai_mode', 'n8n' );
+        update_option( 'pl_n8n_webhook_url', $s['n8n_webhook_url'] );
+        update_option( 'pl_n8n_timeout', 30 );
+        $report['steps'][] = [ 'n8n_mode' => 'configured' ];
+
+        $created_pages = self::ensure_pages();
+        self::apply_wp_settings( $created_pages );
+        $report['steps'][] = [ 'pages' => $created_pages ];
+
+        $theme_used = self::ensure_blank_theme();
+        $report['steps'][] = [ 'theme' => $theme_used ];
+
+        $report['finished_at'] = gmdate( 'c' );
+        self::save_report_and_redirect( $report );
+    }
+
+    private static function settings(): array {
+        $raw = get_option( self::OPT_KEY, [] );
+        if ( is_string( $raw ) ) {
+            $raw = json_decode( $raw, true ) ?? [];
+        }
+
+        $default_path = is_dir( '/opt/pedagolens/.git' ) ? '/opt/pedagolens' : ABSPATH;
+
+        return wp_parse_args( $raw, [
+            'repo_url' => 'https://github.com/yasserzanari/HackIaThon-Quarter.zip.git',
+            'branch' => 'main',
+            'deploy_path' => $default_path,
+            'n8n_webhook_url' => home_url( '/webhook/pedagolens-ai' ),
+        ] );
+    }
+
+    private static function assert_admin(): void {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Acces refuse.', 'pedagolens-git-preconfig' ) );
+        }
+    }
+
+    private static function redirect(): void {
+        wp_safe_redirect( admin_url( 'tools.php?page=' . self::PAGE_SLUG ) );
+        exit;
+    }
+
+    private static function save_report_and_redirect( array $report ): void {
+        set_transient( 'pl_git_preconfig_report', $report, MINUTE_IN_SECONDS * 15 );
+        self::redirect();
+    }
+
+    private static function run_cmd( array $parts ): array {
+        $command = implode( ' ', array_map( 'escapeshellarg', $parts ) );
+        $descriptors = [
+            0 => [ 'pipe', 'r' ],
+            1 => [ 'pipe', 'w' ],
+            2 => [ 'pipe', 'w' ],
+        ];
+
+        $proc = @proc_open( $command, $descriptors, $pipes );
+        if ( ! is_resource( $proc ) ) {
+            return [
+                'command' => $command,
+                'exit_code' => 1,
+                'stdout' => '',
+                'stderr' => 'proc_open failed',
+            ];
+        }
+
+        fclose( $pipes[0] );
+        $stdout = stream_get_contents( $pipes[1] );
+        $stderr = stream_get_contents( $pipes[2] );
+        fclose( $pipes[1] );
+        fclose( $pipes[2] );
+        $code = proc_close( $proc );
+
+        return [
+            'command' => $command,
+            'exit_code' => (int) $code,
+            'stdout' => trim( (string) $stdout ),
+            'stderr' => trim( (string) $stderr ),
+        ];
+    }
+
+    private static function activate_required_plugins(): array {
+        require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+        $required = [
+            'pedagolens-core/pedagolens-core.php',
+            'pedagolens-api-bridge/pedagolens-api-bridge.php',
+            'pedagolens-landing/pedagolens-landing.php',
+            'pedagolens-teacher-dashboard/pedagolens-teacher-dashboard.php',
+            'pedagolens-course-workbench/pedagolens-course-workbench.php',
+            'pedagolens-student-twin/pedagolens-student-twin.php',
+            'pedagolens-migration/pedagolens-migration.php',
+        ];
+
+        $out = [];
+        foreach ( $required as $plugin_file ) {
+            if ( file_exists( WP_PLUGIN_DIR . '/' . $plugin_file ) && ! is_plugin_active( $plugin_file ) ) {
+                $res = activate_plugin( $plugin_file );
+                $out[ $plugin_file ] = is_wp_error( $res ) ? $res->get_error_message() : 'activated';
+            } else {
+                $out[ $plugin_file ] = is_plugin_active( $plugin_file ) ? 'already_active' : 'missing';
+            }
+        }
+
+        return $out;
+    }
+
+    private static function ensure_pages(): array {
+        $pages = [
+            [ 'title' => 'Accueil', 'slug' => 'accueil', 'shortcode' => '[pedagolens_landing]' ],
+            [ 'title' => 'Connexion', 'slug' => 'connexion', 'shortcode' => '[pedagolens_login]' ],
+            [ 'title' => 'Dashboard Enseignant', 'slug' => 'dashboard-enseignant', 'shortcode' => '[pedagolens_teacher_dashboard]' ],
+            [ 'title' => 'Dashboard Etudiant', 'slug' => 'dashboard-etudiant', 'shortcode' => '[pedagolens_student_dashboard]' ],
+            [ 'title' => 'Cours Projets', 'slug' => 'cours-projets', 'shortcode' => '[pedagolens_courses]' ],
+            [ 'title' => 'Atelier Pedagogique', 'slug' => 'workbench', 'shortcode' => '[pedagolens_workbench]' ],
+            [ 'title' => 'Mon Compte', 'slug' => 'compte', 'shortcode' => '[pedagolens_account]' ],
+            [ 'title' => 'Historique', 'slug' => 'historique', 'shortcode' => '[pedagolens_history]' ],
+            [ 'title' => 'Parametres', 'slug' => 'parametres', 'shortcode' => '[pedagolens_settings]' ],
+            [ 'title' => 'Vue Institutionnelle', 'slug' => 'institutionnel', 'shortcode' => '[pedagolens_institutional]' ],
+            [ 'title' => 'Jumeau IA', 'slug' => 'jumeau-ia', 'shortcode' => '[pedagolens_jumeau_ia]' ],
+        ];
+
+        $created = [];
+        foreach ( $pages as $p ) {
+            $existing = get_page_by_path( $p['slug'] );
+            if ( $existing ) {
+                wp_update_post( [
+                    'ID' => $existing->ID,
+                    'post_title' => $p['title'],
+                    'post_content' => $p['shortcode'],
+                    'post_status' => 'publish',
+                ] );
+                $created[ $p['slug'] ] = (int) $existing->ID;
+                continue;
+            }
+
+            $id = wp_insert_post( [
+                'post_type' => 'page',
+                'post_status' => 'publish',
+                'post_title' => $p['title'],
+                'post_name' => $p['slug'],
+                'post_content' => $p['shortcode'],
+            ] );
+            if ( ! is_wp_error( $id ) ) {
+                $created[ $p['slug'] ] = (int) $id;
+            }
+        }
+
+        return $created;
+    }
+
+    private static function apply_wp_settings( array $pages ): void {
+        if ( isset( $pages['accueil'] ) ) {
+            update_option( 'show_on_front', 'page' );
+            update_option( 'page_on_front', (int) $pages['accueil'] );
+        }
+
+        global $wp_rewrite;
+        if ( is_object( $wp_rewrite ) ) {
+            $wp_rewrite->set_permalink_structure( '/%postname%/' );
+        }
+        flush_rewrite_rules( false );
+    }
+
+    private static function ensure_blank_theme(): string {
+        require_once ABSPATH . 'wp-admin/includes/theme.php';
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+        require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+
+        $candidates = [ 'blank-canvas', 'blank', 'twentytwentyfour' ];
+
+        foreach ( $candidates as $slug ) {
+            $theme = wp_get_theme( $slug );
+            if ( $theme->exists() ) {
+                switch_theme( $slug );
+                return $slug;
+            }
+        }
+
+        foreach ( $candidates as $slug ) {
+            $zip = "https://downloads.wordpress.org/theme/{$slug}.latest-stable.zip";
+            $upgrader = new Theme_Upgrader( new Automatic_Upgrader_Skin() );
+            $result = $upgrader->install( $zip );
+            if ( $result === true ) {
+                $theme = wp_get_theme( $slug );
+                if ( $theme->exists() ) {
+                    switch_theme( $slug );
+                    return $slug;
+                }
+            }
+        }
+
+        $current = wp_get_theme();
+        return $current->get_stylesheet();
+    }
+}

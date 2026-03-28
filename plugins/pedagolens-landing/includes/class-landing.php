@@ -2,10 +2,10 @@
 /**
  * PedagoLens_Landing
  *
- * Shortcodes front-end pour toutes les pages publiques PédagoLens.
+ * Shortcodes front-end pour toutes les pages publiques PÃ©dagoLens.
  * - Landing page    : [pedagolens_landing]
  * - Dashboard prof  : [pedagolens_teacher_dashboard]
- * - Dashboard étud  : [pedagolens_student_dashboard]
+ * - Dashboard Ã©tud  : [pedagolens_student_dashboard]
  * - Cours & Projets : [pedagolens_courses]
  * - Workbench       : [pedagolens_workbench]
  * - Compte          : [pedagolens_account]
@@ -39,7 +39,7 @@ class PedagoLens_Landing {
 
         add_action( 'wp_enqueue_scripts', [ self::class, 'enqueue_front_assets' ] );
 
-        // AJAX front-end pour workbench (enseignants connectés)
+        // AJAX front-end pour workbench (enseignants connectÃ©s)
         if ( ! has_action( 'wp_ajax_pl_get_suggestions' ) ) {
             add_action( 'wp_ajax_pl_get_suggestions',   [ 'PedagoLens_Workbench_Admin', 'ajax_get_suggestions' ] );
         }
@@ -66,12 +66,12 @@ class PedagoLens_Landing {
             add_action( 'wp_ajax_pl_save_account_profile', [ self::class, 'ajax_save_account_profile' ] );
         }
 
-        // AJAX front-end pour sauvegarde difficultés étudiant
+        // AJAX front-end pour sauvegarde difficultÃ©s Ã©tudiant
         if ( ! has_action( 'wp_ajax_pl_save_student_difficulties' ) ) {
             add_action( 'wp_ajax_pl_save_student_difficulties', [ self::class, 'ajax_save_student_difficulties' ] );
         }
 
-        // AJAX front-end pour chat Léa (API Bridge → Bedrock ou mock)
+        // AJAX front-end pour chat LÃ©a (API Bridge â†’ Bedrock ou mock)
         if ( ! has_action( 'wp_ajax_pl_lea_chat' ) ) {
             add_action( 'wp_ajax_pl_lea_chat', [ self::class, 'ajax_lea_chat' ] );
         }
@@ -87,7 +87,7 @@ class PedagoLens_Landing {
             add_action( 'wp_ajax_pl_create_course',     [ 'PedagoLens_Dashboard_Admin', 'ajax_create_course' ] );
         }
 
-        // AJAX login / register (accessible aux visiteurs ET aux connectés)
+        // AJAX login / register (accessible aux visiteurs ET aux connectÃ©s)
         if ( ! has_action( 'wp_ajax_nopriv_pl_login' ) ) {
             add_action( 'wp_ajax_nopriv_pl_login',    [ self::class, 'ajax_login' ] );
             add_action( 'wp_ajax_pl_login',           [ self::class, 'ajax_login' ] );
@@ -97,7 +97,7 @@ class PedagoLens_Landing {
             add_action( 'wp_ajax_pl_register',        [ self::class, 'ajax_register' ] );
         }
 
-        // AJAX front-end pour sauvegarde paramètres utilisateur
+        // AJAX front-end pour sauvegarde paramÃ¨tres utilisateur
         if ( ! has_action( 'wp_ajax_pl_save_settings' ) ) {
             add_action( 'wp_ajax_pl_save_settings', [ self::class, 'ajax_save_settings' ] );
         }
@@ -113,7 +113,7 @@ class PedagoLens_Landing {
             add_action( 'wp_ajax_pl_delete_course_front', [ self::class, 'ajax_delete_course_front' ] );
         }
 
-        // AJAX front-end pour création projet (Task 17)
+        // AJAX front-end pour crÃ©ation projet (Task 17)
         if ( ! has_action( 'wp_ajax_pl_create_project_front' ) ) {
             add_action( 'wp_ajax_pl_create_project_front', [ self::class, 'ajax_create_project_front' ] );
         }
@@ -192,24 +192,24 @@ class PedagoLens_Landing {
                 'settings'  => wp_create_nonce( 'pl_settings_nonce' ),
             ],
             'i18n' => [
-                'analyzing'    => 'Analyse en cours…',
+                'analyzing'    => 'Analyse en coursâ€¦',
                 'analyzeError' => 'Erreur lors de l\'analyse.',
-                'sending'      => 'Envoi…',
-                'saving'       => 'Enregistrement…',
-                'sessionEnded' => 'Session terminée. À bientôt !',
+                'sending'      => 'Envoiâ€¦',
+                'saving'       => 'Enregistrementâ€¦',
+                'sessionEnded' => 'Session terminÃ©e. Ã€ bientÃ´t !',
             ],
         ] );
     }
 
     // -------------------------------------------------------------------------
-    // [pedagolens_landing] — Page d'accueil marketing
+    // [pedagolens_landing] â€” Page d'accueil marketing
     // -------------------------------------------------------------------------
 
     
         public static function shortcode_landing( array $atts ): string {
             $s             = self::get_settings();
-            $hero_title    = esc_html( get_option( 'pl_landing_hero_title', $s['hero_title'] ?? 'PédagoLens' ) );
-            $hero_subtitle = esc_html( get_option( 'pl_landing_hero_subtitle', $s['hero_subtitle'] ?? "L'IA qui révèle le potentiel de chaque élève." ) );
+            $hero_title    = esc_html( get_option( 'pl_landing_hero_title', $s['hero_title'] ?? 'PÃ©dagoLens' ) );
+            $hero_subtitle = esc_html( get_option( 'pl_landing_hero_subtitle', $s['hero_subtitle'] ?? "L'IA qui rÃ©vÃ¨le le potentiel de chaque Ã©lÃ¨ve." ) );
             $login_page    = get_page_by_path( 'connexion' );
             $login_url     = $login_page ? get_permalink( $login_page ) : wp_login_url();
             $cta_url       = esc_url( $s['cta_url'] ?? $login_url );
@@ -225,13 +225,13 @@ class PedagoLens_Landing {
         <nav class="plx-nav">
             <div class="plx-nav-logo">
                 <a href="<?php echo esc_url( home_url('/') ); ?>">
-                    <img src="http://pedagolens.34.199.149.247.nip.io/wp-content/uploads/2026/03/logo.png" alt="PédagoLens" class="pl-logo-img pl-logo-img--landing-nav" />
+                    <img src="<?php echo esc_url( self::get_logo_url() ); ?>" alt="PÃ©dagoLens" class="pl-logo-img pl-logo-img--landing-nav" />
                 </a>
             </div>
             <div class="plx-nav-links">
-                <a href="#plx-features" class="plx-nav-link plx-nav-link--active">Fonctionnalités</a>
-                <a href="#plx-how" class="plx-nav-link">Comment ça marche</a>
-                <a href="#plx-testimonials" class="plx-nav-link">Témoignages</a>
+                <a href="#plx-features" class="plx-nav-link plx-nav-link--active">FonctionnalitÃ©s</a>
+                <a href="#plx-how" class="plx-nav-link">Comment Ã§a marche</a>
+                <a href="#plx-testimonials" class="plx-nav-link">TÃ©moignages</a>
                 <a href="#plx-cta" class="plx-nav-link">Contact</a>
             </div>
             <div class="plx-nav-actions">
@@ -257,12 +257,12 @@ class PedagoLens_Landing {
         <div class="plx-hero-inner">
             <div class="plx-hero-content">
                 <h1 class="plx-hero-title">
-                    L'IA qui transforme chaque cours en expérience d'apprentissage <span class="plx-gradient-text">personnalisée</span>
+                    L'IA qui transforme chaque cours en expÃ©rience d'apprentissage <span class="plx-gradient-text">personnalisÃ©e</span>
                 </h1>
-                <p class="plx-hero-subtitle">Aidez vos étudiants de cégep et d'université à réussir grâce à une pédagogie adaptée à chaque profil cognitif. Conçu par et pour les professeurs québécois.</p>
+                <p class="plx-hero-subtitle">Aidez vos Ã©tudiants de cÃ©gep et d'universitÃ© Ã  rÃ©ussir grÃ¢ce Ã  une pÃ©dagogie adaptÃ©e Ã  chaque profil cognitif. ConÃ§u par et pour les professeurs quÃ©bÃ©cois.</p>
                 <div class="plx-hero-ctas">
                     <a href="<?php echo esc_url( $cta_url ); ?>" class="plx-btn-primary-lg">
-                        Démarrer gratuitement
+                        DÃ©marrer gratuitement
                         <span class="material-symbols-outlined">bolt</span>
                     </a>
                 </div>
@@ -276,7 +276,7 @@ class PedagoLens_Landing {
                             <div class="plx-mockup-icon-wrap"><span class="material-symbols-outlined">analytics</span></div>
                             <div>
                                 <h4>Tableau de bord IA</h4>
-                                <p>Session A25 — Introduction à la psychologie</p>
+                                <p>Session A25 â€” Introduction Ã  la psychologie</p>
                             </div>
                         </div>
                         <span class="plx-badge-live">SYNC LIVE</span>
@@ -284,7 +284,7 @@ class PedagoLens_Landing {
                     <div class="plx-mockup-body">
                         <div class="plx-mockup-stat-block">
                             <div class="plx-mockup-stat-row">
-                                <span class="plx-mockup-stat-label">Réception cognitive</span>
+                                <span class="plx-mockup-stat-label">RÃ©ception cognitive</span>
                                 <span class="plx-mockup-stat-value">92%</span>
                             </div>
                             <div class="plx-progress-bar"><div class="plx-progress-fill" style="width:92%"></div></div>
@@ -295,13 +295,13 @@ class PedagoLens_Landing {
                                 <span class="plx-mini-value plx-color-violet">78%</span>
                             </div>
                             <div class="plx-mockup-mini-stat">
-                                <span class="plx-mini-label">Biais détectés</span>
+                                <span class="plx-mini-label">Biais dÃ©tectÃ©s</span>
                                 <span class="plx-mini-value plx-color-red">02</span>
                             </div>
                         </div>
                         <div class="plx-mockup-suggestion">
                             <span class="material-symbols-outlined">auto_awesome</span>
-                            <p><strong>Optimisation suggérée :</strong> Remplacez le bloc texte de la p.14 par un diagramme. +14% de mémorisation prévue pour le segment "Visuel-Spatial".</p>
+                            <p><strong>Optimisation suggÃ©rÃ©e :</strong> Remplacez le bloc texte de la p.14 par un diagramme. +14% de mÃ©morisation prÃ©vue pour le segment "Visuel-Spatial".</p>
                         </div>
                     </div>
                 </div>
@@ -318,19 +318,19 @@ class PedagoLens_Landing {
                 <div class="plx-problem-image">
                     <div class="plx-problem-img-overlay"></div>
                     <div class="plx-problem-quote">
-                        "Dans un amphithéâtre de 200 étudiants, un cours magistral standardisé laisse de côté près de 40% de l'auditoire dès les premières minutes."
+                        "Dans un amphithÃ©Ã¢tre de 200 Ã©tudiants, un cours magistral standardisÃ© laisse de cÃ´tÃ© prÃ¨s de 40% de l'auditoire dÃ¨s les premiÃ¨res minutes."
                     </div>
                 </div>
                 <div class="plx-problem-content">
-                    <h2 class="plx-section-title">Le mythe de l'étudiant moyen<br>est une barrière à la réussite.</h2>
+                    <h2 class="plx-section-title">Le mythe de l'Ã©tudiant moyen<br>est une barriÃ¨re Ã  la rÃ©ussite.</h2>
                     <div class="plx-problem-items">
                         <div class="plx-problem-item">
                             <div class="plx-problem-icon plx-problem-icon--red">
                                 <span class="material-symbols-outlined">trending_down</span>
                             </div>
                             <div>
-                                <h4>Le Décrochage Invisible</h4>
-                                <p>Au cégep, 38% des étudiants ne terminent pas leur programme dans les délais prévus. Le rythme unique et le manque de rétroaction personnalisée sont en cause.</p>
+                                <h4>Le DÃ©crochage Invisible</h4>
+                                <p>Au cÃ©gep, 38% des Ã©tudiants ne terminent pas leur programme dans les dÃ©lais prÃ©vus. Le rythme unique et le manque de rÃ©troaction personnalisÃ©e sont en cause.</p>
                             </div>
                         </div>
                         <div class="plx-problem-item">
@@ -338,8 +338,8 @@ class PedagoLens_Landing {
                                 <span class="material-symbols-outlined">psychology_alt</span>
                             </div>
                             <div>
-                                <h4>Les Barrières Cognitives</h4>
-                                <p>Avec des cours magistraux de 200+ étudiants et une diversité croissante de profils (allophones, TDAH, troubles d'apprentissage), l'enseignement uniforme ne suffit plus.</p>
+                                <h4>Les BarriÃ¨res Cognitives</h4>
+                                <p>Avec des cours magistraux de 200+ Ã©tudiants et une diversitÃ© croissante de profils (allophones, TDAH, troubles d'apprentissage), l'enseignement uniforme ne suffit plus.</p>
                             </div>
                         </div>
                     </div>
@@ -353,28 +353,28 @@ class PedagoLens_Landing {
         <div class="plx-section-inner">
             <div class="plx-section-header">
                 <h2 class="plx-section-title">La boucle de l'excellence</h2>
-                <p class="plx-section-subtitle">Une méthodologie en trois phases pour une pédagogie véritablement augmentée.</p>
+                <p class="plx-section-subtitle">Une mÃ©thodologie en trois phases pour une pÃ©dagogie vÃ©ritablement augmentÃ©e.</p>
             </div>
             <div class="plx-steps-grid">
                 <div class="plx-step-card">
                     <div class="plx-step-number">01</div>
                     <div class="plx-step-icon plx-icon-blue"><span class="material-symbols-outlined">search_insights</span></div>
                     <h3>Analyser</h3>
-                    <p>Cartographiez les dynamiques cognitives de votre audience via une analyse de données anonymisée et éthique.</p>
+                    <p>Cartographiez les dynamiques cognitives de votre audience via une analyse de donnÃ©es anonymisÃ©e et Ã©thique.</p>
                     <a href="#" class="plx-step-link plx-link-blue">Explorer l'analyse <span class="material-symbols-outlined">arrow_forward</span></a>
                 </div>
                 <div class="plx-step-card">
                     <div class="plx-step-number">02</div>
                     <div class="plx-step-icon plx-icon-violet"><span class="material-symbols-outlined">model_training</span></div>
                     <h3>Simuler</h3>
-                    <p>Déployez votre contenu sur un jumeau numérique de votre classe pour anticiper les zones de friction et d'ennui.</p>
+                    <p>DÃ©ployez votre contenu sur un jumeau numÃ©rique de votre classe pour anticiper les zones de friction et d'ennui.</p>
                     <a href="#" class="plx-step-link plx-link-violet">Voir le jumeau <span class="material-symbols-outlined">arrow_forward</span></a>
                 </div>
                 <div class="plx-step-card">
                     <div class="plx-step-number">03</div>
                     <div class="plx-step-icon plx-icon-teal"><span class="material-symbols-outlined">auto_fix_high</span></div>
                     <h3>Optimiser</h3>
-                    <p>Appliquez les recommandations générées pour rendre chaque minute de cours productive pour 100% des élèves.</p>
+                    <p>Appliquez les recommandations gÃ©nÃ©rÃ©es pour rendre chaque minute de cours productive pour 100% des Ã©lÃ¨ves.</p>
                     <a href="#" class="plx-step-link plx-link-teal">Adapter le cours <span class="material-symbols-outlined">arrow_forward</span></a>
                 </div>
             </div>
@@ -388,8 +388,8 @@ class PedagoLens_Landing {
                 <!-- Large Feature Card -->
                 <div class="plx-premium-card plx-premium-card--primary plx-premium-card--wide">
                     <span class="plx-premium-tag">Data Intelligence</span>
-                    <h3>Scores de compréhension prédictifs</h3>
-                    <p>Identifiez précisément quels concepts bloquent pour quels segments d'étudiants avant même d'entrer en salle.</p>
+                    <h3>Scores de comprÃ©hension prÃ©dictifs</h3>
+                    <p>Identifiez prÃ©cisÃ©ment quels concepts bloquent pour quels segments d'Ã©tudiants avant mÃªme d'entrer en salle.</p>
                     <div class="plx-premium-visual">
                         <div class="plx-premium-placeholder-chart">
                             <div class="plx-chart-bar" style="height:60%"></div>
@@ -405,25 +405,25 @@ class PedagoLens_Landing {
                 <!-- Vertical Card -->
                 <div class="plx-premium-card plx-premium-card--violet">
                     <div class="plx-premium-icon-wrap"><span class="material-symbols-outlined">auto_awesome</span></div>
-                    <h3>Assistance IA en Temps Réel</h3>
-                    <p>Pendant que vous créez, notre IA analyse la structure sémantique et suggère des alternatives visuelles pour les profils à mémoire eidétique.</p>
-                    <a href="<?php echo esc_url( $cta_url ); ?>" class="plx-btn-white-block">Découvrir l'Assistant</a>
+                    <h3>Assistance IA en Temps RÃ©el</h3>
+                    <p>Pendant que vous crÃ©ez, notre IA analyse la structure sÃ©mantique et suggÃ¨re des alternatives visuelles pour les profils Ã  mÃ©moire eidÃ©tique.</p>
+                    <a href="<?php echo esc_url( $cta_url ); ?>" class="plx-btn-white-block">DÃ©couvrir l'Assistant</a>
                     <div class="plx-premium-sparkle"><span class="material-symbols-outlined">sparkles</span></div>
                 </div>
                 <!-- Bottom Feature 1 -->
                 <div class="plx-premium-card plx-premium-card--dark plx-premium-card--small">
                     <div class="plx-premium-row">
                         <div class="plx-premium-icon-sm plx-icon-teal"><span class="material-symbols-outlined">shield_person</span></div>
-                        <h4>Confidentialité Totale</h4>
+                        <h4>ConfidentialitÃ© Totale</h4>
                     </div>
-                    <p>Conformité RGPD stricte. Les données étudiantes sont cryptées de bout en bout et jamais utilisées pour l'entraînement de modèles tiers.</p>
+                    <p>ConformitÃ© RGPD stricte. Les donnÃ©es Ã©tudiantes sont cryptÃ©es de bout en bout et jamais utilisÃ©es pour l'entraÃ®nement de modÃ¨les tiers.</p>
                 </div>
                 <!-- Bottom Feature 2 -->
                 <div class="plx-premium-card plx-premium-card--light plx-premium-card--wide-bottom">
                     <div class="plx-premium-connect-inner">
                         <div>
-                            <h3>Interconnectivité Native</h3>
-                            <p>Intégrez PédagoLens à votre LMS existant (Moodle, Canvas, Blackboard) en un clic pour synchroniser vos cohortes automatiquement.</p>
+                            <h3>InterconnectivitÃ© Native</h3>
+                            <p>IntÃ©grez PÃ©dagoLens Ã  votre LMS existant (Moodle, Canvas, Blackboard) en un clic pour synchroniser vos cohortes automatiquement.</p>
                             <div class="plx-lms-icons">
                                 <div class="plx-lms-icon">M</div>
                                 <div class="plx-lms-icon">C</div>
@@ -446,29 +446,29 @@ class PedagoLens_Landing {
     <section class="plx-section plx-testimonials" id="plx-testimonials">
         <div class="plx-section-inner">
             <div class="plx-section-header">
-                <h2 class="plx-section-title">Ils transforment l'éducation</h2>
-                <p class="plx-section-subtitle">Des enseignants et institutions qui font confiance à PédagoLens.</p>
+                <h2 class="plx-section-title">Ils transforment l'Ã©ducation</h2>
+                <p class="plx-section-subtitle">Des enseignants et institutions qui font confiance Ã  PÃ©dagoLens.</p>
             </div>
             <div class="plx-testimonials-grid">
                 <div class="plx-glass-card plx-testimonial-card">
-                    <p class="plx-testimonial-text">« PédagoLens a transformé ma façon de préparer mes cours. Les scores par profil m'ont ouvert les yeux sur des angles morts que je ne soupçonnais pas. Mes étudiants en difficulté progressent enfin. »</p>
+                    <p class="plx-testimonial-text">Â« PÃ©dagoLens a transformÃ© ma faÃ§on de prÃ©parer mes cours. Les scores par profil m'ont ouvert les yeux sur des angles morts que je ne soupÃ§onnais pas. Mes Ã©tudiants en difficultÃ© progressent enfin. Â»</p>
                     <div class="plx-testimonial-author">
                         <div class="plx-testimonial-avatar">ML</div>
-                        <div><strong>Marie L.</strong><span>Professeure de psychologie, Cégep du Vieux Montréal</span></div>
+                        <div><strong>Marie L.</strong><span>Professeure de psychologie, CÃ©gep du Vieux MontrÃ©al</span></div>
                     </div>
                 </div>
                 <div class="plx-glass-card plx-testimonial-card">
-                    <p class="plx-testimonial-text">« Le jumeau numérique est une révolution. Nos étudiants TDAH ont vu leur engagement augmenter de 35% en un semestre. L'outil s'intègre parfaitement à notre écosystème Moodle. »</p>
+                    <p class="plx-testimonial-text">Â« Le jumeau numÃ©rique est une rÃ©volution. Nos Ã©tudiants TDAH ont vu leur engagement augmenter de 35% en un semestre. L'outil s'intÃ¨gre parfaitement Ã  notre Ã©cosystÃ¨me Moodle. Â»</p>
                     <div class="plx-testimonial-author">
                         <div class="plx-testimonial-avatar">PD</div>
-                        <div><strong>Pierre D.</strong><span>Directeur pédagogique, UQAM</span></div>
+                        <div><strong>Pierre D.</strong><span>Directeur pÃ©dagogique, UQAM</span></div>
                     </div>
                 </div>
                 <div class="plx-glass-card plx-testimonial-card">
-                    <p class="plx-testimonial-text">« L'intégration avec Moodle est transparente. En 3 clics, toute ma cohorte de 180 étudiants était synchronisée et les analyses prêtes pour la session. »</p>
+                    <p class="plx-testimonial-text">Â« L'intÃ©gration avec Moodle est transparente. En 3 clics, toute ma cohorte de 180 Ã©tudiants Ã©tait synchronisÃ©e et les analyses prÃªtes pour la session. Â»</p>
                     <div class="plx-testimonial-author">
                         <div class="plx-testimonial-avatar">SC</div>
-                        <div><strong>Sophie C.</strong><span>Chargée de cours, Université Laval</span></div>
+                        <div><strong>Sophie C.</strong><span>ChargÃ©e de cours, UniversitÃ© Laval</span></div>
                     </div>
                 </div>
             </div>
@@ -481,8 +481,8 @@ class PedagoLens_Landing {
             <div class="plx-cta-dots"></div>
             <div class="plx-cta-gradient"></div>
             <div class="plx-cta-content">
-                <h2>Prêt à redéfinir vos<br>normes pédagogiques ?</h2>
-                <p>Rejoignez les institutions visionnaires qui placent l'équité cognitive au cœur de leur stratégie de réussite.</p>
+                <h2>PrÃªt Ã  redÃ©finir vos<br>normes pÃ©dagogiques ?</h2>
+                <p>Rejoignez les institutions visionnaires qui placent l'Ã©quitÃ© cognitive au cÅ“ur de leur stratÃ©gie de rÃ©ussite.</p>
                 <div class="plx-cta-buttons">
                     <a href="<?php echo esc_url( $cta_url ); ?>" class="plx-btn-white-lg">Commencer maintenant</a>
                     <a href="#plx-features" class="plx-btn-ghost-white-lg">Contacter un expert</a>
@@ -499,10 +499,10 @@ class PedagoLens_Landing {
             <div class="plx-footer-grid">
                 <div class="plx-footer-brand">
                     <div class="plx-nav-logo">
-                        <img src="http://pedagolens.34.199.149.247.nip.io/wp-content/uploads/2026/03/logo.png" alt="PédagoLens" class="pl-logo-img pl-logo-img--footer" />
-                        <span class="plx-logo-text-white">PédagoLens</span>
+                        <img src="<?php echo esc_url( self::get_logo_url() ); ?>" alt="PÃ©dagoLens" class="pl-logo-img pl-logo-img--footer" />
+                        <span class="plx-logo-text-white">PÃ©dagoLens</span>
                     </div>
-                    <p>L'intelligence artificielle dédiée à l'équité pédagogique. Nous aidons les éducateurs à bâtir un futur où personne n'est laissé pour compte.</p>
+                    <p>L'intelligence artificielle dÃ©diÃ©e Ã  l'Ã©quitÃ© pÃ©dagogique. Nous aidons les Ã©ducateurs Ã  bÃ¢tir un futur oÃ¹ personne n'est laissÃ© pour compte.</p>
                     <div class="plx-footer-social">
                         <a href="#" class="plx-social-link"><span class="material-symbols-outlined">public</span></a>
                         <a href="#" class="plx-social-link"><span class="material-symbols-outlined">alternate_email</span></a>
@@ -514,8 +514,8 @@ class PedagoLens_Landing {
                     <ul>
                         <li><a href="#">Plateforme IA</a></li>
                         <li><a href="#">Analyse Cognitive</a></li>
-                        <li><a href="#">Jumeau Numérique</a></li>
-                        <li><a href="#">Intégrations</a></li>
+                        <li><a href="#">Jumeau NumÃ©rique</a></li>
+                        <li><a href="#">IntÃ©grations</a></li>
                     </ul>
                 </div>
                 <div class="plx-footer-col">
@@ -523,34 +523,34 @@ class PedagoLens_Landing {
                     <ul>
                         <li><a href="#">Documentation</a></li>
                         <li><a href="#">Webinaires</a></li>
-                        <li><a href="#">Études de cas</a></li>
+                        <li><a href="#">Ã‰tudes de cas</a></li>
                         <li><a href="#">Blog</a></li>
                     </ul>
                 </div>
                 <div class="plx-footer-col">
                     <h4>Entreprise</h4>
                     <ul>
-                        <li><a href="#">À propos</a></li>
+                        <li><a href="#">Ã€ propos</a></li>
                         <li><a href="#">Partenaires</a></li>
-                        <li><a href="#">Éthique IA</a></li>
+                        <li><a href="#">Ã‰thique IA</a></li>
                         <li><a href="#">Contact</a></li>
                     </ul>
                 </div>
                 <div class="plx-footer-col">
-                    <h4>Légal</h4>
+                    <h4>LÃ©gal</h4>
                     <ul>
-                        <li><a href="#">Confidentialité</a></li>
-                        <li><a href="#">Mentions légales</a></li>
-                        <li><a href="#">Loi 25 (Québec)</a></li>
+                        <li><a href="#">ConfidentialitÃ©</a></li>
+                        <li><a href="#">Mentions lÃ©gales</a></li>
+                        <li><a href="#">Loi 25 (QuÃ©bec)</a></li>
                         <li><a href="#">Cookies</a></li>
                     </ul>
                 </div>
             </div>
             <div class="plx-footer-bottom">
-                <p>&copy; <?php echo $year; ?> PédagoLens AI. Tous droits réservés.</p>
+                <p>&copy; <?php echo $year; ?> PÃ©dagoLens AI. Tous droits rÃ©servÃ©s.</p>
                 <div class="plx-footer-lang">
                     <span class="material-symbols-outlined">language</span>
-                    <span>Français (Québec)</span>
+                    <span>FranÃ§ais (QuÃ©bec)</span>
                 </div>
             </div>
         </div>
@@ -596,8 +596,33 @@ class PedagoLens_Landing {
         return home_url( '/' );
     }
 
+    /**
+     * Resolve logo URL from migration option, custom logo, or uploads fallback.
+     */
+    private static function get_logo_url(): string {
+        $forced = trim( (string) get_option( 'pl_brand_logo_url', '' ) );
+        if ( $forced !== '' ) {
+            return $forced;
+        }
+
+        $custom_logo_id = (int) get_theme_mod( 'custom_logo' );
+        if ( $custom_logo_id > 0 ) {
+            $custom = wp_get_attachment_image_url( $custom_logo_id, 'full' );
+            if ( is_string( $custom ) && $custom !== '' ) {
+                return $custom;
+            }
+        }
+
+        $uploads = wp_get_upload_dir();
+        if ( ! empty( $uploads['baseurl'] ) ) {
+            return trailingslashit( $uploads['baseurl'] ) . 'logo.png';
+        }
+
+        return '';
+    }
+
     // -------------------------------------------------------------------------
-    // [pedagolens_teacher_dashboard] — Dashboard enseignant front-end (Stitch)
+    // [pedagolens_teacher_dashboard] â€” Dashboard enseignant front-end (Stitch)
     // -------------------------------------------------------------------------
 
     
@@ -630,7 +655,7 @@ class PedagoLens_Landing {
                 'post_status'    => 'publish',
             ] );
 
-            // Recent projects (ateliers/séances)
+            // Recent projects (ateliers/sÃ©ances)
             $recent_projects = get_posts( [
                 'post_type'      => 'pl_project',
                 'posts_per_page' => 4,
@@ -647,7 +672,7 @@ class PedagoLens_Landing {
             ?>
     <div class="pl-dash-page pl-dash-page--fw">
 
-        <!-- ── Header compact ──────────────────────────────────── -->
+        <!-- â”€â”€ Header compact â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <div class="pl-dash-header pl-dash-header--fw">
             <div>
                 <h1 class="pl-dash-title pl-dash-title--fw">Bonjour, <?php echo $first_name; ?> &#128075;</h1>
@@ -659,7 +684,7 @@ class PedagoLens_Landing {
             </a>
         </div>
 
-        <!-- ── KPI Grid (4 cards) ──────────────────────────────── -->
+        <!-- â”€â”€ KPI Grid (4 cards) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <div class="pl-dash-kpi-grid pl-dash-kpi-grid--fw">
             <div class="pl-dash-kpi-card pl-dash-kpi-card--fw">
                 <div class="pl-dash-kpi-icon pl-dash-icon-blue"><span class="material-symbols-outlined">menu_book</span></div>
@@ -691,10 +716,10 @@ class PedagoLens_Landing {
             </div>
         </div>
 
-        <!-- ── Bottom zone : 3 columns ─────────────────────────── -->
+        <!-- â”€â”€ Bottom zone : 3 columns â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <div class="pl-dash-bottom-grid">
 
-            <!-- Cours récents -->
+            <!-- Cours rÃ©cents -->
             <section class="pl-dash-section-card">
                 <h2 class="pl-dash-section-heading">
                     <span class="material-symbols-outlined">menu_book</span> Cours r&eacute;cents
@@ -722,7 +747,7 @@ class PedagoLens_Landing {
                 <?php endif; ?>
             </section>
 
-            <!-- Ateliers récents -->
+            <!-- Ateliers rÃ©cents -->
             <section class="pl-dash-section-card">
                 <h2 class="pl-dash-section-heading">
                     <span class="material-symbols-outlined">science</span> Ateliers r&eacute;cents
@@ -788,7 +813,7 @@ class PedagoLens_Landing {
 
 
     // -------------------------------------------------------------------------
-    // [pedagolens_student_dashboard] — Dashboard étudiant (Stitch)
+    // [pedagolens_student_dashboard] â€” Dashboard Ã©tudiant (Stitch)
     // -------------------------------------------------------------------------
 
     
@@ -812,7 +837,7 @@ class PedagoLens_Landing {
 
             ob_start();
 
-            // Teacher/Admin → Agent IA Léa interface with analytics
+            // Teacher/Admin â†’ Agent IA LÃ©a interface with analytics
             if ( $is_teacher ) {
                 echo self::render_header( 'Agent IA L&eacute;a' );
                 echo '<div class="pl-app-layout">';
@@ -968,7 +993,7 @@ class PedagoLens_Landing {
                     </div>
                 </section>
 
-                <!-- Questions fréquentes -->
+                <!-- Questions frÃ©quentes -->
                 <section class="pl-lea-analytics-section">
                     <h3><span class="material-symbols-outlined">help</span> Questions fr&eacute;quentes</h3>
                     <ol class="pl-lea-faq-list">
@@ -1027,7 +1052,7 @@ class PedagoLens_Landing {
                 return ob_get_clean();
             }
 
-            // ── Jumeau IA full-screen view (?view=twin) ──
+            // â”€â”€ Jumeau IA full-screen view (?view=twin) â”€â”€
             if ( isset( $_GET['view'] ) && $_GET['view'] === 'twin' ) {
                 $dash_url    = esc_url( self::page_url( 'dashboard-etudiant', '' ) );
                 $history_url = esc_url( self::page_url( 'historique', '' ) );
@@ -1049,7 +1074,7 @@ class PedagoLens_Landing {
     <header class="pl-twin-header">
         <div class="pl-twin-header-left">
             <a href="<?php echo $dash_url; ?>" class="pl-twin-logo-link">
-                <img src="http://pedagolens.34.199.149.247.nip.io/wp-content/uploads/2026/03/logo.png" alt="P&eacute;dagoLens" class="pl-logo-img pl-logo-img--twin" />
+                <img src="<?php echo esc_url( self::get_logo_url() ); ?>" alt="P&eacute;dagoLens" class="pl-logo-img pl-logo-img--twin" />
             </a>
             <div class="pl-twin-header-sep"></div>
             <h1 class="pl-twin-header-title">Jumeau IA &mdash; L&eacute;a</h1>
@@ -1203,7 +1228,7 @@ class PedagoLens_Landing {
                     </div>
                 </div>
             </div>
-            <!-- CTA vers Jumeau IA Léa -->
+            <!-- CTA vers Jumeau IA LÃ©a -->
             <section class="pl-stu-lea-cta" style="margin-bottom:2rem;">
                 <div class="pl-stu-lea-cta-card" style="border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,#f0f4ff 0%,#faf5ff 100%);padding:2rem;display:flex;align-items:center;gap:1.5rem;">
                     <div class="pl-stu-lea-cta-icon" style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
@@ -1257,7 +1282,7 @@ class PedagoLens_Landing {
 
 
     // -------------------------------------------------------------------------
-    // [pedagolens_jumeau_ia] — Page dédiée Jumeau IA étudiant (chat Léa)
+    // [pedagolens_jumeau_ia] â€” Page dÃ©diÃ©e Jumeau IA Ã©tudiant (chat LÃ©a)
     // -------------------------------------------------------------------------
 
     public static function shortcode_jumeau_ia( array $atts ): string {
@@ -1299,7 +1324,7 @@ class PedagoLens_Landing {
     <!-- Header compact -->
     <header class="pl-twin-header">
         <div class="pl-twin-header-left">
-            <img src="http://pedagolens.34.199.149.247.nip.io/wp-content/uploads/2026/03/logo.png" alt="P&eacute;dagoLens" class="pl-logo-img pl-logo-img--twin" />
+            <img src="<?php echo esc_url( self::get_logo_url() ); ?>" alt="P&eacute;dagoLens" class="pl-logo-img pl-logo-img--twin" />
             <h1 class="pl-twin-header-title">Jumeau IA &mdash; L&eacute;a</h1>
         </div>
         <div class="pl-twin-header-center">
@@ -1318,7 +1343,7 @@ class PedagoLens_Landing {
         </div>
     </header>
 
-    <!-- Zone de chat plein écran -->
+    <!-- Zone de chat plein Ã©cran -->
     <div class="pl-twin-chat-area">
         <div class="pl-twin-messages" id="pl-lea-messages">
             <div class="pl-lea-msg pl-lea-msg--bot">
@@ -1344,7 +1369,7 @@ class PedagoLens_Landing {
     }
 
     // -------------------------------------------------------------------------
-    // [pedagolens_courses] — Liste des cours et projets (front-end complet)
+    // [pedagolens_courses] â€” Liste des cours et projets (front-end complet)
     // -------------------------------------------------------------------------
 
     public static function shortcode_courses( array $atts ): string {
@@ -1365,20 +1390,20 @@ class PedagoLens_Landing {
         $type_labels = [
             'magistral'      => 'Magistral',
             'exercice'       => 'Exercice',
-            'travail_equipe' => 'Travail d\'équipe',
-            'evaluation'     => 'Évaluation',
+            'travail_equipe' => 'Travail d\'Ã©quipe',
+            'evaluation'     => 'Ã‰valuation',
         ];
         $type_icons = [
-            'magistral'      => '🎓',
-            'exercice'       => '📝',
-            'travail_equipe' => '👥',
-            'evaluation'     => '📋',
+            'magistral'      => 'ðŸŽ“',
+            'exercice'       => 'ðŸ“',
+            'travail_equipe' => 'ðŸ‘¥',
+            'evaluation'     => 'ðŸ“‹',
         ];
         $project_type_options = [
             'magistral'      => 'Magistral (PowerPoint de cours)',
             'exercice'       => 'Exercice (PowerPoint + Word)',
-            'travail_equipe' => 'Travail d\'équipe (documents collaboratifs)',
-            'evaluation'     => 'Évaluation (examens, dissertations)',
+            'travail_equipe' => 'Travail d\'Ã©quipe (documents collaboratifs)',
+            'evaluation'     => 'Ã‰valuation (examens, dissertations)',
         ];
 
         ob_start();
@@ -1393,7 +1418,7 @@ class PedagoLens_Landing {
 
             <div class="pl-courses-page-header pl-animate-in">
                 <div>
-                    <span class="pl-section-tag">📚 Mes cours</span>
+                    <span class="pl-section-tag">ðŸ“š Mes cours</span>
                     <h1 class="pl-courses-main-title">Cours &amp; S&eacute;ances</h1>
                     <p class="pl-courses-subtitle">G&eacute;rez vos cours, cr&eacute;ez des s&eacute;ances et analysez-les avec l'IA.</p>
                 </div>
@@ -1474,15 +1499,15 @@ class PedagoLens_Landing {
                                 </button>
                             </div>
                             <div class="pl-course-card-body">
-                                <span class="pl-course-type-icon"><?php echo $type_icons[ $course_type ] ?? '📄'; ?></span>
+                                <span class="pl-course-type-icon"><?php echo $type_icons[ $course_type ] ?? 'ðŸ“„'; ?></span>
                                 <h3 class="pl-course-card-title"><?php echo esc_html( $course->post_title ); ?></h3>
                                 <span class="pl-badge pl-type-<?php echo esc_attr( $course_type ); ?>">
                                     <?php echo esc_html( $type_labels[ $course_type ] ?? $course_type ); ?>
                                 </span>
                                 <div class="pl-course-card-meta">
-                                    <span>📁 <?php echo $nb_projects; ?> s&eacute;ance(s)</span>
+                                    <span>ðŸ“ <?php echo $nb_projects; ?> s&eacute;ance(s)</span>
                                     <?php if ( $last_analysis ) : ?>
-                                        <span>🔍 <?php echo esc_html( $last_analysis ); ?></span>
+                                        <span>ðŸ” <?php echo esc_html( $last_analysis ); ?></span>
                                     <?php endif; ?>
                                 </div>
                                 <span class="pl-course-card-hint">Cliquer pour voir les s&eacute;ances</span>
@@ -1502,19 +1527,19 @@ class PedagoLens_Landing {
     </div>
 
         <?php
-        // ── Create Course Modal ──
+        // â”€â”€ Create Course Modal â”€â”€
         ?>
         <div class="pl-modal" data-pl-modal="create-course">
           <div class="pl-modal-backdrop"></div>
           <div class="pl-modal-content">
             <div class="pl-modal-header">
-              <h2>Créer un nouveau cours</h2>
+              <h2>CrÃ©er un nouveau cours</h2>
               <button data-pl-modal-close class="pl-modal-close-btn"><span class="material-symbols-outlined">close</span></button>
             </div>
             <form id="pl-create-course-form" class="pl-modal-form">
               <div class="pl-form-group">
                 <label for="pl-course-title">Titre du cours *</label>
-                <input type="text" id="pl-course-title" name="title" required placeholder="Ex: Français 103" class="pl-form-input" />
+                <input type="text" id="pl-course-title" name="title" required placeholder="Ex: FranÃ§ais 103" class="pl-form-input" />
               </div>
               <div class="pl-form-row">
                 <div class="pl-form-group pl-form-half">
@@ -1535,14 +1560,14 @@ class PedagoLens_Landing {
                 <select id="pl-course-type" name="course_type" class="pl-form-input">
                   <option value="magistral">Magistral</option>
                   <option value="exercice">Exercice</option>
-                  <option value="travail_equipe">Travail d'équipe</option>
-                  <option value="evaluation">Évaluation</option>
+                  <option value="travail_equipe">Travail d'Ã©quipe</option>
+                  <option value="evaluation">Ã‰valuation</option>
                 </select>
               </div>
               <div class="pl-modal-footer">
                 <button type="button" data-pl-modal-close class="pl-btn pl-btn--ghost">Annuler</button>
                 <button type="submit" class="pl-btn pl-btn--primary pl-btn-submit">
-                  <span class="pl-btn-text">Créer le cours</span>
+                  <span class="pl-btn-text">CrÃ©er le cours</span>
                   <span class="pl-btn-loader" style="display:none;"><span class="material-symbols-outlined pl-spin">progress_activity</span></span>
                 </button>
               </div>
@@ -1551,7 +1576,7 @@ class PedagoLens_Landing {
         </div>
 
         <?php
-        // ── Edit Course Modal ──
+        // â”€â”€ Edit Course Modal â”€â”€
         ?>
         <div class="pl-modal" data-pl-modal="edit-course">
           <div class="pl-modal-backdrop"></div>
@@ -1564,7 +1589,7 @@ class PedagoLens_Landing {
               <input type="hidden" id="pl-edit-course-id" name="course_id" />
               <div class="pl-form-group">
                 <label for="pl-edit-course-title">Titre du cours *</label>
-                <input type="text" id="pl-edit-course-title" name="title" required placeholder="Ex: Français 103" class="pl-form-input" />
+                <input type="text" id="pl-edit-course-title" name="title" required placeholder="Ex: FranÃ§ais 103" class="pl-form-input" />
               </div>
               <div class="pl-form-row">
                 <div class="pl-form-group pl-form-half">
@@ -1585,8 +1610,8 @@ class PedagoLens_Landing {
                 <select id="pl-edit-course-type" name="course_type" class="pl-form-input">
                   <option value="magistral">Magistral</option>
                   <option value="exercice">Exercice</option>
-                  <option value="travail_equipe">Travail d'équipe</option>
-                  <option value="evaluation">Évaluation</option>
+                  <option value="travail_equipe">Travail d'Ã©quipe</option>
+                  <option value="evaluation">Ã‰valuation</option>
                 </select>
               </div>
               <div class="pl-modal-footer">
@@ -1601,7 +1626,7 @@ class PedagoLens_Landing {
         </div>
 
         <?php
-        // ── Create Project Modal (Task 17) ──
+        // â”€â”€ Create Project Modal (Task 17) â”€â”€
         ?>
         <div class="pl-modal" data-pl-modal="create-project">
           <div class="pl-modal-backdrop"></div>
@@ -1613,11 +1638,11 @@ class PedagoLens_Landing {
             <form id="pl-create-project-form" class="pl-modal-form" enctype="multipart/form-data">
               <input type="hidden" id="pl-project-course-id" name="course_id" value="" />
               <div class="pl-project-course-info">
-                📚 Cours : <span id="pl-project-course-label"></span>
+                ðŸ“š Cours : <span id="pl-project-course-label"></span>
               </div>
               <div class="pl-form-group">
                 <label for="pl-project-title">Titre de la s&eacute;ance *</label>
-                <input type="text" id="pl-project-title" name="title" required placeholder="Ex: Semaine 3 — Les fonctions" class="pl-form-input" />
+                <input type="text" id="pl-project-title" name="title" required placeholder="Ex: Semaine 3 â€” Les fonctions" class="pl-form-input" />
               </div>
               <div class="pl-form-group">
                 <label for="pl-project-type">Type de s&eacute;ance</label>
@@ -1655,16 +1680,16 @@ class PedagoLens_Landing {
         </div>
 
         <?php
-        // ── Séances Modal (Task 36) ──
+        // â”€â”€ SÃ©ances Modal (Task 36) â”€â”€
         ?>
         <div class="pl-modal pl-seances-modal" data-pl-modal="view-seances">
           <div class="pl-modal-backdrop"></div>
           <div class="pl-modal-content pl-seances-modal-content">
             <div class="pl-modal-header pl-seances-modal-header">
               <div class="pl-seances-modal-title-wrap">
-                <span class="pl-seances-modal-icon" id="pl-seances-modal-icon">📚</span>
+                <span class="pl-seances-modal-icon" id="pl-seances-modal-icon">ðŸ“š</span>
                 <div>
-                  <h2 id="pl-seances-modal-title">Séances du cours</h2>
+                  <h2 id="pl-seances-modal-title">SÃ©ances du cours</h2>
                   <span class="pl-seances-modal-badge" id="pl-seances-modal-badge"></span>
                 </div>
               </div>
@@ -1676,7 +1701,7 @@ class PedagoLens_Landing {
             <div class="pl-seances-modal-footer">
               <button class="pl-btn pl-btn--primary pl-btn--icon pl-seances-modal-create-btn" id="pl-seances-modal-create-btn">
                 <span class="material-symbols-outlined">add</span>
-                Créer une séance
+                CrÃ©er une sÃ©ance
               </button>
             </div>
           </div>
@@ -1690,7 +1715,7 @@ class PedagoLens_Landing {
     }
 
     // -------------------------------------------------------------------------
-    // [pedagolens_workbench] — Atelier d'édition complet front-end
+    // [pedagolens_workbench] â€” Atelier d'Ã©dition complet front-end
     // -------------------------------------------------------------------------
 
     public static function shortcode_workbench( array $atts ): string {
@@ -1716,12 +1741,12 @@ class PedagoLens_Landing {
             ] );
 
             $type_icons = [
-                'magistral' => '🎓', 'exercice' => '📝',
-                'travail_equipe' => '👥', 'evaluation' => '📋',
+                'magistral' => 'ðŸŽ“', 'exercice' => 'ðŸ“',
+                'travail_equipe' => 'ðŸ‘¥', 'evaluation' => 'ðŸ“‹',
             ];
             $type_labels = [
                 'magistral' => 'Magistral', 'exercice' => 'Exercice',
-                'travail_equipe' => 'Travail d\'équipe', 'evaluation' => 'Évaluation',
+                'travail_equipe' => 'Travail d\'Ã©quipe', 'evaluation' => 'Ã‰valuation',
             ];
 
             ob_start();
@@ -1732,16 +1757,16 @@ class PedagoLens_Landing {
             ?>
             <div class="pl-wb-selector">
                 <div class="pl-wb-selector-header">
-                    <span class="pl-section-tag">🔬 Atelier pédagogique</span>
-                    <h1 class="pl-wb-selector-title">Choisissez une séance</h1>
-                    <p class="pl-wb-selector-subtitle">Sélectionnez un cours puis une séance pour ouvrir l'atelier d'analyse IA.</p>
+                    <span class="pl-section-tag">ðŸ”¬ Atelier pÃ©dagogique</span>
+                    <h1 class="pl-wb-selector-title">Choisissez une sÃ©ance</h1>
+                    <p class="pl-wb-selector-subtitle">SÃ©lectionnez un cours puis une sÃ©ance pour ouvrir l'atelier d'analyse IA.</p>
                 </div>
 
                 <?php if ( empty( $courses ) ) : ?>
                     <div class="pl-wb-selector-empty">
-                        <div class="pl-wb-selector-empty-icon">📚</div>
+                        <div class="pl-wb-selector-empty-icon">ðŸ“š</div>
                         <h3>Aucun cours</h3>
-                        <p>Créez d'abord un cours sur la page <a href="<?php echo esc_url( $courses_url ); ?>">Cours &amp; Séances</a>.</p>
+                        <p>CrÃ©ez d'abord un cours sur la page <a href="<?php echo esc_url( $courses_url ); ?>">Cours &amp; SÃ©ances</a>.</p>
                     </div>
                 <?php else : ?>
                     <div class="pl-wb-selector-grid">
@@ -1750,7 +1775,7 @@ class PedagoLens_Landing {
                             $projects = class_exists( 'PedagoLens_Teacher_Dashboard' )
                                 ? PedagoLens_Teacher_Dashboard::get_projects( $course->ID )
                                 : [];
-                            $c_icon = $type_icons[ $c_type ] ?? '📄';
+                            $c_icon = $type_icons[ $c_type ] ?? 'ðŸ“„';
                             ?>
                             <div class="pl-wb-selector-course" data-wb-course-id="<?php echo (int) $course->ID; ?>">
                                 <div class="pl-wb-selector-course-header">
@@ -1763,14 +1788,14 @@ class PedagoLens_Landing {
                                 </div>
                                 <div class="pl-wb-selector-seances" style="display:none;">
                                     <?php if ( empty( $projects ) ) : ?>
-                                        <p class="pl-wb-selector-no-seance">Aucune séance. <a href="<?php echo esc_url( $courses_url ); ?>">Créer une séance</a></p>
+                                        <p class="pl-wb-selector-no-seance">Aucune sÃ©ance. <a href="<?php echo esc_url( $courses_url ); ?>">CrÃ©er une sÃ©ance</a></p>
                                     <?php else : ?>
                                         <?php foreach ( $projects as $p ) :
                                             $wb_url = $workbench_page
                                                 ? get_permalink( $workbench_page ) . '?project_id=' . $p['id']
                                                 : admin_url( 'admin.php?page=pl-course-workbench&project_id=' . $p['id'] );
                                             $p_type = $p['type'] ?? 'magistral';
-                                            $p_icon = $type_icons[ $p_type ] ?? '📄';
+                                            $p_icon = $type_icons[ $p_type ] ?? 'ðŸ“„';
                                             ?>
                                             <a href="<?php echo esc_url( $wb_url ); ?>" class="pl-wb-selector-seance-card">
                                                 <span class="pl-wb-selector-seance-icon"><?php echo $p_icon; ?></span>
@@ -1796,7 +1821,7 @@ class PedagoLens_Landing {
         }
 
         if ( ! class_exists( 'PedagoLens_Workbench_Admin' ) ) {
-            return '<div class="pl-notice pl-notice-error"><p>Le plugin Course Workbench n\'est pas activé.</p></div>';
+            return '<div class="pl-notice pl-notice-error"><p>Le plugin Course Workbench n\'est pas activÃ©.</p></div>';
         }
 
         // Get the workbench HTML from the admin class
@@ -1820,13 +1845,13 @@ class PedagoLens_Landing {
     }
 
     // -------------------------------------------------------------------------
-    // [pedagolens_account] — Page de compte utilisateur
+    // [pedagolens_account] â€” Page de compte utilisateur
     // -------------------------------------------------------------------------
 
     public static function shortcode_account( array $atts ): string {
 
         // -----------------------------------------------------------------
-        // Visiteur non connecté → formulaire de connexion stylé
+        // Visiteur non connectÃ© â†’ formulaire de connexion stylÃ©
         // -----------------------------------------------------------------
         if ( ! is_user_logged_in() ) {
             $login_url = wp_login_url( get_permalink() );
@@ -1835,7 +1860,7 @@ class PedagoLens_Landing {
             <div class="pl-account-page">
                 <div class="pl-account-login-card pl-glass-card pl-animate-in">
                     <div class="pl-login-icon">&#128274;</div>
-                    <h2>Connexion &agrave; PédagoLens</h2>
+                    <h2>Connexion &agrave; PÃ©dagoLens</h2>
                     <p class="pl-text-muted">Connectez-vous pour acc&eacute;der &agrave; votre espace.</p>
                     <?php wp_login_form( [
                         'redirect'       => get_permalink(),
@@ -1856,7 +1881,7 @@ class PedagoLens_Landing {
         }
 
         // -----------------------------------------------------------------
-        // Utilisateur connecté
+        // Utilisateur connectÃ©
         // -----------------------------------------------------------------
         $user       = wp_get_current_user();
         $roles      = (array) $user->roles;
@@ -1978,7 +2003,7 @@ class PedagoLens_Landing {
 
                 <?php
                 // =================================================================
-                // ENSEIGNANT / ADMIN — Préférences + Liens rapides
+                // ENSEIGNANT / ADMIN â€” PrÃ©fÃ©rences + Liens rapides
                 // =================================================================
                 if ( $is_admin || $is_teacher ) :
                     $teacher_page   = get_page_by_path( 'dashboard-enseignant' );
@@ -1993,7 +2018,7 @@ class PedagoLens_Landing {
                     $notif = ! empty( $prefs['notifications'] );
                 ?>
 
-                    <!-- Préférences -->
+                    <!-- PrÃ©fÃ©rences -->
                     <div class="pl-account-section pl-glass-card pl-animate-in">
                         <h3>&#9881; Mes pr&eacute;f&eacute;rences</h3>
                         <div class="pl-prefs-grid">
@@ -2031,7 +2056,7 @@ class PedagoLens_Landing {
 
                 <?php
                 // =================================================================
-                // ÉTUDIANT — Difficultés + Liens rapides
+                // Ã‰TUDIANT â€” DifficultÃ©s + Liens rapides
                 // =================================================================
                 elseif ( $is_student ) :
                     $raw_diff     = get_user_meta( $user->ID, 'pl_student_difficulties', true );
@@ -2064,7 +2089,7 @@ class PedagoLens_Landing {
 
                     <!-- Student right column: 2-column grid for profile + difficulties -->
                     <div class="pl-account-right-grid">
-                        <!-- Mes difficultés -->
+                        <!-- Mes difficultÃ©s -->
                         <div class="pl-account-section pl-glass-card pl-animate-in">
                             <h3>&#128203; Mes difficult&eacute;s / troubles</h3>
                             <p class="pl-text-muted" style="font-size:.78rem;margin-bottom:.5rem;">Ces informations aident vos enseignants &agrave; adapter leur p&eacute;dagogie.</p>
@@ -2081,7 +2106,7 @@ class PedagoLens_Landing {
                                         </label>
                                         <?php if ( $key === 'autre' ) : ?>
                                             <div class="pl-autre-field" style="<?php echo in_array( 'autre', $checked_keys, true ) ? '' : 'display:none;'; ?>">
-                                                <input type="text" name="autre_text" placeholder="Pr&eacute;cisez…"
+                                                <input type="text" name="autre_text" placeholder="Pr&eacute;cisezâ€¦"
                                                        value="<?php echo esc_attr( $other_text ); ?>" />
                                             </div>
                                         <?php endif; ?>
@@ -2091,7 +2116,7 @@ class PedagoLens_Landing {
                             </form>
                         </div>
 
-                        <!-- Liens rapides étudiant -->
+                        <!-- Liens rapides Ã©tudiant -->
                         <div class="pl-account-section pl-glass-card pl-animate-in">
                             <h3>&#128279; Liens rapides</h3>
                             <div class="pl-quick-links">
@@ -2115,11 +2140,11 @@ class PedagoLens_Landing {
 
         <script>
         (function($){
-            // --- Profil form (tous les rôles) ---
+            // --- Profil form (tous les rÃ´les) ---
             $('#pl-profile-form').on('submit', function(e){
                 e.preventDefault();
                 var $form = $(this), $msg = $('#pl-profile-msg'), $btn = $form.find('button[type=submit]');
-                $btn.prop('disabled',true).text('Enregistrement…');
+                $btn.prop('disabled',true).text('Enregistrementâ€¦');
                 $msg.hide();
                 $.post(plFront.ajaxUrl, {
                     action: 'pl_save_account_profile',
@@ -2130,16 +2155,16 @@ class PedagoLens_Landing {
                 }, function(res){
                     $msg.removeClass('pl-msg-ok pl-msg-err')
                         .addClass(res.success ? 'pl-msg-ok' : 'pl-msg-err')
-                        .text(res.data?.message || (res.success ? 'Profil mis à jour.' : 'Erreur.'))
+                        .text(res.data?.message || (res.success ? 'Profil mis Ã  jour.' : 'Erreur.'))
                         .show();
                     $btn.prop('disabled',false).text('Enregistrer');
                 }).fail(function(){
-                    $msg.addClass('pl-msg-err').text('Erreur réseau.').show();
+                    $msg.addClass('pl-msg-err').text('Erreur rÃ©seau.').show();
                     $btn.prop('disabled',false).text('Enregistrer');
                 });
             });
 
-            // --- Difficultés étudiant ---
+            // --- DifficultÃ©s Ã©tudiant ---
             $('[name="difficulties[]"][value="autre"]').on('change', function(){
                 $('.pl-autre-field').toggle(this.checked);
             });
@@ -2155,7 +2180,7 @@ class PedagoLens_Landing {
                         checked.push(key);
                     }
                 });
-                $btn.prop('disabled',true).text('Enregistrement…');
+                $btn.prop('disabled',true).text('Enregistrementâ€¦');
                 $msg.hide();
                 $.post(plFront.ajaxUrl, {
                     action: 'pl_save_student_difficulties',
@@ -2164,16 +2189,16 @@ class PedagoLens_Landing {
                 }, function(res){
                     $msg.removeClass('pl-msg-ok pl-msg-err')
                         .addClass(res.success ? 'pl-msg-ok' : 'pl-msg-err')
-                        .text(res.data?.message || (res.success ? 'Sauvegardé !' : 'Erreur.'))
+                        .text(res.data?.message || (res.success ? 'SauvegardÃ© !' : 'Erreur.'))
                         .show();
                     $btn.prop('disabled',false).text('Sauvegarder');
                 }).fail(function(){
-                    $msg.addClass('pl-msg-err').text('Erreur réseau.').show();
+                    $msg.addClass('pl-msg-err').text('Erreur rÃ©seau.').show();
                     $btn.prop('disabled',false).text('Sauvegarder');
                 });
             });
 
-            // --- Préférences toggle (enseignant) ---
+            // --- PrÃ©fÃ©rences toggle (enseignant) ---
             $('.pl-toggle-input').on('change', function(){
                 var pref = $(this).data('pref'), val = this.checked ? 1 : 0;
                 $.post(plFront.ajaxUrl, {
@@ -2193,28 +2218,28 @@ class PedagoLens_Landing {
     }
 
     // -------------------------------------------------------------------------
-    // AJAX — Sauvegarde difficultés étudiant
+    // AJAX â€” Sauvegarde difficultÃ©s Ã©tudiant
     // -------------------------------------------------------------------------
 
     public static function ajax_save_student_difficulties(): void {
         check_ajax_referer( 'pl_student_difficulties' );
 
         if ( ! is_user_logged_in() ) {
-            wp_send_json_error( [ 'message' => 'Non authentifié.' ] );
+            wp_send_json_error( [ 'message' => 'Non authentifiÃ©.' ] );
         }
 
         $user  = wp_get_current_user();
         $roles = (array) $user->roles;
 
         if ( ! in_array( 'pedagolens_student', $roles, true ) && ! in_array( 'administrator', $roles, true ) ) {
-            wp_send_json_error( [ 'message' => 'Accès refusé.' ] );
+            wp_send_json_error( [ 'message' => 'AccÃ¨s refusÃ©.' ] );
         }
 
         $raw = isset( $_POST['difficulties'] ) ? sanitize_text_field( wp_unslash( $_POST['difficulties'] ) ) : '[]';
         $decoded = json_decode( $raw, true );
 
         if ( ! is_array( $decoded ) ) {
-            wp_send_json_error( [ 'message' => 'Données invalides.' ] );
+            wp_send_json_error( [ 'message' => 'DonnÃ©es invalides.' ] );
         }
 
         // Sanitize each entry
@@ -2232,29 +2257,29 @@ class PedagoLens_Landing {
 
         update_user_meta( $user->ID, 'pl_student_difficulties', $clean );
 
-        wp_send_json_success( [ 'message' => 'Difficultés enregistrées.' ] );
+        wp_send_json_success( [ 'message' => 'DifficultÃ©s enregistrÃ©es.' ] );
     }
 
     // -------------------------------------------------------------------------
-    // AJAX — Sauvegarde profil / préférences compte
+    // AJAX â€” Sauvegarde profil / prÃ©fÃ©rences compte
     // -------------------------------------------------------------------------
 
     public static function ajax_save_account_profile(): void {
         check_ajax_referer( 'pl_account_profile' );
 
         if ( ! is_user_logged_in() ) {
-            wp_send_json_error( [ 'message' => 'Non authentifié.' ] );
+            wp_send_json_error( [ 'message' => 'Non authentifiÃ©.' ] );
         }
 
         $user = wp_get_current_user();
 
-        // Préférence toggle (enseignant)
+        // PrÃ©fÃ©rence toggle (enseignant)
         if ( ! empty( $_POST['pref_key'] ) ) {
             $prefs = (array) get_user_meta( $user->ID, 'pl_teacher_prefs', true );
             $key   = sanitize_key( $_POST['pref_key'] );
             $prefs[ $key ] = (int) $_POST['pref_val'] ? true : false;
             update_user_meta( $user->ID, 'pl_teacher_prefs', $prefs );
-            wp_send_json_success( [ 'message' => 'Préférence enregistrée.' ] );
+            wp_send_json_success( [ 'message' => 'PrÃ©fÃ©rence enregistrÃ©e.' ] );
         }
 
         // Profil complet
@@ -2266,11 +2291,11 @@ class PedagoLens_Landing {
             wp_send_json_error( [ 'message' => 'Nom et courriel requis.' ] );
         }
 
-        // Vérifier unicité email
+        // VÃ©rifier unicitÃ© email
         if ( $email !== $user->user_email ) {
             $existing = get_user_by( 'email', $email );
             if ( $existing && $existing->ID !== $user->ID ) {
-                wp_send_json_error( [ 'message' => 'Ce courriel est déjà utilisé.' ] );
+                wp_send_json_error( [ 'message' => 'Ce courriel est dÃ©jÃ  utilisÃ©.' ] );
             }
         }
 
@@ -2282,7 +2307,7 @@ class PedagoLens_Landing {
 
         if ( ! empty( $password ) ) {
             if ( strlen( $password ) < 6 ) {
-                wp_send_json_error( [ 'message' => 'Le mot de passe doit contenir au moins 6 caractères.' ] );
+                wp_send_json_error( [ 'message' => 'Le mot de passe doit contenir au moins 6 caractÃ¨res.' ] );
             }
             $update_data['user_pass'] = $password;
         }
@@ -2293,7 +2318,7 @@ class PedagoLens_Landing {
             wp_send_json_error( [ 'message' => $result->get_error_message() ] );
         }
 
-        wp_send_json_success( [ 'message' => 'Profil mis à jour.' ] );
+        wp_send_json_success( [ 'message' => 'Profil mis Ã  jour.' ] );
     }
 
     // -------------------------------------------------------------------------
@@ -2315,7 +2340,7 @@ class PedagoLens_Landing {
 
         ob_start();
 
-        // ── Variante 1 : Visiteur (non connecté) ──
+        // â”€â”€ Variante 1 : Visiteur (non connectÃ©) â”€â”€
         if ( ! $is_logged ) :
             $dash_teacher = esc_url( self::page_url( 'dashboard-enseignant', 'pl-teacher-dashboard' ) );
         ?>
@@ -2323,7 +2348,7 @@ class PedagoLens_Landing {
             <nav class="plx-nav" role="navigation" aria-label="Navigation principale">
                 <div class="plx-nav-inner">
                     <a href="<?php echo $home_url; ?>" class="plx-nav-logo">
-                        <img src="http://pedagolens.34.199.149.247.nip.io/wp-content/uploads/2026/03/logo.png" alt="PédagoLens" class="pl-logo-img pl-logo-img--header" />
+                        <img src="<?php echo esc_url( self::get_logo_url() ); ?>" alt="PÃ©dagoLens" class="pl-logo-img pl-logo-img--header" />
                         P&eacute;dagoLens
                     </a>
                     <ul class="plx-nav-links">
@@ -2339,7 +2364,7 @@ class PedagoLens_Landing {
             </nav>
         </header>
         <?php
-        // ── Variante 2 & 3 : Utilisateur connecté (étudiant / enseignant / admin) ──
+        // â”€â”€ Variante 2 & 3 : Utilisateur connectÃ© (Ã©tudiant / enseignant / admin) â”€â”€
         else :
             $avatar_url = get_avatar_url( $user->ID, [ 'size' => 64 ] );
             $display    = esc_html( $user->display_name );
@@ -2366,7 +2391,7 @@ class PedagoLens_Landing {
         <header class="pl-header-app" role="banner">
             <div class="pl-header-app-left">
                 <a href="<?php echo $home_url; ?>" class="pl-header-app-logo-link">
-                    <img src="http://pedagolens.34.199.149.247.nip.io/wp-content/uploads/2026/03/logo.png" alt="PédagoLens" class="pl-logo-img pl-logo-img--header-app" />
+                    <img src="<?php echo esc_url( self::get_logo_url() ); ?>" alt="PÃ©dagoLens" class="pl-logo-img pl-logo-img--header-app" />
                     <span class="pl-header-app-brand">P&eacute;dagoLens AI</span>
                 </a>
                 <?php if ( $bc_html ) : ?>
@@ -2382,7 +2407,7 @@ class PedagoLens_Landing {
                     <a href="<?php echo esc_url( self::page_url( 'compte', '' ) ); ?>" class="pl-header-account-btn" title="Mon compte">
                         <span class="material-symbols-outlined">person</span>
                     </a>
-                    <a href="<?php echo $logout_url; ?>" class="pl-header-logout-btn" title="Déconnexion">
+                    <a href="<?php echo $logout_url; ?>" class="pl-header-logout-btn" title="DÃ©connexion">
                         <span class="material-symbols-outlined">logout</span>
                     </a>
                 </div>
@@ -2410,7 +2435,7 @@ class PedagoLens_Landing {
     }
 
     // -------------------------------------------------------------------------
-    // Reusable Sidebar — contextual navigation by role
+    // Reusable Sidebar â€” contextual navigation by role
     // -------------------------------------------------------------------------
 
     public static function render_sidebar( string $active = '' ): string {
@@ -2457,7 +2482,7 @@ class PedagoLens_Landing {
         ?>
         <aside class="pl-app-sidebar" role="navigation" aria-label="Menu principal">
             <div class="pl-app-sidebar-logo">
-                <img src="http://pedagolens.34.199.149.247.nip.io/wp-content/uploads/2026/03/logo.png" alt="PédagoLens" class="pl-logo-img pl-logo-img--sidebar" />
+                <img src="<?php echo esc_url( self::get_logo_url() ); ?>" alt="PÃ©dagoLens" class="pl-logo-img pl-logo-img--sidebar" />
                 <span class="pl-app-sidebar-brand">P&eacute;dagoLens AI</span>
             </div>
             <div class="pl-app-sidebar-sub">Portail &Eacute;ducatif</div>
@@ -2499,11 +2524,11 @@ class PedagoLens_Landing {
     }
 
     // -------------------------------------------------------------------------
-    // [pedagolens_login] — Page de connexion / inscription (Stitch)
+    // [pedagolens_login] â€” Page de connexion / inscription (Stitch)
     // -------------------------------------------------------------------------
 
     public static function shortcode_login( array $atts ): string {
-        // Si déjà connecté, rediriger vers le dashboard approprié
+        // Si dÃ©jÃ  connectÃ©, rediriger vers le dashboard appropriÃ©
         if ( is_user_logged_in() ) {
             $user  = wp_get_current_user();
             $roles = (array) $user->roles;
@@ -2527,7 +2552,7 @@ class PedagoLens_Landing {
     <!-- ========== LOGIN HEADER ========== -->
     <header class="pl-login-header">
         <a href="<?php echo esc_url( home_url('/') ); ?>" class="pl-login-header-logo">
-            <img src="http://pedagolens.34.199.149.247.nip.io/wp-content/uploads/2026/03/logo.png" alt="PédagoLens" class="pl-logo-img pl-logo-img--login-header" />
+            <img src="<?php echo esc_url( self::get_logo_url() ); ?>" alt="PÃ©dagoLens" class="pl-logo-img pl-logo-img--login-header" />
         </a>
         <nav class="pl-login-header-nav">
             <a href="<?php echo esc_url( home_url('/') ); ?>">Accueil</a>
@@ -2542,12 +2567,12 @@ class PedagoLens_Landing {
         <section class="pl-st-login-branding">
             <div class="pl-st-login-branding-content">
                 <div class="pl-st-login-brand-logo">
-                    <img src="http://pedagolens.34.199.149.247.nip.io/wp-content/uploads/2026/03/logo.png" alt="PédagoLens" class="pl-logo-img pl-logo-img--login-hero" />
+                    <img src="<?php echo esc_url( self::get_logo_url() ); ?>" alt="PÃ©dagoLens" class="pl-logo-img pl-logo-img--login-hero" />
                 </div>
                 <h1 class="pl-st-login-brand-title">
                     Transformez chaque <span class="pl-st-login-brand-accent">s&eacute;ance de cours</span> gr&acirc;ce &agrave; l'IA.
                 </h1>
-                <p class="pl-st-login-brand-desc">Analysez vos plans de cours, d&eacute;tectez les zones &agrave; risque et personnalisez l'apprentissage pour chaque &eacute;tudiant — en quelques clics.</p>
+                <p class="pl-st-login-brand-desc">Analysez vos plans de cours, d&eacute;tectez les zones &agrave; risque et personnalisez l'apprentissage pour chaque &eacute;tudiant â€” en quelques clics.</p>
                 <div class="pl-st-login-brand-widgets">
                     <div class="pl-st-login-widget">
                         <span class="material-symbols-outlined">auto_awesome</span>
@@ -2704,7 +2729,7 @@ class PedagoLens_Landing {
 
     </div>
 
-    <!-- ============ MODAL DIFFICULTÉS ============ -->
+    <!-- ============ MODAL DIFFICULTÃ‰S ============ -->
     <div id="pl-difficulties-modal" class="pl-diff-modal" style="display:none;">
         <div class="pl-diff-modal-backdrop"></div>
         <div class="pl-diff-modal-content">
@@ -2745,7 +2770,7 @@ class PedagoLens_Landing {
     }
 
     // -------------------------------------------------------------------------
-    // AJAX — Login
+    // AJAX â€” Login
     // -------------------------------------------------------------------------
 
     public static function ajax_login(): void {
@@ -2789,7 +2814,7 @@ class PedagoLens_Landing {
     }
 
     // -------------------------------------------------------------------------
-    // AJAX — Register
+    // AJAX â€” Register
     // -------------------------------------------------------------------------
 
     public static function ajax_register(): void {
@@ -2821,13 +2846,13 @@ class PedagoLens_Landing {
             wp_send_json_error( [ 'message' => 'Ce courriel est d&eacute;j&agrave; utilis&eacute;.' ] );
         }
 
-        // Créer le user (display_name = partie avant @ du courriel par défaut)
+        // CrÃ©er le user (display_name = partie avant @ du courriel par dÃ©faut)
         $user_id = wp_create_user( $email, $password, $email );
         if ( is_wp_error( $user_id ) ) {
             wp_send_json_error( [ 'message' => $user_id->get_error_message() ] );
         }
 
-        // Mettre à jour le rôle + display_name temporaire
+        // Mettre Ã  jour le rÃ´le + display_name temporaire
         $wp_role      = $role === 'teacher' ? 'pedagolens_teacher' : 'pedagolens_student';
         $display_name = ucfirst( explode( '@', $email )[0] );
         wp_update_user( [
@@ -2836,10 +2861,10 @@ class PedagoLens_Landing {
             'role'         => $wp_role,
         ] );
 
-        // Marquer le profil comme incomplet pour forcer la complétion sur /compte
+        // Marquer le profil comme incomplet pour forcer la complÃ©tion sur /compte
         update_user_meta( $user_id, 'pl_profile_incomplete', '1' );
 
-        // Sauvegarder les difficultés (étudiant)
+        // Sauvegarder les difficultÃ©s (Ã©tudiant)
         if ( $role === 'student' ) {
             $decoded = json_decode( $raw_diff, true );
             if ( is_array( $decoded ) && ! empty( $decoded ) ) {
@@ -2863,19 +2888,19 @@ class PedagoLens_Landing {
         wp_set_auth_cookie( $user_id, true );
         wp_set_current_user( $user_id );
 
-        // Toujours rediriger vers /compte pour compléter le profil
+        // Toujours rediriger vers /compte pour complÃ©ter le profil
         $redirect = home_url( '/compte' );
 
         wp_send_json_success( [ 'redirect' => $redirect ] );
     }
 
     // -------------------------------------------------------------------------
-    // [pedagolens_settings] — Page paramètres front (Stitch)
+    // [pedagolens_settings] â€” Page paramÃ¨tres front (Stitch)
     // -------------------------------------------------------------------------
 
     public static function shortcode_settings( array $atts = [] ): string {
         if ( ! is_user_logged_in() ) {
-            return self::render_login_notice( 'Vous devez être connecté pour accéder aux paramètres.' );
+            return self::render_login_notice( 'Vous devez Ãªtre connectÃ© pour accÃ©der aux paramÃ¨tres.' );
         }
 
         $user   = wp_get_current_user();
@@ -2884,7 +2909,7 @@ class PedagoLens_Landing {
         $is_teacher = in_array( 'pedagolens_teacher', $roles, true );
 
         if ( ! $is_admin && ! $is_teacher ) {
-            return '<div class="pl-notice pl-notice-error"><p>Accès réservé aux enseignants.</p></div>';
+            return '<div class="pl-notice pl-notice-error"><p>AccÃ¨s rÃ©servÃ© aux enseignants.</p></div>';
         }
 
         $first_name  = esc_html( $user->first_name ?: $user->display_name );
@@ -2923,14 +2948,14 @@ class PedagoLens_Landing {
             $profiles = [
                 [ 'slug' => 'tdah',      'name' => 'TDAH',        'icon' => 'neurology',     'desc' => 'Focus sur la gestion de l\'attention et l\'organisation.' ],
                 [ 'slug' => 'allophone', 'name' => 'Allophone',   'icon' => 'translate',     'desc' => 'Adaptation linguistique et supports visuels accrus.' ],
-                [ 'slug' => 'hpi',       'name' => 'HPI / Avancé', 'icon' => 'rocket_launch', 'desc' => 'Approfondissement critique et défis complexes.' ],
+                [ 'slug' => 'hpi',       'name' => 'HPI / AvancÃ©', 'icon' => 'rocket_launch', 'desc' => 'Approfondissement critique et dÃ©fis complexes.' ],
             ];
         }
 
         $settings_nonce = wp_create_nonce( 'pl_settings_nonce' );
 
         ob_start();
-        echo self::render_header('Paramètres');
+        echo self::render_header('ParamÃ¨tres');
         echo '<div class="pl-app-layout">';
         echo self::render_sidebar('settings');
         echo '<main class="pl-app-main">';
@@ -2942,8 +2967,8 @@ class PedagoLens_Landing {
 
         <!-- Header -->
         <header class="pl-st-settings-header">
-            <h2 class="pl-st-settings-title">Paramètres du Système</h2>
-            <p class="pl-st-settings-subtitle">Gérez vos préférences pédagogiques et la configuration de votre intelligence artificielle.</p>
+            <h2 class="pl-st-settings-title">ParamÃ¨tres du SystÃ¨me</h2>
+            <p class="pl-st-settings-subtitle">GÃ©rez vos prÃ©fÃ©rences pÃ©dagogiques et la configuration de votre intelligence artificielle.</p>
         </header>
 
         <div id="pl-settings-msg" class="pl-st-settings-msg" style="display:none;"></div>
@@ -2974,12 +2999,12 @@ class PedagoLens_Landing {
                     </div>
                     <div class="pl-st-settings-fields">
                         <div class="pl-st-field-group">
-                            <label class="pl-st-field-label">Université / Établissement</label>
-                            <input type="text" name="institution" class="pl-st-field-input" value="<?php echo $institution; ?>" placeholder="Université de Paris-Sorbonne" />
+                            <label class="pl-st-field-label">UniversitÃ© / Ã‰tablissement</label>
+                            <input type="text" name="institution" class="pl-st-field-input" value="<?php echo $institution; ?>" placeholder="UniversitÃ© de Paris-Sorbonne" />
                         </div>
                         <div class="pl-st-field-group">
-                            <label class="pl-st-field-label">Département</label>
-                            <input type="text" name="department" class="pl-st-field-input" value="<?php echo $department; ?>" placeholder="Sciences de l'Éducation" />
+                            <label class="pl-st-field-label">DÃ©partement</label>
+                            <input type="text" name="department" class="pl-st-field-input" value="<?php echo $department; ?>" placeholder="Sciences de l'Ã‰ducation" />
                         </div>
                     </div>
                 </section>
@@ -2989,17 +3014,17 @@ class PedagoLens_Landing {
             <!-- ============ RIGHT COLUMN ============ -->
             <div class="pl-st-settings-col-right">
 
-                <!-- Modèles de Profils Élèves (lecture seule) -->
+                <!-- ModÃ¨les de Profils Ã‰lÃ¨ves (lecture seule) -->
                 <section class="pl-st-settings-card pl-st-settings-card--profiles">
                     <div class="pl-st-settings-card-header-row">
                         <div>
-                            <h3>Modèles de Profils Élèves</h3>
-                            <p class="pl-st-settings-card-desc">Configurez les types d'analyses récurrents.</p>
+                            <h3>ModÃ¨les de Profils Ã‰lÃ¨ves</h3>
+                            <p class="pl-st-settings-card-desc">Configurez les types d'analyses rÃ©currents.</p>
                         </div>
                         <?php if ( $is_admin ) : ?>
                             <a href="<?php echo esc_url( admin_url( 'admin.php?page=pl-profiles' ) ); ?>" class="pl-st-settings-link-add">
                                 <span class="material-symbols-outlined">add_circle</span>
-                                Nouveau modèle
+                                Nouveau modÃ¨le
                             </a>
                         <?php endif; ?>
                     </div>
@@ -3020,28 +3045,28 @@ class PedagoLens_Landing {
                     </div>
                 </section>
 
-                <!-- Préférences de l'IA -->
+                <!-- PrÃ©fÃ©rences de l'IA -->
                 <section class="pl-st-settings-card">
                     <div class="pl-st-settings-card-header">
                         <div class="pl-st-settings-icon-badge pl-st-icon-violet">
                             <span class="material-symbols-outlined">psychology_alt</span>
                         </div>
-                        <h3>Préférences de l'IA</h3>
+                        <h3>PrÃ©fÃ©rences de l'IA</h3>
                     </div>
                     <div class="pl-st-settings-ai-grid">
                         <div class="pl-st-settings-ai-col">
                             <div class="pl-st-field-group">
-                                <label class="pl-st-field-label">Modèle d'Analyse</label>
+                                <label class="pl-st-field-label">ModÃ¨le d'Analyse</label>
                                 <select name="ai_model" class="pl-st-field-select">
-                                    <option value="elite" <?php selected( $ai_model, 'elite' ); ?>>PédagoLens-4-Elite (Par défaut)</option>
-                                    <option value="flash" <?php selected( $ai_model, 'flash' ); ?>>PédagoLens-Flash (Vitesse)</option>
-                                    <option value="research" <?php selected( $ai_model, 'research' ); ?>>Modèle de Recherche Académique</option>
+                                    <option value="elite" <?php selected( $ai_model, 'elite' ); ?>>PÃ©dagoLens-4-Elite (Par dÃ©faut)</option>
+                                    <option value="flash" <?php selected( $ai_model, 'flash' ); ?>>PÃ©dagoLens-Flash (Vitesse)</option>
+                                    <option value="research" <?php selected( $ai_model, 'research' ); ?>>ModÃ¨le de Recherche AcadÃ©mique</option>
                                 </select>
                             </div>
                             <div class="pl-st-field-group">
-                                <label class="pl-st-field-label">Ton Épistémologique</label>
+                                <label class="pl-st-field-label">Ton Ã‰pistÃ©mologique</label>
                                 <div class="pl-st-tone-btns">
-                                    <button type="button" class="pl-st-tone-btn <?php echo $ai_tone === 'academic' ? 'pl-st-tone-btn--active' : ''; ?>" data-tone="academic">Académique</button>
+                                    <button type="button" class="pl-st-tone-btn <?php echo $ai_tone === 'academic' ? 'pl-st-tone-btn--active' : ''; ?>" data-tone="academic">AcadÃ©mique</button>
                                     <button type="button" class="pl-st-tone-btn <?php echo $ai_tone === 'pragmatic' ? 'pl-st-tone-btn--active' : ''; ?>" data-tone="pragmatic">Pragmatique</button>
                                     <button type="button" class="pl-st-tone-btn <?php echo $ai_tone === 'narrative' ? 'pl-st-tone-btn--active' : ''; ?>" data-tone="narrative">Narratif</button>
                                 </div>
@@ -3050,17 +3075,17 @@ class PedagoLens_Landing {
                         </div>
                         <div class="pl-st-settings-ai-col">
                             <div class="pl-st-field-group">
-                                <label class="pl-st-field-label">Niveau de Détail des Rapports</label>
+                                <label class="pl-st-field-label">Niveau de DÃ©tail des Rapports</label>
                                 <input type="range" name="report_detail" class="pl-st-field-range" min="1" max="5" value="<?php echo $report_detail; ?>" />
                                 <div class="pl-st-range-labels">
-                                    <span>SYNTHÉTIQUE</span>
+                                    <span>SYNTHÃ‰TIQUE</span>
                                     <span>EXHAUSTIF</span>
                                 </div>
                             </div>
                             <div class="pl-st-toggle-card">
                                 <div class="pl-st-toggle-info">
                                     <span class="pl-st-toggle-title">Suggestions Proactives</span>
-                                    <span class="pl-st-toggle-desc">L'IA propose des ajustements en temps réel</span>
+                                    <span class="pl-st-toggle-desc">L'IA propose des ajustements en temps rÃ©el</span>
                                 </div>
                                 <label class="pl-st-switch">
                                     <input type="checkbox" name="proactive_ai" value="1" <?php checked( $proactive_ai ); ?> />
@@ -3078,7 +3103,7 @@ class PedagoLens_Landing {
                         <h3 class="pl-st-settings-card-title">Notifications</h3>
                         <div class="pl-st-notif-list">
                             <div class="pl-st-notif-row">
-                                <span>Alertes de progression élève</span>
+                                <span>Alertes de progression Ã©lÃ¨ve</span>
                                 <label class="pl-st-switch">
                                     <input type="checkbox" name="notif_progress" value="1" <?php checked( $notif_progress ); ?> />
                                     <span class="pl-st-switch-slider"></span>
@@ -3092,7 +3117,7 @@ class PedagoLens_Landing {
                                 </label>
                             </div>
                             <div class="pl-st-notif-row pl-st-notif-row--disabled">
-                                <span>Alertes système par SMS</span>
+                                <span>Alertes systÃ¨me par SMS</span>
                                 <label class="pl-st-switch">
                                     <input type="checkbox" name="notif_sms" value="1" <?php checked( $notif_sms ); ?> disabled />
                                     <span class="pl-st-switch-slider"></span>
@@ -3101,20 +3126,20 @@ class PedagoLens_Landing {
                         </div>
                     </section>
 
-                    <!-- Préférences d'affichage -->
+                    <!-- PrÃ©fÃ©rences d'affichage -->
                     <section class="pl-st-settings-card">
                         <h3 class="pl-st-settings-card-title">Affichage &amp; Langue</h3>
                         <div class="pl-st-settings-fields">
                             <div class="pl-st-field-group">
                                 <label class="pl-st-field-label">Langue</label>
                                 <select name="language" class="pl-st-field-select">
-                                    <option value="fr" <?php selected( $language, 'fr' ); ?>>Français</option>
+                                    <option value="fr" <?php selected( $language, 'fr' ); ?>>FranÃ§ais</option>
                                     <option value="en" <?php selected( $language, 'en' ); ?>>English</option>
                                 </select>
                             </div>
                             <div class="pl-st-toggle-card">
                                 <div class="pl-st-toggle-info">
-                                    <span class="pl-st-toggle-title">Thème sombre</span>
+                                    <span class="pl-st-toggle-title">ThÃ¨me sombre</span>
                                     <span class="pl-st-toggle-desc">Interface en mode nuit</span>
                                 </div>
                                 <label class="pl-st-switch">
@@ -3129,7 +3154,7 @@ class PedagoLens_Landing {
                 <!-- Action Footer -->
                 <footer class="pl-st-settings-actions">
                     <button type="button" class="pl-st-settings-btn-cancel" id="pl-settings-cancel">Annuler les modifications</button>
-                    <button type="submit" class="pl-st-settings-btn-save">Sauvegarder les paramètres</button>
+                    <button type="submit" class="pl-st-settings-btn-save">Sauvegarder les paramÃ¨tres</button>
                 </footer>
 
             </div>
@@ -3154,21 +3179,21 @@ class PedagoLens_Landing {
     }
 
     // -------------------------------------------------------------------------
-    // AJAX — Sauvegarde paramètres front (enseignant)
+    // AJAX â€” Sauvegarde paramÃ¨tres front (enseignant)
     // -------------------------------------------------------------------------
 
     public static function ajax_save_settings(): void {
         check_ajax_referer( 'pl_settings_nonce' );
 
         if ( ! is_user_logged_in() ) {
-            wp_send_json_error( [ 'message' => 'Non authentifié.' ] );
+            wp_send_json_error( [ 'message' => 'Non authentifiÃ©.' ] );
         }
 
         $user  = wp_get_current_user();
         $roles = (array) $user->roles;
 
         if ( ! in_array( 'administrator', $roles, true ) && ! in_array( 'pedagolens_teacher', $roles, true ) ) {
-            wp_send_json_error( [ 'message' => 'Accès refusé.' ] );
+            wp_send_json_error( [ 'message' => 'AccÃ¨s refusÃ©.' ] );
         }
 
         $prefs = (array) get_user_meta( $user->ID, 'pl_teacher_prefs', true );
@@ -3200,18 +3225,18 @@ class PedagoLens_Landing {
 
         update_user_meta( $user->ID, 'pl_teacher_prefs', $prefs );
 
-        wp_send_json_success( [ 'message' => 'Paramètres enregistrés.' ] );
+        wp_send_json_success( [ 'message' => 'ParamÃ¨tres enregistrÃ©s.' ] );
     }
 
     // -------------------------------------------------------------------------
-    // Course CRUD — Front-end AJAX handlers (Task 16)
+    // Course CRUD â€” Front-end AJAX handlers (Task 16)
     // -------------------------------------------------------------------------
 
     public static function ajax_create_course_front(): void {
         check_ajax_referer( 'pl_nonce', 'nonce' );
 
         if ( ! current_user_can( 'edit_posts' ) && ! current_user_can( 'edit_pl_courses' ) ) {
-            wp_send_json_error( [ 'message' => 'Permission refusée.' ] );
+            wp_send_json_error( [ 'message' => 'Permission refusÃ©e.' ] );
         }
 
         $title   = sanitize_text_field( $_POST['title'] ?? '' );
@@ -3233,7 +3258,7 @@ class PedagoLens_Landing {
         ] );
 
         if ( is_wp_error( $post_id ) ) {
-            wp_send_json_error( [ 'message' => 'Erreur lors de la création du cours.' ] );
+            wp_send_json_error( [ 'message' => 'Erreur lors de la crÃ©ation du cours.' ] );
         }
 
         update_post_meta( $post_id, '_pl_course_code', $code );
@@ -3241,7 +3266,7 @@ class PedagoLens_Landing {
         update_post_meta( $post_id, '_pl_course_type', $type );
 
         wp_send_json_success( [
-            'message'   => 'Cours créé avec succès !',
+            'message'   => 'Cours crÃ©Ã© avec succÃ¨s !',
             'course_id' => $post_id,
             'title'     => $title,
         ] );
@@ -3251,7 +3276,7 @@ class PedagoLens_Landing {
         check_ajax_referer( 'pl_nonce', 'nonce' );
 
         if ( ! current_user_can( 'edit_posts' ) && ! current_user_can( 'edit_pl_courses' ) ) {
-            wp_send_json_error( [ 'message' => 'Permission refusée.' ] );
+            wp_send_json_error( [ 'message' => 'Permission refusÃ©e.' ] );
         }
 
         $course_id = (int) ( $_POST['course_id'] ?? 0 );
@@ -3279,14 +3304,14 @@ class PedagoLens_Landing {
         update_post_meta( $course_id, '_pl_session', $session );
         update_post_meta( $course_id, '_pl_course_type', $type );
 
-        wp_send_json_success( [ 'message' => 'Cours mis à jour !', 'course_id' => $course_id ] );
+        wp_send_json_success( [ 'message' => 'Cours mis Ã  jour !', 'course_id' => $course_id ] );
     }
 
     public static function ajax_delete_course_front(): void {
         check_ajax_referer( 'pl_nonce', 'nonce' );
 
         if ( ! current_user_can( 'delete_posts' ) ) {
-            wp_send_json_error( [ 'message' => 'Permission refusée.' ] );
+            wp_send_json_error( [ 'message' => 'Permission refusÃ©e.' ] );
         }
 
         $course_id = (int) ( $_POST['course_id'] ?? 0 );
@@ -3306,16 +3331,16 @@ class PedagoLens_Landing {
 
         wp_delete_post( $course_id, true );
 
-        wp_send_json_success( [ 'message' => 'Cours supprimé.' ] );
+        wp_send_json_success( [ 'message' => 'Cours supprimÃ©.' ] );
     }
 
-    // ── Task 17: Create project from front-end ──────────────────────────
+    // â”€â”€ Task 17: Create project from front-end â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public static function ajax_create_project_front(): void {
         check_ajax_referer( 'pl_nonce', 'nonce' );
 
         if ( ! current_user_can( 'edit_posts' ) && ! current_user_can( 'edit_pl_courses' ) ) {
-            wp_send_json_error( [ 'message' => 'Permission refusée.' ] );
+            wp_send_json_error( [ 'message' => 'Permission refusÃ©e.' ] );
         }
 
         $course_id = (int) ( $_POST['course_id'] ?? 0 );
@@ -3328,7 +3353,7 @@ class PedagoLens_Landing {
         $desc  = sanitize_textarea_field( $_POST['description'] ?? '' );
 
         if ( empty( $title ) ) {
-            wp_send_json_error( [ 'message' => 'Le titre de la séance est requis.' ] );
+            wp_send_json_error( [ 'message' => 'Le titre de la sÃ©ance est requis.' ] );
         }
 
         $post_id = wp_insert_post( [
@@ -3340,7 +3365,7 @@ class PedagoLens_Landing {
         ] );
 
         if ( is_wp_error( $post_id ) ) {
-            wp_send_json_error( [ 'message' => 'Erreur lors de la création.' ] );
+            wp_send_json_error( [ 'message' => 'Erreur lors de la crÃ©ation.' ] );
         }
 
         update_post_meta( $post_id, '_pl_course_id', $course_id );
@@ -3461,7 +3486,7 @@ class PedagoLens_Landing {
             : admin_url( 'admin.php?page=pl-course-workbench&project_id=' . $post_id );
 
         wp_send_json_success( [
-            'message'        => 'Séance créée avec succès !',
+            'message'        => 'SÃ©ance crÃ©Ã©e avec succÃ¨s !',
             'project_id'     => $post_id,
             'workbench_url'  => $wb_url,
             'sections_count' => $sections_count,
@@ -3470,14 +3495,14 @@ class PedagoLens_Landing {
     }
 
     // -------------------------------------------------------------------------
-    // AJAX — Chat Léa (API Bridge → Bedrock ou mock)
+    // AJAX â€” Chat LÃ©a (API Bridge â†’ Bedrock ou mock)
     // -------------------------------------------------------------------------
 
     public static function ajax_lea_chat(): void {
         check_ajax_referer( 'pl_nonce', '_wpnonce' );
 
         if ( ! is_user_logged_in() ) {
-            wp_send_json_error( [ 'message' => 'Vous devez être connecté.' ] );
+            wp_send_json_error( [ 'message' => 'Vous devez Ãªtre connectÃ©.' ] );
         }
 
         $message   = sanitize_textarea_field( wp_unslash( $_POST['message'] ?? '' ) );
@@ -3491,7 +3516,7 @@ class PedagoLens_Landing {
         $first_name = $user->first_name ?: $user->display_name;
 
         // Build course context for the prompt
-        $course_context = 'Général';
+        $course_context = 'GÃ©nÃ©ral';
         if ( $course_id > 0 ) {
             $course_post = get_post( $course_id );
             if ( $course_post && $course_post->post_type === 'pl_course' ) {
@@ -3508,7 +3533,7 @@ class PedagoLens_Landing {
 
         // Check if API Bridge is available
         if ( ! class_exists( 'PedagoLens_API_Bridge' ) ) {
-            wp_send_json_error( [ 'message' => 'Le module API Bridge n\'est pas activé.' ] );
+            wp_send_json_error( [ 'message' => 'Le module API Bridge n\'est pas activÃ©.' ] );
         }
 
         try {
@@ -3519,18 +3544,18 @@ class PedagoLens_Landing {
                 $response_text = $result['reply'] ?? $result['response'] ?? '';
 
                 if ( empty( $response_text ) ) {
-                    $response_text = 'Je suis là pour t\'aider ! Peux-tu reformuler ta question ?';
+                    $response_text = 'Je suis lÃ  pour t\'aider ! Peux-tu reformuler ta question ?';
                 }
 
                 wp_send_json_success( [ 'response' => $response_text ] );
             } else {
-                // API Bridge returned an error — fallback with generic response
-                $fallback = 'Désolée, je rencontre un petit souci technique. Réessaie dans un instant ! 😊';
+                // API Bridge returned an error â€” fallback with generic response
+                $fallback = 'DÃ©solÃ©e, je rencontre un petit souci technique. RÃ©essaie dans un instant ! ðŸ˜Š';
                 wp_send_json_success( [ 'response' => $fallback ] );
             }
         } catch ( \Throwable $e ) {
             wp_send_json_success( [
-                'response' => 'Oups, une erreur est survenue. Réessaie dans quelques secondes !',
+                'response' => 'Oups, une erreur est survenue. RÃ©essaie dans quelques secondes !',
             ] );
         }
     }
@@ -3540,12 +3565,12 @@ class PedagoLens_Landing {
     // -------------------------------------------------------------------------
 
     // -------------------------------------------------------------------------
-    // [pedagolens_history] — Historique des analyses & sessions (Stitch)
+    // [pedagolens_history] â€” Historique des analyses & sessions (Stitch)
     // -------------------------------------------------------------------------
 
     public static function shortcode_history( array $atts ): string {
         if ( ! is_user_logged_in() ) {
-            return self::render_login_notice( 'Vous devez être connecté pour accéder à l\'historique.' );
+            return self::render_login_notice( 'Vous devez Ãªtre connectÃ© pour accÃ©der Ã  l\'historique.' );
         }
 
         $user       = wp_get_current_user();
@@ -3577,7 +3602,7 @@ class PedagoLens_Landing {
         $filter_course       = (int) ( $_GET['course_id'] ?? 0 );
         $filter_course_title = $filter_course ? get_the_title( $filter_course ) : '';
 
-        // ── Build unified timeline ──────────────────────────────
+        // â”€â”€ Build unified timeline â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         $timeline = [];
 
         // Analyses (pl_analysis)
@@ -3669,7 +3694,7 @@ class PedagoLens_Landing {
                     'badge'     => 'Session jumeau',
                     'risk'      => 'none',
                     'summary'   => $msg_count > 0
-                        ? sprintf( '%d message%s échangé%s', $msg_count, $msg_count > 1 ? 's' : '', $msg_count > 1 ? 's' : '' )
+                        ? sprintf( '%d message%s Ã©changÃ©%s', $msg_count, $msg_count > 1 ? 's' : '', $msg_count > 1 ? 's' : '' )
                         : 'Session vide',
                 ];
             }
@@ -3689,7 +3714,7 @@ class PedagoLens_Landing {
         // Risk badge helper
         $risk_html = function( string $risk ): string {
             return match( $risk ) {
-                'high'   => '<div class="pl-hi-risk pl-hi-risk--high"><span class="pl-hi-risk-dot"></span>Élevé</div>',
+                'high'   => '<div class="pl-hi-risk pl-hi-risk--high"><span class="pl-hi-risk-dot"></span>Ã‰levÃ©</div>',
                 'medium' => '<div class="pl-hi-risk pl-hi-risk--medium"><span class="pl-hi-risk-dot"></span>Moyen</div>',
                 'low'    => '<div class="pl-hi-risk pl-hi-risk--low"><span class="pl-hi-risk-dot"></span>Faible</div>',
                 default  => '<div class="pl-hi-risk pl-hi-risk--none"><span class="pl-hi-risk-dot"></span>N/A</div>',
@@ -3729,7 +3754,7 @@ class PedagoLens_Landing {
         <?php if ( $filter_course && $filter_course_title ) : ?>
         <div class="pl-hi-course-filter-banner">
             <span class="material-symbols-outlined">filter_alt</span>
-            Filtré par cours : <strong><?php echo esc_html( $filter_course_title ); ?></strong>
+            FiltrÃ© par cours : <strong><?php echo esc_html( $filter_course_title ); ?></strong>
             <a href="<?php echo esc_url( remove_query_arg( 'course_id' ) ); ?>" class="pl-hi-clear-filter">
                 <span class="material-symbols-outlined">close</span> Voir tout
             </a>
@@ -3876,9 +3901,9 @@ class PedagoLens_Landing {
         }
 
         return wp_parse_args( (array) $raw, [
-            'hero_title'    => 'PédagoLens',
-            'hero_subtitle' => "L'IA pédagogique pour les enseignants du CÉGEP.",
-            'cta_text'      => 'Demander une démo',
+            'hero_title'    => 'PÃ©dagoLens',
+            'hero_subtitle' => "L'IA pÃ©dagogique pour les enseignants du CÃ‰GEP.",
+            'cta_text'      => 'Demander une dÃ©mo',
             'cta_url'       => '#',
             'primary_color' => '#2271b1',
             'features'      => self::default_features(),
@@ -3887,15 +3912,15 @@ class PedagoLens_Landing {
 
     private static function default_features(): array {
         return [
-            [ 'icon' => '&#128269;', 'title' => 'Analyse pédagogique IA',    'desc' => "Analysez vos cours selon 7 profils d'apprenants en quelques secondes." ],
-            [ 'icon' => '&#9999;',   'title' => 'Atelier de cours',           'desc' => "Recevez des suggestions concrètes pour améliorer l'accessibilité de vos contenus." ],
-            [ 'icon' => '&#129302;', 'title' => 'Jumeau numérique étudiant', 'desc' => "Simulez l'expérience d'un étudiant avec des garde-fous pédagogiques intégrés." ],
-            [ 'icon' => '&#128202;', 'title' => 'Tableau de bord',           'desc' => "Visualisez les scores par profil et suivez l'évolution de vos cours." ],
+            [ 'icon' => '&#128269;', 'title' => 'Analyse pÃ©dagogique IA',    'desc' => "Analysez vos cours selon 7 profils d'apprenants en quelques secondes." ],
+            [ 'icon' => '&#9999;',   'title' => 'Atelier de cours',           'desc' => "Recevez des suggestions concrÃ¨tes pour amÃ©liorer l'accessibilitÃ© de vos contenus." ],
+            [ 'icon' => '&#129302;', 'title' => 'Jumeau numÃ©rique Ã©tudiant', 'desc' => "Simulez l'expÃ©rience d'un Ã©tudiant avec des garde-fous pÃ©dagogiques intÃ©grÃ©s." ],
+            [ 'icon' => '&#128202;', 'title' => 'Tableau de bord',           'desc' => "Visualisez les scores par profil et suivez l'Ã©volution de vos cours." ],
         ];
     }
 
     // -------------------------------------------------------------------------
-    // [pedagolens_institutional] — Lumière institutionnelle (Stitch)
+    // [pedagolens_institutional] â€” LumiÃ¨re institutionnelle (Stitch)
     // -------------------------------------------------------------------------
 
     public static function shortcode_institutional( array $atts = [] ): string {
@@ -3910,7 +3935,7 @@ class PedagoLens_Landing {
             return '<div class="pl-notice pl-notice-warning"><p>Acc&egrave;s r&eacute;serv&eacute; aux administrateurs et enseignants.</p></div>';
         }
 
-        // ── Aggregate data from pl_analysis CPT ─────────────────────────
+        // â”€â”€ Aggregate data from pl_analysis CPT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         $all_analyses = get_posts( [
             'post_type'      => 'pl_analysis',
             'posts_per_page' => -1,
@@ -3925,8 +3950,8 @@ class PedagoLens_Landing {
         $profile_labels = [
             'visuel'       => 'Visuel-Spatial',
             'auditif'      => 'Auditif-Verbal',
-            'kinesthesique'=> 'Kinesthésique',
-            'lecture'       => 'Lecture-Écriture',
+            'kinesthesique'=> 'KinesthÃ©sique',
+            'lecture'       => 'Lecture-Ã‰criture',
             'social'       => 'Social',
             'solitaire'    => 'Solitaire',
             'logique'      => 'Logique-Math',
@@ -4025,7 +4050,7 @@ class PedagoLens_Landing {
         $first_name = esc_html( $user->first_name ?: $user->display_name );
 
         ob_start();
-        echo self::render_header('Lumière institutionnelle');
+        echo self::render_header('LumiÃ¨re institutionnelle');
         echo '<div class="pl-app-layout">';
         echo self::render_sidebar('institutional');
         echo '<main class="pl-app-main">';
@@ -4200,7 +4225,7 @@ class PedagoLens_Landing {
     }
 
     // -------------------------------------------------------------------------
-    // PPTX → Images via LibreOffice
+    // PPTX â†’ Images via LibreOffice
     // -------------------------------------------------------------------------
 
     /**
@@ -4224,8 +4249,8 @@ class PedagoLens_Landing {
             wp_mkdir_p( $out_dir );
         }
 
-        // Run LibreOffice headless conversion: PPTX → PDF → PNG
-        // Step 1: PPTX → PDF
+        // Run LibreOffice headless conversion: PPTX â†’ PDF â†’ PNG
+        // Step 1: PPTX â†’ PDF
         $pdf_cmd = sprintf(
             'HOME=/tmp %s --headless --convert-to pdf --outdir %s %s 2>&1',
             escapeshellarg( $lo_bin ),
@@ -4332,3 +4357,4 @@ class PedagoLens_Landing {
         return self::shortcode_institutional( $atts );
     }
 }
+

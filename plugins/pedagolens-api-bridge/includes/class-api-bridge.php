@@ -74,6 +74,9 @@ class PedagoLens_API_Bridge {
         if ( $mode === 'mock' ) {
             return PedagoLens_API_Bridge_Mock::invoke( $prompt_key, $params );
         }
+        if ( $mode === 'n8n' ) {
+            return self::invoke_n8n_webhook( $prompt_key, $params );
+        }
 
         return self::invoke_bedrock( $prompt_key, $params );
     }
@@ -146,6 +149,17 @@ class PedagoLens_API_Bridge {
             'max_tokens'  => (int) get_option( 'pl_bedrock_max_tokens',  128000 ),
             'temperature' => (float) get_option( 'pl_bedrock_temperature', 0.3 ),
             'timeout'     => (int) get_option( 'pl_bedrock_timeout',     120 ),
+        ];
+    }
+
+    /**
+     * Retourne la configuration n8n.
+     */
+    public static function get_n8n_config(): array {
+        return [
+            'webhook_url' => trim( (string) get_option( 'pl_n8n_webhook_url', '' ) ),
+            'api_key'     => trim( (string) get_option( 'pl_n8n_api_key', '' ) ),
+            'timeout'     => (int) get_option( 'pl_n8n_timeout', 30 ),
         ];
     }
 
@@ -278,6 +292,83 @@ class PedagoLens_API_Bridge {
 
     public static function get_ai_mode(): string {
         return get_option( 'pl_ai_mode', 'mock' );
+    }
+
+    // -------------------------------------------------------------------------
+    // Appel n8n
+    // -------------------------------------------------------------------------
+
+    /**
+     * Délègue l'inférence IA à un webhook n8n.
+     */
+    private static function invoke_n8n_webhook( string $prompt_key, array $params ): array {
+        $cfg = self::get_n8n_config();
+        if ( $cfg['webhook_url'] === '' ) {
+            return self::error( 'pl_n8n_config_missing', 'Webhook n8n non configuré.' );
+        }
+
+        $payload = [
+            'prompt_key' => $prompt_key,
+            'params'     => $params,
+            'site_url'   => home_url( '/' ),
+            'timestamp'  => gmdate( 'c' ),
+        ];
+
+        $headers = [
+            'Content-Type' => 'application/json',
+        ];
+        if ( $cfg['api_key'] !== '' ) {
+            $headers['Authorization'] = 'Bearer ' . $cfg['api_key'];
+            $headers['X-API-Key']     = $cfg['api_key'];
+        }
+
+        $response = wp_remote_post( $cfg['webhook_url'], [
+            'timeout' => max( 5, $cfg['timeout'] ),
+            'headers' => $headers,
+            'body'    => wp_json_encode( $payload ),
+        ] );
+
+        if ( is_wp_error( $response ) ) {
+            return self::error( 'pl_n8n_request_failed', $response->get_error_message() );
+        }
+
+        $code = wp_remote_retrieve_response_code( $response );
+        $body = wp_remote_retrieve_body( $response );
+        if ( $code < 200 || $code >= 300 ) {
+            return self::error(
+                'pl_n8n_bad_response',
+                "Réponse HTTP {$code} du webhook n8n.",
+                [ 'body' => mb_substr( (string) $body, 0, 500 ) ]
+            );
+        }
+
+        $decoded = json_decode( (string) $body, true );
+        if ( ! is_array( $decoded ) ) {
+            return self::error( 'pl_n8n_invalid_json', 'Le webhook n8n a retourné un JSON invalide.' );
+        }
+
+        if ( isset( $decoded['success'] ) && $decoded['success'] === false ) {
+            return self::error(
+                'pl_n8n_failed',
+                (string) ( $decoded['error_message'] ?? $decoded['message'] ?? 'Le webhook n8n a retourné une erreur.' ),
+                is_array( $decoded['context'] ?? null ) ? $decoded['context'] : []
+            );
+        }
+
+        $result = $decoded;
+        if ( isset( $decoded['data'] ) && is_array( $decoded['data'] ) ) {
+            $result = $decoded['data'];
+        }
+
+        if ( ! self::validate_response( $result, $prompt_key ) ) {
+            return self::error(
+                'pl_n8n_invalid_response',
+                'Structure de réponse n8n non conforme au schéma attendu.',
+                [ 'keys' => array_keys( $result ) ]
+            );
+        }
+
+        return array_merge( [ 'success' => true ], $result );
     }
 
     // -------------------------------------------------------------------------
@@ -695,3 +786,4 @@ class PedagoLens_API_Bridge {
         ];
     }
 }
+
