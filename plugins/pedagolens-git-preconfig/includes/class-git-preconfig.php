@@ -138,18 +138,27 @@ class PedagoLens_Git_Preconfig {
             self::save_report_and_redirect( $report );
         }
 
-        if ( ! is_dir( $s['deploy_path'] ) ) {
+        $resolved = self::resolve_repo_path( $s['deploy_path'] );
+        if ( ! $resolved['ok'] ) {
             $report['success'] = false;
-            $report['error'] = 'Deploy path not found: ' . $s['deploy_path'];
+            $report['error'] = 'Git repository not found from deploy path: ' . $s['deploy_path'];
+            $report['hint'] = [
+                'Set Deploy path to the real git repo root (example: /opt/pedagolens).',
+                'Current path exists but is not a git repo: /var/www/html is often only web root.',
+            ];
+            $report['diagnostic'] = $resolved;
             self::save_report_and_redirect( $report );
         }
 
+        $deploy_path = $resolved['path'];
+        $report['resolved_deploy_path'] = $deploy_path;
+
         $cmds = [
-            [ $git, '-C', $s['deploy_path'], 'rev-parse', '--is-inside-work-tree' ],
-            [ $git, '-C', $s['deploy_path'], 'remote', 'set-url', 'origin', $s['repo_url'] ],
-            [ $git, '-C', $s['deploy_path'], 'fetch', '--all', '--prune' ],
-            [ $git, '-C', $s['deploy_path'], 'checkout', $s['branch'] ],
-            [ $git, '-C', $s['deploy_path'], 'pull', 'origin', $s['branch'] ],
+            [ $git, '-C', $deploy_path, 'rev-parse', '--is-inside-work-tree' ],
+            [ $git, '-C', $deploy_path, 'remote', 'set-url', 'origin', $s['repo_url'] ],
+            [ $git, '-C', $deploy_path, 'fetch', '--all', '--prune' ],
+            [ $git, '-C', $deploy_path, 'checkout', $s['branch'] ],
+            [ $git, '-C', $deploy_path, 'pull', 'origin', $s['branch'] ],
         ];
 
         foreach ( $cmds as $cmd ) {
@@ -233,6 +242,46 @@ class PedagoLens_Git_Preconfig {
         }
 
         return '';
+    }
+
+    private static function resolve_repo_path( string $configured_path ): array {
+        $configured_path = trim( $configured_path );
+        $candidates = [];
+
+        if ( $configured_path !== '' ) {
+            $candidates[] = $configured_path;
+        }
+
+        foreach ( [ '/opt/pedagolens', ABSPATH, '/var/www/html' ] as $candidate ) {
+            if ( ! in_array( $candidate, $candidates, true ) ) {
+                $candidates[] = $candidate;
+            }
+        }
+
+        foreach ( $candidates as $path ) {
+            if ( self::is_git_repo_path( $path ) ) {
+                return [
+                    'ok' => true,
+                    'path' => $path,
+                    'candidates' => $candidates,
+                ];
+            }
+        }
+
+        return [
+            'ok' => false,
+            'path' => '',
+            'candidates' => $candidates,
+        ];
+    }
+
+    private static function is_git_repo_path( string $path ): bool {
+        $path = rtrim( $path, '/\\' );
+        if ( $path === '' || ! is_dir( $path ) ) {
+            return false;
+        }
+
+        return file_exists( $path . '/.git' );
     }
 
     private static function assert_admin(): void {

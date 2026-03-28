@@ -138,6 +138,9 @@ class PedagoLens_Landing {
             }
             return $classes;
         } );
+
+        // Landing canvas mode: hide active theme chrome to avoid double header/footer layout.
+        add_filter( 'body_class', [ self::class, 'add_landing_canvas_body_class' ] );
     }
 
     // -------------------------------------------------------------------------
@@ -199,6 +202,27 @@ class PedagoLens_Landing {
                 'sessionEnded' => 'Session terminÃ©e. Ã€ bientÃ´t !',
             ],
         ] );
+    }
+
+    public static function add_landing_canvas_body_class( array $classes ): array {
+        if ( self::current_page_has_shortcode( 'pedagolens_landing' ) ) {
+            $classes[] = 'pl-landing-canvas';
+        }
+
+        return $classes;
+    }
+
+    private static function current_page_has_shortcode( string $shortcode ): bool {
+        if ( ! is_singular( 'page' ) ) {
+            return false;
+        }
+
+        $post = get_post( get_queried_object_id() );
+        if ( ! $post instanceof WP_Post ) {
+            return false;
+        }
+
+        return has_shortcode( (string) $post->post_content, $shortcode );
     }
 
     // -------------------------------------------------------------------------
