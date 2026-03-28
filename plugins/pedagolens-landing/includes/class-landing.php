@@ -141,6 +141,7 @@ class PedagoLens_Landing {
 
         // Landing canvas mode: hide active theme chrome to avoid double header/footer layout.
         add_filter( 'body_class', [ self::class, 'add_landing_canvas_body_class' ] );
+        add_filter( 'do_shortcode_tag', [ self::class, 'repair_shortcode_output_encoding' ], 10, 4 );
     }
 
     // -------------------------------------------------------------------------
@@ -210,6 +211,36 @@ class PedagoLens_Landing {
         }
 
         return $classes;
+    }
+
+    public static function repair_shortcode_output_encoding( $output, string $tag, array $attr, array $m ) {
+        if ( strpos( $tag, 'pedagolens_' ) !== 0 || ! is_string( $output ) || $output === '' ) {
+            return $output;
+        }
+
+        return self::repair_mojibake_text( $output );
+    }
+
+    private static function repair_mojibake_text( string $text ): string {
+        static $map = null;
+        if ( $map === null ) {
+            $map = [
+                'ÃƒÂ©' => 'é', 'ÃƒÂ¨' => 'è', 'ÃƒÂª' => 'ê', 'ÃƒÂ«' => 'ë',
+                'ÃƒÂ ' => 'à', 'ÃƒÂ¢' => 'â', 'ÃƒÂ®' => 'î', 'ÃƒÂ¯' => 'ï',
+                'ÃƒÂ´' => 'ô', 'ÃƒÂ¹' => 'ù', 'ÃƒÂ»' => 'û', 'ÃƒÂ§' => 'ç',
+                'Ãƒâ€°' => 'É', 'Ãƒâ‚¬' => 'À', 'Ãƒâ€¡' => 'Ç', 'Ãƒâ€Ž' => 'Î',
+                'Ã©' => 'é', 'Ã¨' => 'è', 'Ãª' => 'ê', 'Ã«' => 'ë',
+                'Ã ' => 'à', 'Ã¢' => 'â', 'Ã®' => 'î', 'Ã¯' => 'ï',
+                'Ã´' => 'ô', 'Ã¹' => 'ù', 'Ã»' => 'û', 'Ã§' => 'ç',
+                'Ã‰' => 'É', 'Ã€' => 'À', 'Ã‡' => 'Ç', 'ÃŽ' => 'Î',
+                'â€™' => '’', 'â€œ' => '“', 'â€' => '”', 'â€¦' => '…',
+                'â€“' => '–', 'â€”' => '—', 'Â«' => '«', 'Â»' => '»',
+                'Â ' => ' ', 'Â' => '',
+            ];
+        }
+
+        $fixed = strtr( $text, $map );
+        return str_replace( [ 'Ã', 'â€' ], '', $fixed );
     }
 
     private static function current_page_has_shortcode( string $shortcode ): bool {
