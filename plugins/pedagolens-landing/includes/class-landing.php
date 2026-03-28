@@ -239,9 +239,32 @@ class PedagoLens_Landing {
             $cta_url       = esc_url( $s['cta_url'] ?? $login_url );
             $cta_text      = esc_html( $s['cta_text'] ?? 'Essai gratuit' );
             $year          = esc_html( date( 'Y' ) );
+            $page_id       = (int) get_queried_object_id();
+            $page_scope    = $page_id > 0 ? 'body.page-id-' . $page_id : 'body';
 
             ob_start();
             ?>
+    <style id="pl-landing-canvas-inline">
+        <?php echo esc_html( $page_scope ); ?> .wp-site-blocks > header.wp-block-template-part,
+        <?php echo esc_html( $page_scope ); ?> .wp-site-blocks > footer.wp-block-template-part,
+        <?php echo esc_html( $page_scope ); ?> .wp-site-blocks > main .wp-block-post-title { display: none !important; }
+
+        <?php echo esc_html( $page_scope ); ?> .wp-site-blocks > main#wp--skip-link--target {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        <?php echo esc_html( $page_scope ); ?> .wp-site-blocks > main .entry-content {
+            margin: 0 !important;
+            max-width: none !important;
+            padding: 0 !important;
+        }
+
+        <?php echo esc_html( $page_scope ); ?> .wp-site-blocks > main .entry-content.has-global-padding {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+    </style>
     <div class="pl-stitch-landing">
 
     <!-- ========== NAV ========== -->
